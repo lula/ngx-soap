@@ -1,0 +1,9 @@
+{
+  "name": "soap-lib",
+  "version": "0.0.1",
+  "description": "A minimal node SOAP client",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+   "main": "./soap.js"
+}
