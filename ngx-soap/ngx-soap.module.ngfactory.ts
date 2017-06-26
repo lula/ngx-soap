@@ -19,7 +19,8 @@ export const NgxSoapModuleNgFactory:i0.NgModuleFactory<i1.NgxSoapModule> = i0.ɵ
           ([] as any[])),i0.ɵmpd(4608,i2.XHRBackend,i2.XHRBackend,[i2.BrowserXhr,i2.ResponseOptions,
           i2.XSRFStrategy]),i0.ɵmpd(4608,i2.RequestOptions,i2.BaseRequestOptions,([] as any[])),
           i0.ɵmpd(5120,i2.Http,i2.ɵc,[i2.XHRBackend,i2.RequestOptions]),i0.ɵmpd(4608,
-              i3.SOAPService,i3.SOAPService,[i2.Http]),i0.ɵmpd(512,i2.HttpModule,i2.HttpModule,
-              ([] as any[])),i0.ɵmpd(512,i1.NgxSoapModule,i1.NgxSoapModule,([] as any[]))]);
+              i3.SOAPService,i3.SOAPService,([] as any[])),i0.ɵmpd(512,i2.HttpModule,
+              i2.HttpModule,([] as any[])),i0.ɵmpd(512,i1.NgxSoapModule,i1.NgxSoapModule,
+              ([] as any[]))]);
     });
-//# sourceMappingURL=data:application/json;base64,eyJmaWxlIjoiL1VzZXJzL2x1Y2EvV29ya3NwYWNlL0RldmVsb3AvbnBtL25neC1zb2FwL25neC1zb2FwL25neC1zb2FwLm1vZHVsZS5uZ2ZhY3RvcnkudHMiLCJ2ZXJzaW9uIjozLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJuZzovLy9Vc2Vycy9sdWNhL1dvcmtzcGFjZS9EZXZlbG9wL25wbS9uZ3gtc29hcC9uZ3gtc29hcC9uZ3gtc29hcC5tb2R1bGUudHMiXSwic291cmNlc0NvbnRlbnQiOlsiICJdLCJtYXBwaW5ncyI6IkFBQUE7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OyJ9
+//# sourceMappingURL=data:application/json;base64,eyJmaWxlIjoiL1VzZXJzL2x1Y2EvV29ya3NwYWNlL0RldmVsb3AvbnBtL25neC1zb2FwL25neC1zb2FwL25neC1zb2FwLm1vZHVsZS5uZ2ZhY3RvcnkudHMiLCJ2ZXJzaW9uIjozLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJuZzovLy9Vc2Vycy9sdWNhL1dvcmtzcGFjZS9EZXZlbG9wL25wbS9uZ3gtc29hcC9uZ3gtc29hcC9uZ3gtc29hcC5tb2R1bGUudHMiXSwic291cmNlc0NvbnRlbnQiOlsiICJdLCJtYXBwaW5ncyI6IkFBQUE7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OzsifQ==

@@ -1,261 +1,4 @@
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@angular/core'), require('@angular/http'), require('rxjs/add/operator/map'), require('lodash'), require('sax'), require('url'), require('assert'), require('uuid')) :
-	typeof define === 'function' && define.amd ? define(['exports', '@angular/core', '@angular/http', 'rxjs/add/operator/map', 'lodash', 'sax', 'url', 'assert', 'uuid'], factory) :
-	(factory((global.ng = global.ng || {}, global.ng.ngxsoap = global.ng.ngxsoap || {}),global.ng.core,global.ng.http,global.Rx.Observable,global._,global.sax,global.url,global.assert,global.uuid));
-}(this, (function (exports,_angular_core,_angular_http,rxjs_add_operator_map,_,sax,url,assert,uuid) { 'use strict';
-
-// import * as crypto from '                     crypto-js/sha1';
-// import * as buffer from "buffer/";
-// export function passwordDigest(nonce, created, password) {
-//   // digest = base64 ( sha1 ( nonce + created + password ) )
-//   var pwHash = crypto.createHash('sha1');
-//   var rawNonce = buffer.Buffer(nonce || '', 'base64').toString('binary');
-//   pwHash.update(rawNonce + created + password);
-//   return pwHash.digest('base64');
-// };
-// import * as crypto from '                     crypto-js/sha1';
-var TNS_PREFIX = '__tns__'; // Prefix for targetNamespace
-/**
- * Find a key from an object based on the value
- * @param {Object} Namespace prefix/uri mapping
- * @param {*} nsURI value
- * @returns {String} The matching key
- */
-// Prefix for targetNamespace
-function findPrefix(xmlnsMapping, nsURI) {
-    for (var n in xmlnsMapping) {
-        if (n === TNS_PREFIX)
-            continue;
-        if (xmlnsMapping[n] === nsURI) {
-            return n;
-        }
-    }
-}
-
-var NamespaceScope = (function () {
-    /**
-     * Scope for XML namespaces
-     * @param {NamespaceScope} [parent] Parent scope
-     * @returns {NamespaceScope}
-     * @constructor
-     */
-    function NamespaceScope(parent) {
-        this.namespaces = {};
-        if (!(this instanceof NamespaceScope)) {
-            return new NamespaceScope(parent);
-        }
-        this.parent = parent;
-        this.namespaces = {};
-    }
-    /**
-     * Look up the namespace URI by prefix
-     * @param {String} prefix Namespace prefix
-     * @param {Boolean} [localOnly] Search current scope only
-     * @returns {String} Namespace URI
-     */
-    NamespaceScope.prototype.getNamespaceURI = function (prefix, localOnly) {
-        switch (prefix) {
-            case 'xml':
-                return 'http://www.w3.org/XML/1998/namespace';
-            case 'xmlns':
-                return 'http://www.w3.org/2000/xmlns/';
-            default:
-                var nsUri = this.namespaces[prefix];
-                /*jshint -W116 */
-                if (nsUri != null) {
-                    return nsUri.uri;
-                }
-                else if (!localOnly && this.parent) {
-                    return this.parent.getNamespaceURI(prefix);
-                }
-                else {
-                    return null;
-                }
-        }
-    };
-    NamespaceScope.prototype.getNamespaceMapping = function (prefix) {
-        switch (prefix) {
-            case 'xml':
-                return {
-                    uri: 'http://www.w3.org/XML/1998/namespace',
-                    prefix: 'xml',
-                    declared: true
-                };
-            case 'xmlns':
-                return {
-                    uri: 'http://www.w3.org/2000/xmlns/',
-                    prefix: 'xmlns',
-                    declared: true
-                };
-            default:
-                var mapping = this.namespaces[prefix];
-                /*jshint -W116 */
-                if (mapping != null) {
-                    return mapping;
-                }
-                else if (this.parent) {
-                    return this.parent.getNamespaceMapping(prefix);
-                }
-                else {
-                    return null;
-                }
-        }
-    };
-    /**
-     * Look up the namespace prefix by URI
-     * @param {String} nsUri Namespace URI
-     * @param {Boolean} [localOnly] Search current scope only
-     * @returns {String} Namespace prefix
-     */
-    NamespaceScope.prototype.getPrefix = function (nsUri, localOnly) {
-        switch (nsUri) {
-            case 'http://www.w3.org/XML/1998/namespace':
-                return 'xml';
-            case 'http://www.w3.org/2000/xmlns/':
-                return 'xmlns';
-            default:
-                for (var p in this.namespaces) {
-                    if (this.namespaces[p].uri === nsUri) {
-                        return p;
-                    }
-                }
-                if (!localOnly && this.parent) {
-                    return this.parent.getPrefix(nsUri);
-                }
-                else {
-                    return null;
-                }
-        }
-    };
-    return NamespaceScope;
-}());
-/**
- * Namespace context that manages hierarchical scopes
- * @returns {NamespaceContext}
- * @constructor
- */
-var NamespaceContext = (function () {
-    function NamespaceContext() {
-        /**
-         * Register a namespace
-         * @param {String} nsUri Namespace URI
-         * @returns {String} The matching or generated namespace prefix
-         */
-        this.registerNamespace = function (nsUri) {
-            var prefix = this.getPrefix(nsUri);
-            if (prefix) {
-                // If the namespace has already mapped to a prefix
-                return prefix;
-            }
-            else {
-                // Try to generate a unique namespace
-                while (true) {
-                    prefix = 'ns' + (++this.prefixCount);
-                    if (!this.getNamespaceURI(prefix)) {
-                        // The prefix is not used
-                        break;
-                    }
-                }
-            }
-            this.addNamespace(prefix, nsUri, true);
-            return prefix;
-        };
-        // if (!(this instanceof NamespaceContext)) {
-        //   return new NamespaceContext();
-        // }
-        this.scopes = [];
-        this.pushContext();
-        this.prefixCount = 0;
-    }
-    /**
-   * Add a prefix/URI namespace mapping
-   * @param {String} prefix Namespace prefix
-   * @param {String} nsUri Namespace URI
-   * @param {Boolean} [localOnly] Search current scope only
-   * @returns {boolean} true if the mapping is added or false if the mapping
-   * already exists
-   */
-    NamespaceContext.prototype.addNamespace = function (prefix, nsUri, localOnly) {
-        if (this.getNamespaceURI(prefix, localOnly) === nsUri) {
-            return false;
-        }
-        if (this.currentScope) {
-            this.currentScope.namespaces[prefix] = {
-                uri: nsUri,
-                prefix: prefix,
-                declared: false
-            };
-            return true;
-        }
-        return false;
-    };
-    /**
-     * Push a scope into the context
-     * @returns {NamespaceScope} The current scope
-     */
-    NamespaceContext.prototype.pushContext = function () {
-        var scope = new NamespaceScope(this.currentScope);
-        this.scopes.push(scope);
-        this.currentScope = scope;
-        return scope;
-    };
-    /**
-   * Pop a scope out of the context
-   * @returns {NamespaceScope} The removed scope
-   */
-    NamespaceContext.prototype.popContext = function () {
-        var scope = this.scopes.pop();
-        if (scope) {
-            this.currentScope = scope.parent;
-        }
-        else {
-            this.currentScope = null;
-        }
-        return scope;
-    };
-    /**
-     * Look up the namespace URI by prefix
-     * @param {String} prefix Namespace prefix
-     * @param {Boolean} [localOnly] Search current scope only
-     * @returns {String} Namespace URI
-     */
-    NamespaceContext.prototype.getNamespaceURI = function (prefix, localOnly) {
-        return this.currentScope && this.currentScope.getNamespaceURI(prefix, localOnly);
-    };
-    /**
-   * Look up the namespace prefix by URI
-   * @param {String} nsURI Namespace URI
-   * @param {Boolean} [localOnly] Search current scope only
-   * @returns {String} Namespace prefix
-   */
-    NamespaceContext.prototype.getPrefix = function (nsUri, localOnly) {
-        return this.currentScope && this.currentScope.getPrefix(nsUri, localOnly);
-    };
-    /**
-     * Declare a namespace prefix/uri mapping
-     * @param {String} prefix Namespace prefix
-     * @param {String} nsUri Namespace URI
-     * @returns {Boolean} true if the declaration is created
-     */
-    NamespaceContext.prototype.declareNamespace = function (prefix, nsUri) {
-        if (this.currentScope) {
-            var mapping = this.currentScope.getNamespaceMapping(prefix);
-            if (mapping && mapping.uri === nsUri && mapping.declared) {
-                return false;
-            }
-            this.currentScope.namespaces[prefix] = {
-                uri: nsUri,
-                prefix: prefix,
-                declared: true
-            };
-            return true;
-        }
-        return false;
-    };
-    return NamespaceContext;
-}());
-
-var __extends = (undefined && undefined.__extends) || (function () {
+var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
         function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
@@ -265,6 +8,11 @@ var __extends = (undefined && undefined.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+import * as _ from 'lodash';
+import { parser as saxParser, createStream as saxCreateStream } from 'sax';
+import { resolve as resolveUrl } from "url";
+import { TNS_PREFIX, findPrefix } from './utils';
+import { NamespaceContext } from "./nscontext";
 var stripBom = function (x) {
     // Catches EFBBBF (UTF-8 BOM) because the buffer-to-string
     // conversion translates it to FEFF (UTF-16 BOM)
@@ -342,9 +90,9 @@ function deepMerge(destination, source) {
         return _.isArray(a) ? a.concat(b) : undefined;
     });
 }
-function openWsdl(uri, http, options) {
+export function openWsdl(uri, http, options) {
     if (options === void 0) { options = {}; }
-    return new Promise(function (resolve$$1, reject) {
+    return new Promise(function (resolve, reject) {
         var request_headers = options.wsdl_headers;
         var request_options = options.wsdl_options;
         http.get(uri).subscribe(function (response) {
@@ -353,7 +101,7 @@ function openWsdl(uri, http, options) {
                 reject("No wsdl found at url " + uri);
             try {
                 var wsdl = new WSDL(http, wsdlDef, uri, options);
-                resolve$$1(wsdl.build());
+                resolve(wsdl.build());
             }
             catch (e) {
                 reject(e);
@@ -884,7 +632,7 @@ var WSDL = (function () {
     WSDL.prototype.xmlToObject = function (xml, callback) {
         var self = this;
         // var p = typeof callback === 'function' ? {} : saxParser(true, {});
-        var p = sax.parser(true, {});
+        var p = saxParser(true, {});
         var objectName = null;
         var root = {};
         var schema = {
@@ -1106,7 +854,7 @@ var WSDL = (function () {
         };
         if (typeof callback === 'function') {
             // we be streaming
-            var saxStream = sax.createStream(true, {});
+            var saxStream = saxCreateStream(true, {});
             saxStream.on('opentag', p.onopentag);
             saxStream.on('closetag', p.onclosetag);
             saxStream.on('cdata', p.oncdata);
@@ -1157,13 +905,13 @@ var WSDL = (function () {
     };
     WSDL.prototype._processNextInclude = function (includes) {
         var _this = this;
-        return new Promise(function (resolve$$1, reject) {
+        return new Promise(function (resolve, reject) {
             var include = includes.shift();
             var options;
             if (!include) {
-                resolve$$1(_this.definitions);
+                resolve(_this.definitions);
             }
-            var includePath = url.resolve(_this.uri || '', include.location);
+            var includePath = resolveUrl(_this.uri || '', include.location);
             options = _.assign({}, _this.options);
             // follow supplied ignoredNamespaces option
             options.ignoredNamespaces = _this._originalIgnoredNamespaces || _this.options.ignoredNamespaces;
@@ -1233,17 +981,17 @@ var WSDL = (function () {
     };
     WSDL.prototype._fromXML = function (xml) {
         var _this = this;
-        return new Promise(function (resolve$$1, reject) {
+        return new Promise(function (resolve, reject) {
             _this.definitions = _this._parse(xml);
             _this.definitions.descriptions = {
                 types: {}
             };
             _this.xml = xml;
-            resolve$$1(_this.definitions);
+            resolve(_this.definitions);
         });
     };
     WSDL.prototype._parse = function (xml) {
-        var self = this, p = sax.parser(true, {}), stack = [], root = null, types = null, schema = null, options = self.options;
+        var self = this, p = saxParser(true, {}), stack = [], root = null, types = null, schema = null, options = self.options;
         p.onopentag = function (node) {
             var nsName = node.name;
             var attrs = node.attributes;
@@ -1292,6 +1040,7 @@ var WSDL = (function () {
     };
     return WSDL;
 }());
+export { WSDL };
 var Element = (function () {
     function Element(nsName, attrs, options) {
         if (attrs === void 0) { attrs = {}; }
@@ -1340,7 +1089,7 @@ var Element = (function () {
             this.ignoredNamespaces = [];
         }
     };
-    
+    ;
     Element.prototype.deleteFixedAttrs = function () {
         this.children && this.children.length === 0 && delete this.children;
         this.xmlns && Object.keys(this.xmlns).length === 0 && delete this.xmlns;
@@ -1348,7 +1097,7 @@ var Element = (function () {
         delete this.prefix;
         delete this.name;
     };
-    
+    ;
     Element.prototype.startElement = function (stack, nsName, attrs, options) {
         // if (!this.allowedChildren) {
         //   return;
@@ -1365,7 +1114,7 @@ var Element = (function () {
         if (ChildClass) {
             stack.push(new ChildClass(nsName, attrs, options));
         }
-        
+        ;
         return stack;
     };
     Element.prototype.unexpected = function (name) {
@@ -2318,395 +2067,4 @@ var ElementTypeMap = {
     definitions: [DefinitionsElement, 'types message portType binding service import documentation'],
     documentation: [DocumentationElement, '']
 };
-
-var Client = (function () {
-    function Client(wsdl, endpoint, options) {
-        options = options || {};
-        this.wsdl = wsdl;
-        this._initializeOptions(options);
-        this._initializeServices(endpoint);
-    }
-    Client.prototype.addSoapHeader = function (soapHeader, name, namespace, xmlns) {
-        if (!this.soapHeaders) {
-            this.soapHeaders = [];
-        }
-        if (typeof soapHeader === 'object') {
-            soapHeader = this.wsdl.objectToXML(soapHeader, name, namespace, xmlns, true);
-        }
-        return this.soapHeaders.push(soapHeader) - 1;
-    };
-    Client.prototype.changeSoapHeader = function (index, soapHeader, name, namespace, xmlns) {
-        if (!this.soapHeaders) {
-            this.soapHeaders = [];
-        }
-        if (typeof soapHeader === 'object') {
-            soapHeader = this.wsdl.objectToXML(soapHeader, name, namespace, xmlns, true);
-        }
-        this.soapHeaders[index] = soapHeader;
-    };
-    Client.prototype.getSoapHeaders = function () {
-        return this.soapHeaders;
-    };
-    Client.prototype.clearSoapHeaders = function () {
-        this.soapHeaders = null;
-    };
-    Client.prototype.addHttpHeader = function (name, value) {
-        if (!this.httpHeaders) {
-            this.httpHeaders = {};
-        }
-        this.httpHeaders[name] = value;
-    };
-    Client.prototype.getHttpHeaders = function () {
-        return this.httpHeaders;
-    };
-    Client.prototype.clearHttpHeaders = function () {
-        this.httpHeaders = {};
-    };
-    Client.prototype.addBodyAttribute = function (bodyAttribute, name, namespace, xmlns) {
-        if (!this.bodyAttributes) {
-            this.bodyAttributes = [];
-        }
-        if (typeof bodyAttribute === 'object') {
-            var composition = '';
-            Object.getOwnPropertyNames(bodyAttribute).forEach(function (prop, idx, array) {
-                composition += ' ' + prop + '="' + bodyAttribute[prop] + '"';
-            });
-            bodyAttribute = composition;
-        }
-        if (bodyAttribute.substr(0, 1) !== ' ')
-            bodyAttribute = ' ' + bodyAttribute;
-        this.bodyAttributes.push(bodyAttribute);
-    };
-    Client.prototype.getBodyAttributes = function () {
-        return this.bodyAttributes;
-    };
-    Client.prototype.clearBodyAttributes = function () {
-        this.bodyAttributes = null;
-    };
-    Client.prototype.setEndpoint = function (endpoint) {
-        this.endpoint = endpoint;
-        this._initializeServices(endpoint);
-    };
-    Client.prototype.describe = function () {
-        var types = this.wsdl.definitions.types;
-        return this.wsdl.describeServices();
-    };
-    Client.prototype.setSecurity = function (security) {
-        this.security = security;
-    };
-    Client.prototype.setSOAPAction = function (SOAPAction) {
-        this.SOAPAction = SOAPAction;
-    };
-    Client.prototype._initializeServices = function (endpoint) {
-        var definitions = this.wsdl.definitions, services = definitions.services;
-        for (var name in services) {
-            this[name] = this._defineService(services[name], endpoint);
-        }
-    };
-    Client.prototype._initializeOptions = function (options) {
-        if (options === void 0) { options = {}; }
-        this.streamAllowed = options.stream;
-        this.wsdl.options.attributesKey = options.attributesKey || 'attributes';
-        this.wsdl.options.envelopeKey = options.envelopeKey || 'soap';
-        if (options.ignoredNamespaces !== undefined) {
-            if (options.ignoredNamespaces.override !== undefined) {
-                if (options.ignoredNamespaces.override === true) {
-                    if (options.ignoredNamespaces.namespaces !== undefined) {
-                        this.wsdl.options.ignoredNamespaces = options.ignoredNamespaces.namespaces;
-                    }
-                }
-            }
-        }
-        if (options.overrideRootElement !== undefined) {
-            this.wsdl.options.overrideRootElement = options.overrideRootElement;
-        }
-        this.wsdl.options.forceSoap12Headers = !!options.forceSoap12Headers;
-    };
-    Client.prototype._defineService = function (service, endpoint) {
-        var ports = service.ports, def = {};
-        for (var name in ports) {
-            def[name] = this._definePort(ports[name], endpoint ? endpoint : ports[name].location);
-        }
-        return def;
-    };
-    Client.prototype._definePort = function (port, endpoint) {
-        var location = endpoint, binding = port.binding, methods = binding.methods, def = {};
-        for (var name in methods) {
-            def[name] = this._defineMethod(methods[name], location);
-            this[name] = def[name];
-        }
-        return def;
-    };
-    Client.prototype._defineMethod = function (method, location) {
-        var self = this;
-        var temp;
-        return function (args, callback, options, extraHeaders) {
-            if (typeof args === 'function') {
-                callback = args;
-                args = {};
-            }
-            else if (typeof options === 'function') {
-                temp = callback;
-                callback = options;
-                options = temp;
-            }
-            else if (typeof extraHeaders === 'function') {
-                temp = callback;
-                callback = extraHeaders;
-                extraHeaders = options;
-                options = temp;
-            }
-            self._invoke(method, args, location, function (error, result, raw, soapHeader) {
-                callback(error, result, raw, soapHeader);
-            }, options, extraHeaders);
-        };
-    };
-    Client.prototype._invoke = function (method, args, location, callback, options, extraHeaders) {
-        var _this = this;
-        var self = this, name = method.$name, input = method.input, output = method.output, style = method.style, defs = this.wsdl.definitions, envelopeKey = this.wsdl.options.envelopeKey, ns = defs.$targetNamespace, encoding = '', message = '', xml = null, req = null, soapAction, alias = findPrefix(defs.xmlns, ns), headers = {
-            "Content-Type": "text/xml; charset=utf-8"
-        }, xmlnsSoap = "xmlns:" + envelopeKey + "=\"http://schemas.xmlsoap.org/soap/envelope/\"";
-        if (this.wsdl.options.forceSoap12Headers) {
-            headers["Content-Type"] = "application/soap+xml; charset=utf-8";
-            xmlnsSoap = "xmlns:" + envelopeKey + "=\"http://www.w3.org/2003/05/soap-envelope\"";
-        }
-        if (this.SOAPAction) {
-            soapAction = this.SOAPAction;
-        }
-        else if (method.soapAction !== undefined && method.soapAction !== null) {
-            soapAction = method.soapAction;
-        }
-        else {
-            soapAction = ((ns.lastIndexOf("/") !== ns.length - 1) ? ns + "/" : ns) + name;
-        }
-        if (!this.wsdl.options.forceSoap12Headers) {
-            headers.SOAPAction = '"' + soapAction + '"';
-        }
-        options = options || {};
-        //Add extra headers
-        for (var header in this.httpHeaders) {
-            headers[header] = this.httpHeaders[header];
-        }
-        for (var attr in extraHeaders) {
-            headers[attr] = extraHeaders[attr];
-        }
-        // Allow the security object to add headers
-        if (this.security && this.security.addHeaders)
-            self.security.addHeaders(headers);
-        if (this.security && this.security.addOptions)
-            self.security.addOptions(options);
-        if ((style === 'rpc') && ((input.parts || input.name === "element") || args === null)) {
-            assert.ok(!style || style === 'rpc', 'invalid message definition for document style binding');
-            message = self.wsdl.objectToRpcXML(name, args, alias, ns, (input.name !== "element"));
-            (method.inputSoap === 'encoded') && (encoding = 'soap:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" ');
-        }
-        else {
-            assert.ok(!style || style === 'document', 'invalid message definition for rpc style binding');
-            // pass `input.$lookupType` if `input.$type` could not be found
-            message = self.wsdl.objectToDocumentXML(input.$name, args, input.targetNSAlias, input.targetNamespace, (input.$type || input.$lookupType));
-        }
-        xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
-            "<" + envelopeKey + ":Envelope " +
-            xmlnsSoap + " " +
-            "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
-            encoding +
-            this.wsdl.xmlnsInEnvelope + '>' +
-            ((self.soapHeaders || self.security) ?
-                ("<" + envelopeKey + ":Header>" +
-                    (self.soapHeaders ? self.soapHeaders.join("\n") : "") +
-                    (self.security && !self.security.postProcess ? self.security.toXML() : "") +
-                    "</" + envelopeKey + ":Header>")
-                :
-                    '') +
-            "<" + envelopeKey + ":Body" +
-            (this.bodyAttributes ? this.bodyAttributes.join(' ') : '') +
-            (this.security && this.security.postProcess ? ' Id="_0"' : '') +
-            ">" +
-            message +
-            "</" + envelopeKey + ":Body>" +
-            "</" + envelopeKey + ":Envelope>";
-        if (self.security && self.security.postProcess) {
-            xml = self.security.postProcess(xml, envelopeKey);
-        }
-        this.lastMessage = message;
-        this.lastRequest = xml;
-        this.lastEndpoint = location;
-        var eid = options.exchangeId || uuid.v4();
-        var tryJSONparse = function (body) {
-            try {
-                return JSON.parse(body);
-            }
-            catch (err) {
-                return undefined;
-            }
-        };
-        this.wsdl.http.post(location, xml, {}).map(function (response) {
-            var body = response.text();
-            _this.lastResponse = body;
-            _this.lastResponseHeaders = response.headers;
-            parseSync(body, response);
-        });
-        // if (this.streamAllowed && typeof self.httpClient.requestStream === 'function') {
-        //   callback = _.once(callback);
-        //   var startTime = Date.now();
-        //   req = this.httpClient.requestStream(location, xml, headers, options, self);
-        //   this.lastRequestHeaders = req.headers;
-        //   var onError = function onError(err) {
-        //     self.lastResponse = null;
-        //     self.lastResponseHeaders = null;
-        //     self.lastElapsedTime = null;
-        //     self.emit('response', null, null, eid);
-        //     callback(err);
-        //   };
-        //   req.on('error', onError);
-        //   req.on('response', function (response) {
-        //     response.on('error', onError);
-        //     // When the output element cannot be looked up in the wsdl, play it safe and
-        //     // don't stream
-        //     if (response.statusCode !== 200 || !output || !output.$lookupTypes) {
-        //       response.pipe(concatStream({ encoding: 'string' }, function (body) {
-        //         self.lastResponse = body;
-        //         self.lastResponseHeaders = response && response.headers;
-        //         self.lastElapsedTime = Date.now() - startTime;
-        //         self.emit('response', body, response, eid);
-        //         return parseSync(body, response);
-        //       }));
-        //       return;
-        //     }
-        //     self.wsdl.xmlToObject(response, function (error, obj) {
-        //       self.lastResponse = response;
-        //       self.lastResponseHeaders = response && response.headers;
-        //       self.lastElapsedTime = Date.now() - startTime;
-        //       self.emit('response', '<stream>', response, eid);
-        //       if (error) {
-        //         error.response = response;
-        //         error.body = '<stream>';
-        //         self.emit('soapError', error, eid);
-        //         return callback(error, response);
-        //       }
-        //       return finish(obj, '<stream>', response);
-        //     });
-        //   });
-        //   return;
-        // }
-        // req = th.httpClient.request(location, xml, function (err, response, body) {
-        //   self.lastResponse = body;
-        //   self.lastResponseHeaders = response && response.headers;
-        //   self.lastElapsedTime = response && response.elapsedTime;
-        //   self.emit('response', body, response, eid);
-        //   if (err) {
-        //     callback(err);
-        //   } else {
-        //     return parseSync(body, response);
-        //   }
-        // }, headers, options, self);
-        function parseSync(body, response) {
-            var obj;
-            try {
-                obj = self.wsdl.xmlToObject(body);
-            }
-            catch (error) {
-                //  When the output element cannot be looked up in the wsdl and the body is JSON
-                //  instead of sending the error, we pass the body in the response.
-                if (!output || !output.$lookupTypes) {
-                    //  If the response is JSON then return it as-is.
-                    var json = _.isObject(body) ? body : tryJSONparse(body);
-                    if (json) {
-                        return callback(null, response, json);
-                    }
-                }
-                error.response = response;
-                error.body = body;
-                return callback(error, response, body);
-            }
-            return finish(obj, body, response);
-        }
-        function finish(obj, body, response) {
-            var result;
-            if (!output) {
-                // one-way, no output expected
-                return callback(null, null, body, obj.Header);
-            }
-            if (typeof obj.Body !== 'object') {
-                var error = new Error('Cannot parse response');
-                error.response = response;
-                error.body = body;
-                return callback(error, obj, body);
-            }
-            // if Soap Body is empty
-            if (!obj.Body) {
-                return callback(null, obj, body, obj.Header);
-            }
-            result = obj.Body[output.$name];
-            // RPC/literal response body may contain elements with added suffixes I.E.
-            // 'Response', or 'Output', or 'Out'
-            // This doesn't necessarily equal the ouput message name. See WSDL 1.1 Section 2.4.5
-            if (!result) {
-                result = obj.Body[output.$name.replace(/(?:Out(?:put)?|Response)$/, '')];
-            }
-            if (!result) {
-                ['Response', 'Out', 'Output'].forEach(function (term) {
-                    if (obj.Body.hasOwnProperty(name + term)) {
-                        return result = obj.Body[name + term];
-                    }
-                });
-            }
-            callback(null, result, body, obj.Header);
-        }
-        // Added mostly for testability, but possibly useful for debugging
-        if (req && req.headers)
-            this.lastRequestHeaders = req.headers;
-    };
-    return Client;
-}());
-
-function createSoapClient(url$$1, http, options, endpoint) {
-    if (options === void 0) { options = {}; }
-    return new Promise(function (resolve$$1, reject) {
-        endpoint = options.endpoint || endpoint;
-        openWsdl(url$$1, http, options)
-            .then(function (wsdl) {
-            resolve$$1(new Client(wsdl));
-        })
-            .catch(function (err) { return reject(err); });
-        // else resolve(wsdl && new Client(wsdl, endpoint, http, options));
-        // });
-    });
-}
-
-var SOAPService = (function () {
-    function SOAPService() {
-    }
-    SOAPService.prototype.createClient = function (http, url$$1, options) {
-        if (options === void 0) { options = {}; }
-        return createSoapClient(url$$1, http, options);
-    };
-    return SOAPService;
-}());
-SOAPService.decorators = [
-    { type: _angular_core.Injectable },
-];
-/** @nocollapse */
-SOAPService.ctorParameters = function () { return []; };
-
-var NgxSoapModule = (function () {
-    function NgxSoapModule() {
-    }
-    return NgxSoapModule;
-}());
-NgxSoapModule.decorators = [
-    { type: _angular_core.NgModule, args: [{
-                imports: [_angular_http.HttpModule],
-                providers: [SOAPService]
-            },] },
-];
-/** @nocollapse */
-NgxSoapModule.ctorParameters = function () { return []; };
-
-exports.NgxSoapModule = NgxSoapModule;
-exports.SOAPService = SOAPService;
-exports.Client = Client;
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-})));
+//# sourceMappingURL=wsdl.js.map
