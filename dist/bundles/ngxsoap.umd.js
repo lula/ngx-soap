@@ -1,8 +1,8 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@angular/core'), require('@angular/http'), require('rxjs/add/operator/map'), require('lodash'), require('sax'), require('url'), require('assert'), require('uuid')) :
-	typeof define === 'function' && define.amd ? define(['exports', '@angular/core', '@angular/http', 'rxjs/add/operator/map', 'lodash', 'sax', 'url', 'assert', 'uuid'], factory) :
-	(factory((global.ng = global.ng || {}, global.ng.ngxsoap = global.ng.ngxsoap || {}),global.ng.core,global.ng.http,global.Rx.Observable,global._,global.sax,global.url,global.assert,global.uuid));
-}(this, (function (exports,_angular_core,_angular_http,rxjs_add_operator_map,_,sax,url,assert,uuid) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@angular/core'), require('@angular/http'), require('rxjs/add/operator/map'), require('lodash'), require('sax'), require('assert'), require('uuid')) :
+	typeof define === 'function' && define.amd ? define(['exports', '@angular/core', '@angular/http', 'rxjs/add/operator/map', 'lodash', 'sax', 'assert', 'uuid'], factory) :
+	(factory((global.ng = global.ng || {}, global.ng.ngxsoap = global.ng.ngxsoap || {}),global.ng.core,global.ng.http,global.Rx.Observable,global._,global.sax,global.assert,global.uuid));
+}(this, (function (exports,_angular_core,_angular_http,rxjs_add_operator_map,_,sax,assert,uuid) { 'use strict';
 
 // import * as crypto from '                     crypto-js/sha1';
 // import * as buffer from "buffer/";
@@ -316,6 +316,11 @@ function noColonNameSpace(ns) {
     return (ns && ns.charAt(ns.length - 1) === ':') ? ns.substring(0, ns.length - 1) : ns;
 }
 function splitQName(nsName) {
+    if (typeof nsName !== 'string')
+        return {
+            prefix: '',
+            name: nsName
+        };
     var i = nsName.indexOf(':');
     return i < 0 ? { prefix: TNS_PREFIX, name: nsName } :
         { prefix: nsName.substring(0, i), name: nsName.substring(i + 1) };
@@ -337,33 +342,29 @@ function xmlEscape(obj) {
 function trim(text) {
     return text.replace(trimLeft, '').replace(trimRight, '');
 }
-function deepMerge(destination, source) {
-    return _.merge(destination || {}, source, function (a, b) {
-        return _.isArray(a) ? a.concat(b) : undefined;
-    });
-}
-function openWsdl(uri, http, options) {
+function openWsdl(wsdlDef, options) {
     if (options === void 0) { options = {}; }
-    return new Promise(function (resolve$$1, reject) {
-        var request_headers = options.wsdl_headers;
-        var request_options = options.wsdl_options;
-        http.get(uri).subscribe(function (response) {
-            var wsdlDef = response.text();
-            if (!wsdlDef)
-                reject("No wsdl found at url " + uri);
-            try {
-                var wsdl = new WSDL(http, wsdlDef, uri, options);
-                resolve$$1(wsdl.build());
-            }
-            catch (e) {
-                reject(e);
-            }
-        });
+    return new Promise(function (resolve, reject) {
+        var wsdl = new WSDL(wsdlDef, options);
+        resolve(wsdl.build());
+        // var request_headers = options.wsdl_headers;
+        // var request_options = options.wsdl_options;
+        // http.get(uri).subscribe(response => {
+        //   let wsdlDef = response.text();
+        //   if (!wsdlDef) reject("No wsdl found at url " + uri)
+        //   try {
+        //     let wsdl = new WSDL(http, wsdlDef, uri, options);
+        //     resolve(wsdl.build());
+        //   } catch (e) {
+        //     reject(e);
+        //   }
+        // });
     });
 }
 var WSDL = (function () {
-    function WSDL(http, definition, uri, options) {
+    function WSDL(definition, options) {
         this.options = {};
+        // uri: any;
         this.ignoredNamespaces = ['tns', 'targetNamespace', 'typedNamespace'];
         this.ignoreBaseNameSpaces = false;
         this.valueKey = '$value';
@@ -401,9 +402,8 @@ var WSDL = (function () {
             return def;
         };
         this.definition = definition;
-        this.uri = uri;
+        // this.uri = uri;
         this._includesWsdl = [];
-        this.http = http;
         this._initializeOptions(options);
     }
     WSDL.prototype.build = function () {
@@ -447,6 +447,7 @@ var WSDL = (function () {
                     }
                 }
             }
+            _this.xmlnsInEnvelope = _this._xmlnsMap();
             return _this;
         })
             .catch(function (err) { return console.log("Build error", err); });
@@ -501,10 +502,8 @@ var WSDL = (function () {
         if (!nsContext) {
             nsContext = new NamespaceContext();
             nsContext.declareNamespace(nsPrefix, nsURI);
-            console.log("nscontext created", nsContext);
         }
         else {
-            console.log("nscontext", nsContext);
             nsContext.pushContext();
         }
         // explicitly use xmlns attribute if available
@@ -805,7 +804,7 @@ var WSDL = (function () {
         return schema.complexTypes[name];
     };
     WSDL.prototype.findChildSchemaObject = function (parameterTypeObj, childName, backtrace) {
-        if (backtrace === void 0) { backtrace = {}; }
+        if (backtrace === void 0) { backtrace = []; }
         if (!parameterTypeObj || !childName) {
             return null;
         }
@@ -1157,30 +1156,28 @@ var WSDL = (function () {
     };
     WSDL.prototype._processNextInclude = function (includes) {
         var _this = this;
-        return new Promise(function (resolve$$1, reject) {
-            var include = includes.shift();
-            var options;
-            if (!include) {
-                resolve$$1(_this.definitions);
-            }
-            var includePath = url.resolve(_this.uri || '', include.location);
-            options = _.assign({}, _this.options);
-            // follow supplied ignoredNamespaces option
-            options.ignoredNamespaces = _this._originalIgnoredNamespaces || _this.options.ignoredNamespaces;
-            return openWsdl(includePath, options)
-                .then(function (wsdl) {
-                _this._includesWsdl.push(wsdl);
-                if (wsdl.definitions instanceof DefinitionsElement) {
-                    _.merge(_this.definitions, wsdl.definitions, function (a, b) {
-                        return (a instanceof SchemaElement) ? a.merge(b) : undefined;
-                    });
-                }
-                else {
-                    _this.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace] = deepMerge(_this.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace], wsdl.definitions);
-                }
-                return _this._processNextInclude(includes);
-            })
-                .catch(function (err) { return reject(err); });
+        return new Promise(function (resolve, reject) {
+            resolve(_this.definitions);
+            // var include = includes.shift();
+            // var options;
+            // if (!include) { resolve(this.definitions) }
+            // var includePath = resolveUrl(this.uri || '', include.location);
+            // options = _.assign({}, this.options);
+            // // follow supplied ignoredNamespaces option
+            // options.ignoredNamespaces = this._originalIgnoredNamespaces || this.options.ignoredNamespaces;
+            // return openWsdl(includePath, options)
+            //   .then(wsdl => {
+            //     this._includesWsdl.push(wsdl);
+            //     if (wsdl.definitions instanceof DefinitionsElement) {
+            //       _.merge(this.definitions, wsdl.definitions, function (a: any, b: any) {
+            //         return (a instanceof SchemaElement) ? a.merge(b) : undefined;
+            //       });
+            //     } else {
+            //       this.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace] = deepMerge(this.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace], wsdl.definitions);
+            //     }
+            //     return this._processNextInclude(includes);
+            //   })
+            //   .catch(err => reject(err));
         });
     };
     WSDL.prototype._initializeOptions = function (options) {
@@ -1233,13 +1230,13 @@ var WSDL = (function () {
     };
     WSDL.prototype._fromXML = function (xml) {
         var _this = this;
-        return new Promise(function (resolve$$1, reject) {
+        return new Promise(function (resolve, reject) {
             _this.definitions = _this._parse(xml);
             _this.definitions.descriptions = {
                 types: {}
             };
             _this.xml = xml;
-            resolve$$1(_this.definitions);
+            resolve(_this.definitions);
         });
     };
     WSDL.prototype._parse = function (xml) {
@@ -1289,6 +1286,36 @@ var WSDL = (function () {
         };
         p.write(xml).close();
         return root;
+    };
+    WSDL.prototype._xmlnsMap = function () {
+        var xmlns = this.definitions.xmlns;
+        var str = '';
+        for (var alias in xmlns) {
+            if (alias === '' || alias === TNS_PREFIX) {
+                continue;
+            }
+            var ns = xmlns[alias];
+            switch (ns) {
+                case "http://xml.apache.org/xml-soap": // apachesoap
+                case "http://schemas.xmlsoap.org/wsdl/": // wsdl
+                case "http://schemas.xmlsoap.org/wsdl/soap/": // wsdlsoap
+                case "http://schemas.xmlsoap.org/wsdl/soap12/": // wsdlsoap12
+                case "http://schemas.xmlsoap.org/soap/encoding/": // soapenc
+                case "http://www.w3.org/2001/XMLSchema":
+                    continue;
+            }
+            if (~ns.indexOf('http://schemas.xmlsoap.org/')) {
+                continue;
+            }
+            if (~ns.indexOf('http://www.w3.org/')) {
+                continue;
+            }
+            if (~ns.indexOf('http://xml.apache.org/')) {
+                continue;
+            }
+            str += ' xmlns:' + alias + '="' + ns + '"';
+        }
+        return str;
     };
     return WSDL;
 }());
@@ -2321,6 +2348,7 @@ var ElementTypeMap = {
 
 var Client = (function () {
     function Client(wsdl, endpoint, options) {
+        this.httpHeaders = {};
         options = options || {};
         this.wsdl = wsdl;
         this._initializeOptions(options);
@@ -2397,6 +2425,14 @@ var Client = (function () {
     Client.prototype.setSOAPAction = function (SOAPAction) {
         this.SOAPAction = SOAPAction;
     };
+    Client.prototype.parseResponseBody = function (body) {
+        try {
+            return this.wsdl.xmlToObject(body);
+        }
+        catch (error) {
+            throw new Error("Error parsing body" + error);
+        }
+    };
     Client.prototype._initializeServices = function (endpoint) {
         var definitions = this.wsdl.definitions, services = definitions.services;
         for (var name in services) {
@@ -2456,16 +2492,15 @@ var Client = (function () {
                 extraHeaders = options;
                 options = temp;
             }
+            // return self._invoke(method, args, location);
             self._invoke(method, args, location, function (error, result, raw, soapHeader) {
                 callback(error, result, raw, soapHeader);
             }, options, extraHeaders);
         };
     };
     Client.prototype._invoke = function (method, args, location, callback, options, extraHeaders) {
-        var _this = this;
-        var self = this, name = method.$name, input = method.input, output = method.output, style = method.style, defs = this.wsdl.definitions, envelopeKey = this.wsdl.options.envelopeKey, ns = defs.$targetNamespace, encoding = '', message = '', xml = null, req = null, soapAction, alias = findPrefix(defs.xmlns, ns), headers = {
-            "Content-Type": "text/xml; charset=utf-8"
-        }, xmlnsSoap = "xmlns:" + envelopeKey + "=\"http://schemas.xmlsoap.org/soap/envelope/\"";
+        var self = this, name = method.$name, input = method.input, output = method.output, style = method.style, defs = this.wsdl.definitions, envelopeKey = this.wsdl.options.envelopeKey, ns = defs.$targetNamespace, encoding = '', message = '', xml = null, req = null, soapAction, alias = findPrefix(defs.xmlns, ns), headers = {}, xmlnsSoap = "xmlns:" + envelopeKey + "=\"http://schemas.xmlsoap.org/soap/envelope/\"";
+        headers["Content-Type"] = "text/xml; charset=utf-8";
         if (this.wsdl.options.forceSoap12Headers) {
             headers["Content-Type"] = "application/soap+xml; charset=utf-8";
             xmlnsSoap = "xmlns:" + envelopeKey + "=\"http://www.w3.org/2003/05/soap-envelope\"";
@@ -2480,7 +2515,7 @@ var Client = (function () {
             soapAction = ((ns.lastIndexOf("/") !== ns.length - 1) ? ns + "/" : ns) + name;
         }
         if (!this.wsdl.options.forceSoap12Headers) {
-            headers.SOAPAction = '"' + soapAction + '"';
+            headers["SOAPAction"] = '"' + soapAction + '"';
         }
         options = options || {};
         //Add extra headers
@@ -2491,8 +2526,9 @@ var Client = (function () {
             headers[attr] = extraHeaders[attr];
         }
         // Allow the security object to add headers
-        if (this.security && this.security.addHeaders)
-            self.security.addHeaders(headers);
+        if (this.security && this.security.addHeaders) {
+            headers = self.security.addHeaders(headers);
+        }
         if (this.security && this.security.addOptions)
             self.security.addOptions(options);
         if ((style === 'rpc') && ((input.parts || input.name === "element") || args === null)) {
@@ -2540,146 +2576,28 @@ var Client = (function () {
                 return undefined;
             }
         };
-        this.wsdl.http.post(location, xml, {}).map(function (response) {
-            var body = response.text();
-            _this.lastResponse = body;
-            _this.lastResponseHeaders = response.headers;
-            parseSync(body, response);
-        });
-        // if (this.streamAllowed && typeof self.httpClient.requestStream === 'function') {
-        //   callback = _.once(callback);
-        //   var startTime = Date.now();
-        //   req = this.httpClient.requestStream(location, xml, headers, options, self);
-        //   this.lastRequestHeaders = req.headers;
-        //   var onError = function onError(err) {
-        //     self.lastResponse = null;
-        //     self.lastResponseHeaders = null;
-        //     self.lastElapsedTime = null;
-        //     self.emit('response', null, null, eid);
-        //     callback(err);
-        //   };
-        //   req.on('error', onError);
-        //   req.on('response', function (response) {
-        //     response.on('error', onError);
-        //     // When the output element cannot be looked up in the wsdl, play it safe and
-        //     // don't stream
-        //     if (response.statusCode !== 200 || !output || !output.$lookupTypes) {
-        //       response.pipe(concatStream({ encoding: 'string' }, function (body) {
-        //         self.lastResponse = body;
-        //         self.lastResponseHeaders = response && response.headers;
-        //         self.lastElapsedTime = Date.now() - startTime;
-        //         self.emit('response', body, response, eid);
-        //         return parseSync(body, response);
-        //       }));
-        //       return;
-        //     }
-        //     self.wsdl.xmlToObject(response, function (error, obj) {
-        //       self.lastResponse = response;
-        //       self.lastResponseHeaders = response && response.headers;
-        //       self.lastElapsedTime = Date.now() - startTime;
-        //       self.emit('response', '<stream>', response, eid);
-        //       if (error) {
-        //         error.response = response;
-        //         error.body = '<stream>';
-        //         self.emit('soapError', error, eid);
-        //         return callback(error, response);
-        //       }
-        //       return finish(obj, '<stream>', response);
-        //     });
-        //   });
-        //   return;
-        // }
-        // req = th.httpClient.request(location, xml, function (err, response, body) {
-        //   self.lastResponse = body;
-        //   self.lastResponseHeaders = response && response.headers;
-        //   self.lastElapsedTime = response && response.elapsedTime;
-        //   self.emit('response', body, response, eid);
-        //   if (err) {
-        //     callback(err);
-        //   } else {
-        //     return parseSync(body, response);
-        //   }
-        // }, headers, options, self);
-        function parseSync(body, response) {
-            var obj;
-            try {
-                obj = self.wsdl.xmlToObject(body);
-            }
-            catch (error) {
-                //  When the output element cannot be looked up in the wsdl and the body is JSON
-                //  instead of sending the error, we pass the body in the response.
-                if (!output || !output.$lookupTypes) {
-                    //  If the response is JSON then return it as-is.
-                    var json = _.isObject(body) ? body : tryJSONparse(body);
-                    if (json) {
-                        return callback(null, response, json);
-                    }
-                }
-                error.response = response;
-                error.body = body;
-                return callback(error, response, body);
-            }
-            return finish(obj, body, response);
-        }
-        function finish(obj, body, response) {
-            var result;
-            if (!output) {
-                // one-way, no output expected
-                return callback(null, null, body, obj.Header);
-            }
-            if (typeof obj.Body !== 'object') {
-                var error = new Error('Cannot parse response');
-                error.response = response;
-                error.body = body;
-                return callback(error, obj, body);
-            }
-            // if Soap Body is empty
-            if (!obj.Body) {
-                return callback(null, obj, body, obj.Header);
-            }
-            result = obj.Body[output.$name];
-            // RPC/literal response body may contain elements with added suffixes I.E.
-            // 'Response', or 'Output', or 'Out'
-            // This doesn't necessarily equal the ouput message name. See WSDL 1.1 Section 2.4.5
-            if (!result) {
-                result = obj.Body[output.$name.replace(/(?:Out(?:put)?|Response)$/, '')];
-            }
-            if (!result) {
-                ['Response', 'Out', 'Output'].forEach(function (term) {
-                    if (obj.Body.hasOwnProperty(name + term)) {
-                        return result = obj.Body[name + term];
-                    }
-                });
-            }
-            callback(null, result, body, obj.Header);
-        }
-        // Added mostly for testability, but possibly useful for debugging
-        if (req && req.headers)
-            this.lastRequestHeaders = req.headers;
+        callback(null, location, headers, xml);
     };
     return Client;
 }());
 
-function createSoapClient(url$$1, http, options, endpoint) {
+function createSoapClient(wsdlDef, http, options) {
     if (options === void 0) { options = {}; }
-    return new Promise(function (resolve$$1, reject) {
-        endpoint = options.endpoint || endpoint;
-        openWsdl(url$$1, http, options)
-            .then(function (wsdl) {
-            resolve$$1(new Client(wsdl));
-        })
-            .catch(function (err) { return reject(err); });
-        // else resolve(wsdl && new Client(wsdl, endpoint, http, options));
-        // });
-    });
+    // return new Promise((resolve, reject) => {    
+    return openWsdl(wsdlDef, options)
+        .then(function (wsdl) {
+        return new Client(wsdl);
+    })
+        .catch(function (err) { throw new Error(err); });
+    // });
 }
 
 var SOAPService = (function () {
     function SOAPService() {
     }
-    SOAPService.prototype.createClient = function (http, url$$1, options) {
+    SOAPService.prototype.createClient = function (wsdlDef, options) {
         if (options === void 0) { options = {}; }
-        return createSoapClient(url$$1, http, options);
+        return createSoapClient(wsdlDef, options);
     };
     return SOAPService;
 }());
@@ -2703,9 +2621,30 @@ NgxSoapModule.decorators = [
 /** @nocollapse */
 NgxSoapModule.ctorParameters = function () { return []; };
 
+var BasicAuthSecurity = (function () {
+    function BasicAuthSecurity(username, password, defaults) {
+        this._username = username;
+        this._password = password;
+        this.defaults = {};
+        _.merge(this.defaults, defaults);
+    }
+    BasicAuthSecurity.prototype.addHeaders = function (headers) {
+        headers['Authorization'] = 'Basic ' + btoa(this._username + ':' + this._password);
+        return headers;
+    };
+    BasicAuthSecurity.prototype.toXML = function () {
+        return '';
+    };
+    BasicAuthSecurity.prototype.addOptions = function (options) {
+        _.merge(options, this.defaults);
+    };
+    return BasicAuthSecurity;
+}());
+
 exports.NgxSoapModule = NgxSoapModule;
 exports.SOAPService = SOAPService;
 exports.Client = Client;
+exports.BasicAuthSecurity = BasicAuthSecurity;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 

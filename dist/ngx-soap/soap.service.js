@@ -4,9 +4,9 @@ import { createSoapClient } from "../libts/soap";
 var SOAPService = (function () {
     function SOAPService() {
     }
-    SOAPService.prototype.createClient = function (http, url, options) {
+    SOAPService.prototype.createClient = function (wsdlDef, options) {
         if (options === void 0) { options = {}; }
-        return createSoapClient(url, http, options);
+        return createSoapClient(wsdlDef, options);
     };
     return SOAPService;
 }());

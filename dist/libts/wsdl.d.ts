@@ -1,7 +1,5 @@
-import { Http } from '@angular/http';
-export declare function openWsdl(uri: string, http: Http, options?: any): Promise<WSDL>;
+export declare function openWsdl(wsdlDef: string, options?: any): Promise<WSDL>;
 export declare class WSDL {
-    http: Http;
     xml: any;
     services: any[];
     definition: any;
@@ -9,13 +7,12 @@ export declare class WSDL {
     _originalIgnoredNamespaces: any;
     options: any;
     _includesWsdl: any[];
-    uri: any;
     ignoredNamespaces: string[];
     ignoreBaseNameSpaces: boolean;
     valueKey: string;
     xmlKey: string;
     xmlnsInEnvelope: any;
-    constructor(http: Http, definition: string, uri: any, options: any);
+    constructor(definition: string, options: any);
     build(): Promise<any>;
     processIncludes(): Promise<any>;
     describeServices: () => any;
@@ -57,4 +54,5 @@ export declare class WSDL {
     private _initializeOptions(options);
     private _fromXML(xml);
     private _parse(xml);
+    private _xmlnsMap();
 }

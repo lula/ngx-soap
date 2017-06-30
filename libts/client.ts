@@ -3,23 +3,22 @@ import * as _ from 'lodash';
 import * as assert from 'assert';
 import * as uuid from 'uuid';
 import { WSDL } from "./wsdl";
+import { Buffer } from "buffer";
 
 export class Client {
-  lastResponseHeaders: any;
-  lastResponse: string;
-  endpoint: any;
-  bodyAttributes: any;
-  lastRequestHeaders: any;
-  lastEndpoint: any;
-  lastRequest: any;
-  lastMessage: string;
-  security: any;
-  httpHeaders: any;
-  streamAllowed: any;
-  SOAPAction: any;
-  soapHeaders: any;
-  wsdl: WSDL;
-
+  private endpoint: any;
+  private bodyAttributes: any;
+  private lastRequestHeaders: any;
+  private lastEndpoint: any;
+  private lastRequest: any;
+  private lastMessage: string;
+  private security: any;
+  private httpHeaders: any = {};
+  private streamAllowed: any;
+  private SOAPAction: any;
+  private soapHeaders: any;
+  private wsdl: WSDL;
+  
   constructor(wsdl: WSDL, endpoint?: any, options?: any) {
     options = options || {};
     this.wsdl = wsdl;
@@ -59,6 +58,7 @@ export class Client {
     if (!this.httpHeaders) {
       this.httpHeaders = {};
     }
+
     this.httpHeaders[name] = value;
   }
 
@@ -98,7 +98,7 @@ export class Client {
     this._initializeServices(endpoint);
   }
 
-  describe () {
+  describe() {
     var types = this.wsdl.definitions.types;
     return this.wsdl.describeServices();
   }
@@ -109,6 +109,14 @@ export class Client {
 
   setSOAPAction(SOAPAction: any) {
     this.SOAPAction = SOAPAction;
+  }
+
+  parseResponseBody(body: string): any {
+    try {
+      return this.wsdl.xmlToObject(body);
+    } catch (error) {
+      throw new Error("Error parsing body" + error);
+    }
   }
 
   private _initializeServices(endpoint: any) {
@@ -176,13 +184,14 @@ export class Client {
         extraHeaders = options;
         options = temp;
       }
+      // return self._invoke(method, args, location);
       self._invoke(method, args, location, function (error: any, result: any, raw: any, soapHeader: any) {
         callback(error, result, raw, soapHeader);
       }, options, extraHeaders);
     };
   }
 
-  private _invoke(method: any, args: any, location: any, callback: any, options: any, extraHeaders: any) {
+  private _invoke(method: any, args: any, location: any, callback: any, options?: any, extraHeaders?: any) {
     var self = this,
       name = method.$name,
       input = method.input,
@@ -194,13 +203,13 @@ export class Client {
       encoding = '',
       message = '',
       xml = null,
-      req:any = null,
+      req: any = null,
       soapAction,
       alias = findPrefix(defs.xmlns, ns),
-      headers: any = {
-        "Content-Type": "text/xml; charset=utf-8"
-      },
+      headers: any = {},
       xmlnsSoap = "xmlns:" + envelopeKey + "=\"http://schemas.xmlsoap.org/soap/envelope/\"";
+
+    headers["Content-Type"] = "text/xml; charset=utf-8";
 
     if (this.wsdl.options.forceSoap12Headers) {
       headers["Content-Type"] = "application/soap+xml; charset=utf-8";
@@ -216,20 +225,25 @@ export class Client {
     }
 
     if (!this.wsdl.options.forceSoap12Headers) {
-      headers.SOAPAction = '"' + soapAction + '"';
+      headers["SOAPAction"] = '"' + soapAction + '"';
     }
 
     options = options || {};
 
     //Add extra headers
-    for (var header in this.httpHeaders) { headers[header] = this.httpHeaders[header]; }
-    for (var attr in extraHeaders) { headers[attr] = extraHeaders[attr]; }
+  
+    for (var header in this.httpHeaders) {
+      headers[header] = this.httpHeaders[header]; 
+    }
+    for (var attr in extraHeaders) {
+      headers[attr] = extraHeaders[attr]; 
+    }
 
     // Allow the security object to add headers
-    if (this.security && this.security.addHeaders)
-      self.security.addHeaders(headers);
-    if (this.security && this.security.addOptions)
-      self.security.addOptions(options);
+    if (this.security && this.security.addHeaders) {
+      headers = self.security.addHeaders(headers);
+    }
+    if (this.security && this.security.addOptions) self.security.addOptions(options);
 
     if ((style === 'rpc') && ((input.parts || input.name === "element") || args === null)) {
       assert.ok(!style || style === 'rpc', 'invalid message definition for document style binding');
@@ -283,140 +297,7 @@ export class Client {
       }
     };
 
-    this.wsdl.http.post(location, xml, {}).map(response => {
-      let body = response.text();
-      this.lastResponse = body;
-      this.lastResponseHeaders = response.headers;
-      parseSync(body, response);
-    });
-
-    // if (this.streamAllowed && typeof self.httpClient.requestStream === 'function') {
-    //   callback = _.once(callback);
-    //   var startTime = Date.now();
-    //   req = this.httpClient.requestStream(location, xml, headers, options, self);
-    //   this.lastRequestHeaders = req.headers;
-    //   var onError = function onError(err) {
-    //     self.lastResponse = null;
-    //     self.lastResponseHeaders = null;
-    //     self.lastElapsedTime = null;
-    //     self.emit('response', null, null, eid);
-
-    //     callback(err);
-    //   };
-    //   req.on('error', onError);
-    //   req.on('response', function (response) {
-    //     response.on('error', onError);
-
-    //     // When the output element cannot be looked up in the wsdl, play it safe and
-    //     // don't stream
-    //     if (response.statusCode !== 200 || !output || !output.$lookupTypes) {
-    //       response.pipe(concatStream({ encoding: 'string' }, function (body) {
-    //         self.lastResponse = body;
-    //         self.lastResponseHeaders = response && response.headers;
-    //         self.lastElapsedTime = Date.now() - startTime;
-    //         self.emit('response', body, response, eid);
-
-    //         return parseSync(body, response);
-
-    //       }));
-    //       return;
-    //     }
-
-    //     self.wsdl.xmlToObject(response, function (error, obj) {
-    //       self.lastResponse = response;
-    //       self.lastResponseHeaders = response && response.headers;
-    //       self.lastElapsedTime = Date.now() - startTime;
-    //       self.emit('response', '<stream>', response, eid);
-
-    //       if (error) {
-    //         error.response = response;
-    //         error.body = '<stream>';
-    //         self.emit('soapError', error, eid);
-    //         return callback(error, response);
-    //       }
-
-    //       return finish(obj, '<stream>', response);
-    //     });
-    //   });
-    //   return;
-    // }
-
-    // req = th.httpClient.request(location, xml, function (err, response, body) {
-    //   self.lastResponse = body;
-    //   self.lastResponseHeaders = response && response.headers;
-    //   self.lastElapsedTime = response && response.elapsedTime;
-    //   self.emit('response', body, response, eid);
-
-    //   if (err) {
-    //     callback(err);
-    //   } else {
-    //     return parseSync(body, response);
-    //   }
-    // }, headers, options, self);
-
-    function parseSync(body: any, response: any) {
-      var obj;
-      try {
-        obj = self.wsdl.xmlToObject(body);
-      } catch (error) {
-        //  When the output element cannot be looked up in the wsdl and the body is JSON
-        //  instead of sending the error, we pass the body in the response.
-        if (!output || !output.$lookupTypes) {
-          //  If the response is JSON then return it as-is.
-          var json = _.isObject(body) ? body : tryJSONparse(body);
-          if (json) {
-            return callback(null, response, json);
-          }
-        }
-        error.response = response;
-        error.body = body;
-
-        return callback(error, response, body);
-      }
-      return finish(obj, body, response);
-    }
-
-    function finish(obj:any, body:any, response:any) {
-      var result;
-
-      if (!output) {
-        // one-way, no output expected
-        return callback(null, null, body, obj.Header);
-      }
-
-      if (typeof obj.Body !== 'object') {
-        var error: any = new Error('Cannot parse response');
-        error.response = response;
-        error.body = body;
-        return callback(error, obj, body);
-      }
-
-      // if Soap Body is empty
-      if (!obj.Body) {
-        return callback(null, obj, body, obj.Header);
-      }
-
-      result = obj.Body[output.$name];
-      // RPC/literal response body may contain elements with added suffixes I.E.
-      // 'Response', or 'Output', or 'Out'
-      // This doesn't necessarily equal the ouput message name. See WSDL 1.1 Section 2.4.5
-      if (!result) {
-        result = obj.Body[output.$name.replace(/(?:Out(?:put)?|Response)$/, '')];
-      }
-      if (!result) {
-        ['Response', 'Out', 'Output'].forEach(function (term) {
-          if (obj.Body.hasOwnProperty(name + term)) {
-            return result = obj.Body[name + term];
-          }
-        });
-      }
-
-      callback(null, result, body, obj.Header);
-    }
-
-    // Added mostly for testability, but possibly useful for debugging
-    if (req && req.headers) //fixes an issue when req or req.headers is indefined
-      this.lastRequestHeaders = req.headers;
+    callback(null, location, headers, xml);
   }
 
 }

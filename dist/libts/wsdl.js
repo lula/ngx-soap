@@ -10,7 +10,6 @@ var __extends = (this && this.__extends) || (function () {
 })();
 import * as _ from 'lodash';
 import { parser as saxParser, createStream as saxCreateStream } from 'sax';
-import { resolve as resolveUrl } from "url";
 import { TNS_PREFIX, findPrefix } from './utils';
 import { NamespaceContext } from "./nscontext";
 var stripBom = function (x) {
@@ -64,6 +63,11 @@ function noColonNameSpace(ns) {
     return (ns && ns.charAt(ns.length - 1) === ':') ? ns.substring(0, ns.length - 1) : ns;
 }
 function splitQName(nsName) {
+    if (typeof nsName !== 'string')
+        return {
+            prefix: '',
+            name: nsName
+        };
     var i = nsName.indexOf(':');
     return i < 0 ? { prefix: TNS_PREFIX, name: nsName } :
         { prefix: nsName.substring(0, i), name: nsName.substring(i + 1) };
@@ -90,28 +94,29 @@ function deepMerge(destination, source) {
         return _.isArray(a) ? a.concat(b) : undefined;
     });
 }
-export function openWsdl(uri, http, options) {
+export function openWsdl(wsdlDef, options) {
     if (options === void 0) { options = {}; }
     return new Promise(function (resolve, reject) {
-        var request_headers = options.wsdl_headers;
-        var request_options = options.wsdl_options;
-        http.get(uri).subscribe(function (response) {
-            var wsdlDef = response.text();
-            if (!wsdlDef)
-                reject("No wsdl found at url " + uri);
-            try {
-                var wsdl = new WSDL(http, wsdlDef, uri, options);
-                resolve(wsdl.build());
-            }
-            catch (e) {
-                reject(e);
-            }
-        });
+        var wsdl = new WSDL(wsdlDef, options);
+        resolve(wsdl.build());
+        // var request_headers = options.wsdl_headers;
+        // var request_options = options.wsdl_options;
+        // http.get(uri).subscribe(response => {
+        //   let wsdlDef = response.text();
+        //   if (!wsdlDef) reject("No wsdl found at url " + uri)
+        //   try {
+        //     let wsdl = new WSDL(http, wsdlDef, uri, options);
+        //     resolve(wsdl.build());
+        //   } catch (e) {
+        //     reject(e);
+        //   }
+        // });
     });
 }
 var WSDL = (function () {
-    function WSDL(http, definition, uri, options) {
+    function WSDL(definition, options) {
         this.options = {};
+        // uri: any;
         this.ignoredNamespaces = ['tns', 'targetNamespace', 'typedNamespace'];
         this.ignoreBaseNameSpaces = false;
         this.valueKey = '$value';
@@ -149,9 +154,8 @@ var WSDL = (function () {
             return def;
         };
         this.definition = definition;
-        this.uri = uri;
+        // this.uri = uri;
         this._includesWsdl = [];
-        this.http = http;
         this._initializeOptions(options);
     }
     WSDL.prototype.build = function () {
@@ -195,6 +199,7 @@ var WSDL = (function () {
                     }
                 }
             }
+            _this.xmlnsInEnvelope = _this._xmlnsMap();
             return _this;
         })
             .catch(function (err) { return console.log("Build error", err); });
@@ -249,10 +254,8 @@ var WSDL = (function () {
         if (!nsContext) {
             nsContext = new NamespaceContext();
             nsContext.declareNamespace(nsPrefix, nsURI);
-            console.log("nscontext created", nsContext);
         }
         else {
-            console.log("nscontext", nsContext);
             nsContext.pushContext();
         }
         // explicitly use xmlns attribute if available
@@ -553,7 +556,7 @@ var WSDL = (function () {
         return schema.complexTypes[name];
     };
     WSDL.prototype.findChildSchemaObject = function (parameterTypeObj, childName, backtrace) {
-        if (backtrace === void 0) { backtrace = {}; }
+        if (backtrace === void 0) { backtrace = []; }
         if (!parameterTypeObj || !childName) {
             return null;
         }
@@ -906,29 +909,27 @@ var WSDL = (function () {
     WSDL.prototype._processNextInclude = function (includes) {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            var include = includes.shift();
-            var options;
-            if (!include) {
-                resolve(_this.definitions);
-            }
-            var includePath = resolveUrl(_this.uri || '', include.location);
-            options = _.assign({}, _this.options);
-            // follow supplied ignoredNamespaces option
-            options.ignoredNamespaces = _this._originalIgnoredNamespaces || _this.options.ignoredNamespaces;
-            return openWsdl(includePath, options)
-                .then(function (wsdl) {
-                _this._includesWsdl.push(wsdl);
-                if (wsdl.definitions instanceof DefinitionsElement) {
-                    _.merge(_this.definitions, wsdl.definitions, function (a, b) {
-                        return (a instanceof SchemaElement) ? a.merge(b) : undefined;
-                    });
-                }
-                else {
-                    _this.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace] = deepMerge(_this.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace], wsdl.definitions);
-                }
-                return _this._processNextInclude(includes);
-            })
-                .catch(function (err) { return reject(err); });
+            resolve(_this.definitions);
+            // var include = includes.shift();
+            // var options;
+            // if (!include) { resolve(this.definitions) }
+            // var includePath = resolveUrl(this.uri || '', include.location);
+            // options = _.assign({}, this.options);
+            // // follow supplied ignoredNamespaces option
+            // options.ignoredNamespaces = this._originalIgnoredNamespaces || this.options.ignoredNamespaces;
+            // return openWsdl(includePath, options)
+            //   .then(wsdl => {
+            //     this._includesWsdl.push(wsdl);
+            //     if (wsdl.definitions instanceof DefinitionsElement) {
+            //       _.merge(this.definitions, wsdl.definitions, function (a: any, b: any) {
+            //         return (a instanceof SchemaElement) ? a.merge(b) : undefined;
+            //       });
+            //     } else {
+            //       this.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace] = deepMerge(this.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace], wsdl.definitions);
+            //     }
+            //     return this._processNextInclude(includes);
+            //   })
+            //   .catch(err => reject(err));
         });
     };
     WSDL.prototype._initializeOptions = function (options) {
@@ -1037,6 +1038,36 @@ var WSDL = (function () {
         };
         p.write(xml).close();
         return root;
+    };
+    WSDL.prototype._xmlnsMap = function () {
+        var xmlns = this.definitions.xmlns;
+        var str = '';
+        for (var alias in xmlns) {
+            if (alias === '' || alias === TNS_PREFIX) {
+                continue;
+            }
+            var ns = xmlns[alias];
+            switch (ns) {
+                case "http://xml.apache.org/xml-soap": // apachesoap
+                case "http://schemas.xmlsoap.org/wsdl/": // wsdl
+                case "http://schemas.xmlsoap.org/wsdl/soap/": // wsdlsoap
+                case "http://schemas.xmlsoap.org/wsdl/soap12/": // wsdlsoap12
+                case "http://schemas.xmlsoap.org/soap/encoding/": // soapenc
+                case "http://www.w3.org/2001/XMLSchema":
+                    continue;
+            }
+            if (~ns.indexOf('http://schemas.xmlsoap.org/')) {
+                continue;
+            }
+            if (~ns.indexOf('http://www.w3.org/')) {
+                continue;
+            }
+            if (~ns.indexOf('http://xml.apache.org/')) {
+                continue;
+            }
+            str += ' xmlns:' + alias + '="' + ns + '"';
+        }
+        return str;
     };
     return WSDL;
 }());

@@ -1,6 +1,6 @@
-import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
+import { Client } from "../libts/client";
 export declare class SOAPService {
     constructor();
-    createClient(http: Http, url: string, options?: any): Promise<any>;
+    createClient(wsdlDef: string, options?: any): Promise<Client>;
 }

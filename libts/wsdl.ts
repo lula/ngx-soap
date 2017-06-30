@@ -1,8 +1,6 @@
-import { Http } from '@angular/http';
 import * as _ from 'lodash';
 import { parser as saxParser, createStream as saxCreateStream } from 'sax';
 import { resolve as resolveUrl } from "url";
-
 import { TNS_PREFIX, findPrefix } from './utils';
 import { NamespaceContext } from "./nscontext";
 
@@ -63,6 +61,11 @@ function noColonNameSpace(ns: string) {
 }
 
 function splitQName(nsName: string) {
+  if(typeof nsName !== 'string') return {
+    prefix: '',
+    name: nsName
+  };
+
   var i = nsName.indexOf(':');
   return i < 0 ? { prefix: TNS_PREFIX, name: nsName } :
     { prefix: nsName.substring(0, i), name: nsName.substring(i + 1) };
@@ -94,27 +97,28 @@ function deepMerge(destination: any, source: any) {
   });
 }
 
-export function openWsdl(uri: string, http: Http, options: any = {}): Promise<WSDL> {
+export function openWsdl(wsdlDef: string, options: any = {}): Promise<WSDL> {
   return new Promise((resolve, reject) => {
-    var request_headers = options.wsdl_headers;
-    var request_options = options.wsdl_options;
+    let wsdl = new WSDL(wsdlDef, options);
+    resolve(wsdl.build());
 
-    http.get(uri).subscribe(response => {
-      let wsdlDef = response.text();
-      if (!wsdlDef) reject("No wsdl found at url " + uri)
+    // var request_headers = options.wsdl_headers;
+    // var request_options = options.wsdl_options;
+    // http.get(uri).subscribe(response => {
+    //   let wsdlDef = response.text();
+    //   if (!wsdlDef) reject("No wsdl found at url " + uri)
 
-      try {
-        let wsdl = new WSDL(http, wsdlDef, uri, options);
-        resolve(wsdl.build());
-      } catch (e) {
-        reject(e);
-      }
-    });
+    //   try {
+    //     let wsdl = new WSDL(http, wsdlDef, uri, options);
+    //     resolve(wsdl.build());
+    //   } catch (e) {
+    //     reject(e);
+    //   }
+    // });
   });
 }
 
 export class WSDL {
-  http: Http;
   xml: any;
   services: any[];
   definition: any; //WSDL definition: string or service definition
@@ -123,19 +127,17 @@ export class WSDL {
   options: any = {};
 
   _includesWsdl: any[];
-  uri: any;
+  // uri: any;
   ignoredNamespaces = ['tns', 'targetNamespace', 'typedNamespace'];
   ignoreBaseNameSpaces = false;
   valueKey = '$value';
   xmlKey = '$xml';
   xmlnsInEnvelope: any;
 
-  constructor(http: Http, definition: string, uri: any, options: any) {
+  constructor(definition: string, options: any) {
     this.definition = definition;
-    this.uri = uri;
+    // this.uri = uri;
     this._includesWsdl = [];
-    this.http = http;
-
     this._initializeOptions(options);
   }
 
@@ -180,6 +182,8 @@ export class WSDL {
             }
           }
         }
+
+        this.xmlnsInEnvelope = this._xmlnsMap();
 
         return this;
       })
@@ -584,7 +588,7 @@ export class WSDL {
     return schema.complexTypes[name];
   }
 
-  findChildSchemaObject(parameterTypeObj: any, childName: any, backtrace: any = {}): any {
+  findChildSchemaObject(parameterTypeObj: any, childName: any, backtrace: any = []): any {
     if (!parameterTypeObj || !childName) {
       return null;
     }
@@ -1009,32 +1013,33 @@ export class WSDL {
 
   private _processNextInclude(includes: any[]): Promise<any> {
     return new Promise((resolve, reject) => {
-      var include = includes.shift();
-      var options;
+      resolve(this.definitions);
 
-      if (!include) { resolve(this.definitions) }
+      // var include = includes.shift();
+      // var options;
+      // if (!include) { resolve(this.definitions) }
 
-      var includePath = resolveUrl(this.uri || '', include.location);
+      // var includePath = resolveUrl(this.uri || '', include.location);
 
-      options = _.assign({}, this.options);
-      // follow supplied ignoredNamespaces option
-      options.ignoredNamespaces = this._originalIgnoredNamespaces || this.options.ignoredNamespaces;
+      // options = _.assign({}, this.options);
+      // // follow supplied ignoredNamespaces option
+      // options.ignoredNamespaces = this._originalIgnoredNamespaces || this.options.ignoredNamespaces;
 
-      return openWsdl(includePath, options)
-        .then(wsdl => {
-          this._includesWsdl.push(wsdl);
+      // return openWsdl(includePath, options)
+      //   .then(wsdl => {
+      //     this._includesWsdl.push(wsdl);
 
-          if (wsdl.definitions instanceof DefinitionsElement) {
-            _.merge(this.definitions, wsdl.definitions, function (a: any, b: any) {
-              return (a instanceof SchemaElement) ? a.merge(b) : undefined;
-            });
-          } else {
-            this.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace] = deepMerge(this.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace], wsdl.definitions);
-          }
+      //     if (wsdl.definitions instanceof DefinitionsElement) {
+      //       _.merge(this.definitions, wsdl.definitions, function (a: any, b: any) {
+      //         return (a instanceof SchemaElement) ? a.merge(b) : undefined;
+      //       });
+      //     } else {
+      //       this.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace] = deepMerge(this.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace], wsdl.definitions);
+      //     }
 
-          return this._processNextInclude(includes);
-        })
-        .catch(err => reject(err));
+      //     return this._processNextInclude(includes);
+      //   })
+      //   .catch(err => reject(err));
     });
   }
 
@@ -1156,6 +1161,37 @@ export class WSDL {
 
     p.write(xml).close();
     return root;
+  }
+
+  private _xmlnsMap(): string {
+    var xmlns = this.definitions.xmlns;
+    var str = '';
+    for (var alias in xmlns) {
+      if (alias === '' || alias === TNS_PREFIX) {
+        continue;
+      }
+      var ns = xmlns[alias];
+      switch (ns) {
+        case "http://xml.apache.org/xml-soap": // apachesoap
+        case "http://schemas.xmlsoap.org/wsdl/": // wsdl
+        case "http://schemas.xmlsoap.org/wsdl/soap/": // wsdlsoap
+        case "http://schemas.xmlsoap.org/wsdl/soap12/": // wsdlsoap12
+        case "http://schemas.xmlsoap.org/soap/encoding/": // soapenc
+        case "http://www.w3.org/2001/XMLSchema": // xsd
+          continue;
+      }
+      if (~ns.indexOf('http://schemas.xmlsoap.org/')) {
+        continue;
+      }
+      if (~ns.indexOf('http://www.w3.org/')) {
+        continue;
+      }
+      if (~ns.indexOf('http://xml.apache.org/')) {
+        continue;
+      }
+      str += ' xmlns:' + alias + '="' + ns + '"';
+    }
+    return str;
   }
 }
 
