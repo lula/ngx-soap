@@ -1,13 +1,16 @@
 {
   "name": "ngx-soap",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "SOAP service for Angular4",
-  "main": "dist/index.js",
+  "main": "index.js",
+  "moduleName": "ngx-soap",
   "scripts": {
+    "copy": "node tools/bundle-scripts/copy-package.js && node tools/bundle-scripts/cleanup.js",
     "transpile": "ngc",
-    "package": "rollup -c",
-    "minify": "uglifyjs dist/bundles/ngxsoap.umd.js --screw-ie8 --compress --mangle --comments --output dist/bundles/ngxsoap.umd.min.js",
-    "build": "npm run transpile && npm run package && npm run minify"
+    "bundle": "rimraf dist && rollup -c rollup.config.umd.js && tsc",
+    "postbundle": "node tools/bundle-scripts/remove-code.js",
+    "minify": "uglifyjs dist/ngxsoap.umd.js --screw-ie8 --compress --mangle --comments --output dist/ngxsoap.umd.min.js",
+    "build": "npm run transpile && npm run bundle && npm run minify && npm run copy"
   },
   "keywords": [
     "Angular",
@@ -25,6 +28,7 @@
     "@angular/http": "^4.2.2",
     "@types/assert": "0.0.31",
     "@types/lodash": "^4.14.66",
+    "@types/node": "^8.0.6",
     "@types/sax": "^1.0.0",
     "@types/strip-bom": "^3.0.0",
     "@types/uuid": "^3.0.0",
@@ -33,9 +37,13 @@
     "concat-stream": "^1.6.0",
     "crypto-js": "^3.1.9-1",
     "debug": "^2.6.8",
+    "del": "^3.0.0",
     "events": "^1.1.1",
     "lodash": "^4.17.4",
     "rollup": "^0.43.0",
+    "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-typescript": "^0.8.1",
     "rxjs": "^5.0.1",
     "sax": "^1.2.4",
     "selectn": "^1.1.2",
@@ -47,8 +55,5 @@
     "uuid": "^3.1.0",
     "zone": "^0.3.4",
     "zone.js": "^0.8.12"
-  },
-  "dependencies": {
-    "@types/node": "^8.0.6"
   }
 }

@@ -1,0 +1,16 @@
+{
+  "name": "ngx-soap",
+  "version": "0.0.5",
+  "description": "SOAP service for Angular4",
+  "main": "index.js",
+  "moduleName": "ngx-soap",
+  "keywords": [
+    "Angular",
+    "Angular2",
+    "Angular4",
+    "@angular",
+    "SOAP"
+  ],
+  "author": "Luca Lulani",
+  "license": "MIT"
+}

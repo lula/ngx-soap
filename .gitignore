@@ -5,5 +5,5 @@ yarn.lock
 .vscode
 .idea
 *.iml
-scripts/bin
-scripts/test
+tools/bin
+tools/test

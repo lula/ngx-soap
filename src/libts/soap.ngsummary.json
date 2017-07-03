@@ -1,0 +1,1 @@
+{"summaries":[{"symbol":{"__symbol":0,"members":[]},"metadata":{"__symbolic":"function","parameters":["wsdlDef","options"],"value":{"__symbolic":"error","message":"Function call not supported","line":8,"character":11},"defaults":[null,{}]}}],"symbols":[{"__symbol":0,"name":"createSoapClient","filePath":"/Users/luca/Workspace/Develop/npm/ngx-soap/src/libts/soap.d.ts"}]}
