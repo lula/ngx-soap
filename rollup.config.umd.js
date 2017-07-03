@@ -4,7 +4,7 @@ import typescript from 'rollup-plugin-typescript';
 
 export default {
   entry: 'src/index.ts',
-  dest: 'dist/ngx-soap.umd.js',
+  dest: 'dist/bundles/ngx-soap.umd.js',
   sourceMap: true,
   format: 'umd',
   moduleName: 'ngx-soap',

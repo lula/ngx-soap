@@ -1,16 +1,15 @@
 {
   "name": "ngx-soap",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "SOAP service for Angular4",
-  "main": "ngx-soap.umd.js",
+  "main": "bundles/ngx-soap.umd.js",
   "moduleName": "ngx-soap",
   "scripts": {
-    "copy": "node tools/bundle-scripts/copy-package.js && node tools/bundle-scripts/cleanup.js",
-    "transpile": "ngc",
     "bundle": "rimraf dist && rollup -c rollup.config.umd.js && tsc",
     "postbundle": "node tools/bundle-scripts/remove-code.js",
-    "minify": "uglifyjs dist/ngx-soap.umd.js --screw-ie8 --compress --mangle --comments --output dist/ngx-soap.umd.min.js",
-    "build": "npm run bundle && npm run minify && npm run copy"
+    "minify": "uglifyjs dist/bundles/ngx-soap.umd.js --screw-ie8 --compress --mangle --comments --output dist/bundles/ngx-soap.umd.min.js",
+    "build": "npm run bundle && npm run copy",
+    "copy": "node tools/bundle-scripts/copy-files.js && node tools/bundle-scripts/cleanup.js"
   },
   "keywords": [
     "Angular",
@@ -21,6 +20,15 @@
   ],
   "author": "Luca Lulani",
   "license": "MIT",
+  "readme": "README.md",
+  "homepage": "https://github.com/diabolula/ngx-soap",
+  "bugs": {
+    "url": "https://github.com/diabolula/ngx-soap/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/diabolula/ngx.soap.git"
+  },
   "devDependencies": {
     "@angular/compiler": "^4.2.2",
     "@angular/compiler-cli": "^4.2.2",

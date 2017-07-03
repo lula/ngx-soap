@@ -1,8 +1,8 @@
 {
   "name": "ngx-soap",
-  "version": "0.1.0",
+  "version": "0.0.7",
   "description": "SOAP service for Angular4",
-  "main": "ngx-soap.umd.js",
+  "main": "bundles/ngx-soap.umd.js",
   "moduleName": "ngx-soap",
   "keywords": [
     "Angular",
@@ -12,5 +12,14 @@
     "SOAP"
   ],
   "author": "Luca Lulani",
-  "license": "MIT"
+  "license": "MIT",
+  "readme": "README.md",
+  "homepage": "https://github.com/diabolula/ngx-soap",
+  "bugs": {
+    "url": "https://github.com/diabolula/ngx-soap/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/youraccount/angular-amazing.git"
+  }
 }
