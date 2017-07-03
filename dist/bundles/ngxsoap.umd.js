@@ -2581,15 +2581,13 @@ var Client = (function () {
     return Client;
 }());
 
-function createSoapClient(wsdlDef, http, options) {
+function createSoapClient(wsdlDef, options) {
     if (options === void 0) { options = {}; }
-    // return new Promise((resolve, reject) => {    
     return openWsdl(wsdlDef, options)
         .then(function (wsdl) {
         return new Client(wsdl);
     })
         .catch(function (err) { throw new Error(err); });
-    // });
 }
 
 var SOAPService = (function () {

@@ -1,2 +1,1 @@
-import { Http } from "@angular/http";
-export declare function createSoapClient(wsdlDef: any, http: Http, options?: any): Promise<any>;
+export declare function createSoapClient(wsdlDef: any, options?: any): Promise<any>;
