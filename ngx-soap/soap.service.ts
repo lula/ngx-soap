@@ -7,7 +7,7 @@ import { Client } from "../libts/client";
 
 @Injectable()
 export class SOAPService {
-  
+
   constructor() { }
 
   createClient(wsdlDef: string, options: any = {}): Promise<Client> {

@@ -20,5 +20,10 @@
       "es2016",
       "dom"
     ]
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "test",
+    "bin"
+  ]
 }

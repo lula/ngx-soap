@@ -6,3 +6,4 @@ yarn.lock
 .idea
 *.iml
 scripts/bin
+scripts/test

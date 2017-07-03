@@ -4,15 +4,31 @@ import * as _ from 'underscore';
 import { createSoapClient } from '../libts/soap';
 import { Client } from '../libts/client';
 
+interface Json2TsOptions {
+    rootObjectName?: string;
+    concatChildObjName?: boolean;
+    onlyConcatChildObjNameLastNum?: number
+}
+
 class Json2Ts {
+    private options: Json2TsOptions = {}
+
+    constructor(options:Json2TsOptions = {}) {
+        this.options = options;
+
+        if(this.options.rootObjectName) {
+            this.options.rootObjectName = this.toUpperFirstLetter(this.options.rootObjectName);
+        }
+    }
+
     convert(content: string): string {
         let jsonContent = JSON.parse(content);
 
         if (_.isArray(jsonContent)) {
-            return this.convertObjectToTsInterfaces(jsonContent[0]);
+            return this.convertObjectToTsInterfaces(jsonContent[0], this.options.rootObjectName);
         }
 
-        return this.convertObjectToTsInterfaces(jsonContent);
+        return this.convertObjectToTsInterfaces(jsonContent, this.options.rootObjectName);
     }
 
     private convertObjectToTsInterfaces(jsonContent: any, objectName: string = "RootObject"): string {
@@ -20,10 +36,19 @@ class Json2Ts {
         let objectResult: string[] = [];
 
         for (let key in jsonContent) {
+            if (/\d+(?!\w)/.test(key)) continue;
+
             let value = jsonContent[key];
+            // let isKeyArray = /.*\[\]$/.test(key);
 
             if (_.isObject(value) && !_.isArray(value)) {
-                let childObjectName = this.toUpperFirstLetter(key);
+                let childObjectName = "";
+                if (this.options.concatChildObjName) {
+                    childObjectName = this.formatConcatChildObjectName(key, objectName);
+                } else {
+                    childObjectName = this.toUpperFirstLetter(key.replace('[]', ''));
+                }
+
                 objectResult.push(this.convertObjectToTsInterfaces(value, childObjectName));
                 jsonContent[key] = this.removeMajority(childObjectName) + ";";
             } else if (_.isArray(value)) {
@@ -59,8 +84,10 @@ class Json2Ts {
             }
         }
 
+        objectName = this.toUpperFirstLetter(objectName).replace(new RegExp("-", "g"),'');
         let result = this.formatCharsToTypeScript(jsonContent, objectName, optionalKeys);
-        objectResult.push(result);
+
+        objectResult.push(result.replace("-", ""));
 
         return objectResult.join("\n\n");
     }
@@ -121,19 +148,27 @@ class Json2Ts {
             .replace(new RegExp(",", "g"), "");
 
         let allKeys = _.allKeys(jsonContent);
+
         for (let index = 0, length = allKeys.length; index < length; index++) {
             let key = allKeys[index];
-            if (_.contains(optionalKeys, key)) {
-                // result = result.replace(new RegExp(key + ":", "g"), this.toLowerFirstLetter(key) + "?:");
-                result = result.replace(new RegExp(key + ":", "g"), key + "?:");
-            } else {
-                // result = result.replace(new RegExp(key + ":", "g"), this.toLowerFirstLetter(key) + ":");
-                result = result.replace(new RegExp(key + ":", "g"), key + ":");
+            // if (_.contains(optionalKeys, key)) {
+            //     result = result.replace(new RegExp(key + ":", "g"), this.toLowerFirstLetter(key) + "?:");
+            // } else {
+            //     result = result.replace(new RegExp(key + ":", "g"), this.toLowerFirstLetter(key) + ":");
+            // }
+
+            if (/\d+(?!\w)/.test(key)) {
+                result = result.replace(new RegExp('\n\t' + key + ':.*', "g"), "");
+                continue;
             }
+
+            let formattedKey = key.replace('[]', '');
+            result = result.replace(new RegExp(key.replace('[]', '\\[\\]') + ":", "g"), formattedKey + "?:");
+            result = result.split('-').map(this.toUpperFirstLetter).join("");
         }
 
-        objectName = this.removeMajority(objectName);
-
+        objectName = this.removeMajority(objectName).replace('[]', '');
+        
         return "export interface " + objectName + " " + result;
     }
 
@@ -155,6 +190,17 @@ class Json2Ts {
         return text.charAt(0).toLowerCase() + text.slice(1);
     };
 
+    private formatConcatChildObjectName(key: string, objectName: string): string {
+        let ret = this.toUpperFirstLetter(this.toUpperFirstLetter(objectName) + "-" + this.toUpperFirstLetter(key).replace('[]', ''));
+        let arr = ret.split("-");
+
+        if(this.options.onlyConcatChildObjNameLastNum > 0) {
+            arr = _.last(arr, this.options.onlyConcatChildObjNameLastNum);
+        } 
+        
+        return arr.map(this.toUpperFirstLetter).join("-");
+    } 
+
     isJson(stringContent): boolean {
         try {
             JSON.parse(stringContent);
@@ -167,7 +213,7 @@ class Json2Ts {
 
 let handleError = () => {
     console.log("Usage: ");
-    console.log("npm run getdef <wsdl_file_path> <definition_out_file>");
+    console.log("npm run getdef <wsdl_in_file> <definition_out_file>");
     process.exit();
 }
 
@@ -181,11 +227,19 @@ if (!wsdFilePath) {
     handleError();
 }
 
-let j2t = new Json2Ts();
+let rootObjectName = process.argv[4] || _.last(wsdFilePath.split("/"), 1).join('').replace('.', '');
+
+let j2t = new Json2Ts({
+    rootObjectName: rootObjectName,
+    concatChildObjName: true,
+    onlyConcatChildObjNameLastNum: 2
+});
+
 let wsdlDef = fs.readFileSync(wsdFilePath).toString();
 createSoapClient(wsdlDef)
     .then((client: Client) => {
         let descr = client.describe();
+        // fs.writeFile("./test/descr.json", JSON.stringify(descr));
         fs.writeFile(outFilePath, j2t.convert(JSON.stringify(descr)));
     })
     .catch(err => { throw new Error(err) })
