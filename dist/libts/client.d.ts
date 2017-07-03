@@ -1,0 +1,37 @@
+import { WSDL } from "./wsdl";
+export declare class Client {
+    private endpoint;
+    private bodyAttributes;
+    private lastRequestHeaders;
+    private lastEndpoint;
+    private lastRequest;
+    private lastMessage;
+    private security;
+    private httpHeaders;
+    private streamAllowed;
+    private SOAPAction;
+    private soapHeaders;
+    private wsdl;
+    constructor(wsdl: WSDL, endpoint?: any, options?: any);
+    addSoapHeader(soapHeader: any, name: any, namespace: any, xmlns: any): number;
+    changeSoapHeader(index: any, soapHeader: any, name: any, namespace: any, xmlns: any): void;
+    getSoapHeaders(): any;
+    clearSoapHeaders(): void;
+    addHttpHeader(name: any, value: any): void;
+    getHttpHeaders(): any;
+    clearHttpHeaders(): void;
+    addBodyAttribute(bodyAttribute: any, name: any, namespace: any, xmlns: any): void;
+    getBodyAttributes(): any;
+    clearBodyAttributes(): void;
+    setEndpoint(endpoint: any): void;
+    describe(): any;
+    setSecurity(security: any): void;
+    setSOAPAction(SOAPAction: any): void;
+    parseResponseBody(body: string): any;
+    private _initializeServices(endpoint);
+    private _initializeOptions(options?);
+    private _defineService(service, endpoint);
+    private _definePort(port, endpoint);
+    private _defineMethod(method, location);
+    private _invoke(method, args, location, callback, options?, extraHeaders?);
+}

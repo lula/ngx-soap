@@ -1,7 +1,7 @@
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@angular/core'), require('@angular/http'), require('rxjs/add/operator/map'), require('lodash'), require('sax'), require('assert'), require('uuid')) :
 	typeof define === 'function' && define.amd ? define(['exports', '@angular/core', '@angular/http', 'rxjs/add/operator/map', 'lodash', 'sax', 'assert', 'uuid'], factory) :
-	(factory((global.ngxsoap = global.ngxsoap || {}),global.ng.core,global.ng.http,global.Rx.Observable,global._,global.sax,global.assert,global.uuid));
+	(factory((global['ngx-soap'] = global['ngx-soap'] || {}),global.ng.core,global.ng.http,global.Rx.Observable,global._,global.sax,global.assert,global.uuid));
 }(this, (function (exports,_angular_core,_angular_http,rxjs_add_operator_map,_,sax,assert,uuid) { 'use strict';
 
 function __extends(d, b) {
@@ -2649,4 +2649,4 @@ exports.BasicAuthSecurity = BasicAuthSecurity;
 Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
-//# sourceMappingURL=ngxsoap.umd.js.map
+//# sourceMappingURL=ngx-soap.umd.js.map

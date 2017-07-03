@@ -1,8 +1,8 @@
 {
   "name": "ngx-soap",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "SOAP service for Angular4",
-  "main": "index.js",
+  "main": "ngx-soap.umd.js",
   "moduleName": "ngx-soap",
   "keywords": [
     "Angular",
