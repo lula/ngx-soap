@@ -21,13 +21,13 @@
   "author": "Luca Lulani",
   "license": "MIT",
   "readme": "README.md",
-  "homepage": "https://github.com/diabolula/ngx-soap",
+  "homepage": "https://github.com/lula/ngx-soap",
   "bugs": {
-    "url": "https://github.com/diabolula/ngx-soap/issues"
+    "url": "https://github.com/lula/ngx-soap/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/diabolula/ngx.soap.git"
+    "url": "https://github.com/lula/ngx-soap.git"
   },
   "devDependencies": {
     "@angular/compiler": "^4.2.2",
