@@ -10,13 +10,7 @@ Still at a very early stage.
 
 `npm install --save ngx-soap`
 
-## Example
-
-In the following example the app is created with angular cli:
-
-`ng new ngx-soap-app`
-
-`cd ngx-soap-app`
+## Usage
 
 Install `ngx-soap`:
 
@@ -158,3 +152,5 @@ Import SOAPService and inject it in your component, then:
             });
           });
         }
+
+See full [example app](https://github.com/lula/ngx-soap/tree/master/example) in `example` folder. 
