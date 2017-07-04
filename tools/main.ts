@@ -230,9 +230,10 @@ if (!wsdFilePath) {
 let rootObjectName = process.argv[4] || _.last(wsdFilePath.split("/"), 1).join('').replace('.', '');
 
 let j2t = new Json2Ts({
-    rootObjectName: rootObjectName,
-    concatChildObjName: true,
-    onlyConcatChildObjNameLastNum: 2
+    rootObjectName: rootObjectName
+    // ,
+    // concatChildObjName: true,
+    // onlyConcatChildObjNameLastNum: 2
 });
 
 let wsdlDef = fs.readFileSync(wsdFilePath).toString();

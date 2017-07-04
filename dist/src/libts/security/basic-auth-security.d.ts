@@ -3,7 +3,7 @@ export declare class BasicAuthSecurity {
     private _password;
     private _username;
     constructor(username: string, password: string, defaults: any);
-    addHeaders(headers: any): Headers;
+    addHeaders(headers: any): any;
     toXML(): string;
     addOptions(options: any): void;
 }

@@ -14,7 +14,7 @@ export class BasicAuthSecurity {
     _.merge(this.defaults, defaults);
   }
 
-  addHeaders(headers: any): Headers {
+  addHeaders(headers: any): any {
     headers['Authorization'] = 'Basic ' + btoa(this._username + ':' + this._password);
     return headers;
   }

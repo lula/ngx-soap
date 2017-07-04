@@ -1,12 +1,13 @@
 {
   "name": "ngx-soap",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "SOAP service for Angular4",
   "main": "bundles/ngx-soap.umd.js",
   "typings": "src/index.d.ts",
   "moduleName": "ngx-soap",
   "scripts": {
-    "bundle": "rimraf dist && rollup -c rollup.config.umd.js && tsc",
+    "transpile": "ngc",
+    "bundle": "rimraf dist && npm run transpile && rollup -c rollup.config.umd.js",
     "postbundle": "node tools/bundle-scripts/remove-code.js",
     "minify": "uglifyjs dist/bundles/ngx-soap.umd.js --screw-ie8 --compress --mangle --comments --output dist/bundles/ngx-soap.umd.min.js",
     "build": "npm run bundle && npm run copy",

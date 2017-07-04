@@ -4,23 +4,6 @@
 	(factory((global['ngx-soap'] = global['ngx-soap'] || {}),global.ng.core,global.ng.http,global.Rx.Observable,global._,global.sax,global.assert,global.uuid));
 }(this, (function (exports,_angular_core,_angular_http,rxjs_add_operator_map,_,sax,assert,uuid) { 'use strict';
 
-function __extends(d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-}
-
-function __decorate(decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-}
-
-function __metadata(k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-}
-
 // import * as crypto from '                     crypto-js/sha1';
 // import * as buffer from "buffer/";
 // export function passwordDigest(nonce, created, password) {
@@ -272,6 +255,16 @@ var NamespaceContext = (function () {
     return NamespaceContext;
 }());
 
+var __extends = (undefined && undefined.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var stripBom = function (x) {
     // Catches EFBBBF (UTF-8 BOM) because the buffer-to-string
     // conversion translates it to FEFF (UTF-16 BOM)
@@ -2597,7 +2590,7 @@ function createSoapClient(wsdlDef, options) {
         .catch(function (err) { throw new Error(err); });
 }
 
-exports.SOAPService = (function () {
+var SOAPService = (function () {
     function SOAPService() {
     }
     SOAPService.prototype.createClient = function (wsdlDef, options) {
@@ -2606,22 +2599,25 @@ exports.SOAPService = (function () {
     };
     return SOAPService;
 }());
-exports.SOAPService = __decorate([
-    _angular_core.Injectable(),
-    __metadata("design:paramtypes", [])
-], exports.SOAPService);
+SOAPService.decorators = [
+    { type: _angular_core.Injectable },
+];
+/** @nocollapse */
+SOAPService.ctorParameters = function () { return []; };
 
-exports.NgxSoapModule = (function () {
+var NgxSoapModule = (function () {
     function NgxSoapModule() {
     }
     return NgxSoapModule;
 }());
-exports.NgxSoapModule = __decorate([
-    _angular_core.NgModule({
-        imports: [_angular_http.HttpModule],
-        providers: [exports.SOAPService]
-    })
-], exports.NgxSoapModule);
+NgxSoapModule.decorators = [
+    { type: _angular_core.NgModule, args: [{
+                imports: [_angular_http.HttpModule],
+                providers: [SOAPService]
+            },] },
+];
+/** @nocollapse */
+NgxSoapModule.ctorParameters = function () { return []; };
 
 var BasicAuthSecurity = (function () {
     function BasicAuthSecurity(username, password, defaults) {
@@ -2643,6 +2639,8 @@ var BasicAuthSecurity = (function () {
     return BasicAuthSecurity;
 }());
 
+exports.NgxSoapModule = NgxSoapModule;
+exports.SOAPService = SOAPService;
 exports.Client = Client;
 exports.BasicAuthSecurity = BasicAuthSecurity;
 

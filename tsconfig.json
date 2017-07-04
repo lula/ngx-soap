@@ -18,7 +18,11 @@
     "lib": [
       "es2015", 
       "dom"
-    ]
+    ],
+    "paths": {
+      "@angular/core": ["node_modules/@angular/core"],
+      "rxjs/*": ["node_modules/rxjs/*"]
+    }
   },
   "files": [
     "./src/index.ts"

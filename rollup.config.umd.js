@@ -3,15 +3,15 @@ import commonjs from 'rollup-plugin-commonjs';
 import typescript from 'rollup-plugin-typescript';
 
 export default {
-  entry: 'src/index.ts',
+  entry: 'dist/src/index.js',
   dest: 'dist/bundles/ngx-soap.umd.js',
   sourceMap: true,
   format: 'umd',
   moduleName: 'ngx-soap',
   plugins: [
-    typescript({
-      typescript:require('typescript')
-    }),
+    // typescript({
+    //   typescript:require('typescript')
+    // }),
     resolve({
       module: true,
       main: true
