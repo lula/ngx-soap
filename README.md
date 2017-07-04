@@ -220,7 +220,7 @@ Let's take the following WSDL:
         </wsdl:service>
     </wsdl:definitions>
 
-The WSDL exposes math operations. We'll call Add that takes intA and intB as parameters and returns the sum of the two numbers. 
+The WSDL exposes math operations. 
 
 Import NgxSoapModule in yout app.module:
 
