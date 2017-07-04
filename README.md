@@ -4,7 +4,7 @@ Simple SOAP client for Angular 4 based on amazing [node-soap](https://github.com
 
 WSDL definitions generator is based on [json2ts](https://github.com/GregorBiswanger/json2ts), which is copied in tools/main.ts and updated a little given initial test cases I worked with.
 
-Still at a very initial stage.
+Still at a very early stage.
 
 ## Installation
 
@@ -12,11 +12,11 @@ Still at a very initial stage.
 
 ## Example
 
-In this example the example app is created with angular cli:
+In the following example the app is created with angular cli:
 
-`ng new example`
+`ng new ngx-soap-app`
 
-`cd example`
+`cd ngx-soap-app`
 
 Install `ngx-soap`:
 
