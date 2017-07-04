@@ -1,0 +1,8 @@
+{
+  "/calculator": {
+    "target": "http://www.dneonline.com",
+    "secure": false,
+    "changeOrigin": "true",
+    "pathRewrite": {"^/calculator": ""}
+  }
+}

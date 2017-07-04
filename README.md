@@ -7,10 +7,37 @@ WSDL definitions generator is based on [json2ts](https://github.com/GregorBiswan
 Still at a very initial stage.
 
 ## Installation
-`npm install ngx-soap`
 
-## Usage
-Let's take the following WSDL:
+`npm install --save ngx-soap`
+
+## Example
+
+In this example the example app is created with angular cli:
+
+`ng new example`
+
+`cd example`
+
+Install `ngx-soap`:
+
+`npm install --save ngx-soap`
+
+Import NgxSoapModule in app module:
+
+    import { NgxSoapModule } from 'ngx-soap';
+    ...
+    
+    @NgModule({
+      imports: [
+        ...,
+        NgxSoapModule
+      ],
+      ...
+    })
+    export class AppModule { }
+
+
+Let's use the `calculator.wsdl` definitions ([complete wsdl](http://www.dneonline.com/calculator.asmx?WSDL)):
 
     <?xml version="1.0" encoding="utf-8"?>
     <wsdl:definitions 
@@ -40,51 +67,6 @@ Let's take the following WSDL:
                         </s:sequence>
                     </s:complexType>
                 </s:element>
-                <s:element name="Subtract">
-                    <s:complexType>
-                        <s:sequence>
-                            <s:element minOccurs="1" maxOccurs="1" name="intA" type="s:int" />
-                            <s:element minOccurs="1" maxOccurs="1" name="intB" type="s:int" />
-                        </s:sequence>
-                    </s:complexType>
-                </s:element>
-                <s:element name="SubtractResponse">
-                    <s:complexType>
-                        <s:sequence>
-                            <s:element minOccurs="1" maxOccurs="1" name="SubtractResult" type="s:int" />
-                        </s:sequence>
-                    </s:complexType>
-                </s:element>
-                <s:element name="Multiply">
-                    <s:complexType>
-                        <s:sequence>
-                            <s:element minOccurs="1" maxOccurs="1" name="intA" type="s:int" />
-                            <s:element minOccurs="1" maxOccurs="1" name="intB" type="s:int" />
-                        </s:sequence>
-                    </s:complexType>
-                </s:element>
-                <s:element name="MultiplyResponse">
-                    <s:complexType>
-                        <s:sequence>
-                            <s:element minOccurs="1" maxOccurs="1" name="MultiplyResult" type="s:int" />
-                        </s:sequence>
-                    </s:complexType>
-                </s:element>
-                <s:element name="Divide">
-                    <s:complexType>
-                        <s:sequence>
-                            <s:element minOccurs="1" maxOccurs="1" name="intA" type="s:int" />
-                            <s:element minOccurs="1" maxOccurs="1" name="intB" type="s:int" />
-                        </s:sequence>
-                    </s:complexType>
-                </s:element>
-                <s:element name="DivideResponse">
-                    <s:complexType>
-                        <s:sequence>
-                            <s:element minOccurs="1" maxOccurs="1" name="DivideResult" type="s:int" />
-                        </s:sequence>
-                    </s:complexType>
-                </s:element>
             </s:schema>
         </wsdl:types>
         <wsdl:message name="AddSoapIn">
@@ -92,24 +74,6 @@ Let's take the following WSDL:
         </wsdl:message>
         <wsdl:message name="AddSoapOut">
             <wsdl:part name="parameters" element="tns:AddResponse" />
-        </wsdl:message>
-        <wsdl:message name="SubtractSoapIn">
-            <wsdl:part name="parameters" element="tns:Subtract" />
-        </wsdl:message>
-        <wsdl:message name="SubtractSoapOut">
-            <wsdl:part name="parameters" element="tns:SubtractResponse" />
-        </wsdl:message>
-        <wsdl:message name="MultiplySoapIn">
-            <wsdl:part name="parameters" element="tns:Multiply" />
-        </wsdl:message>
-        <wsdl:message name="MultiplySoapOut">
-            <wsdl:part name="parameters" element="tns:MultiplyResponse" />
-        </wsdl:message>
-        <wsdl:message name="DivideSoapIn">
-            <wsdl:part name="parameters" element="tns:Divide" />
-        </wsdl:message>
-        <wsdl:message name="DivideSoapOut">
-            <wsdl:part name="parameters" element="tns:DivideResponse" />
         </wsdl:message>
         <wsdl:portType name="CalculatorSoap">
             <wsdl:operation name="Add">
@@ -119,50 +83,11 @@ Let's take the following WSDL:
                 <wsdl:input message="tns:AddSoapIn" />
                 <wsdl:output message="tns:AddSoapOut" />
             </wsdl:operation>
-            <wsdl:operation name="Subtract">
-                <wsdl:input message="tns:SubtractSoapIn" />
-                <wsdl:output message="tns:SubtractSoapOut" />
-            </wsdl:operation>
-            <wsdl:operation name="Multiply">
-                <wsdl:input message="tns:MultiplySoapIn" />
-                <wsdl:output message="tns:MultiplySoapOut" />
-            </wsdl:operation>
-            <wsdl:operation name="Divide">
-                <wsdl:input message="tns:DivideSoapIn" />
-                <wsdl:output message="tns:DivideSoapOut" />
-            </wsdl:operation>
         </wsdl:portType>
         <wsdl:binding name="CalculatorSoap" type="tns:CalculatorSoap">
             <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
             <wsdl:operation name="Add">
                 <soap:operation soapAction="http://tempuri.org/Add" style="document" />
-                <wsdl:input>
-                    <soap:body use="literal" />
-                </wsdl:input>
-                <wsdl:output>
-                    <soap:body use="literal" />
-                </wsdl:output>
-            </wsdl:operation>
-            <wsdl:operation name="Subtract">
-                <soap:operation soapAction="http://tempuri.org/Subtract" style="document" />
-                <wsdl:input>
-                    <soap:body use="literal" />
-                </wsdl:input>
-                <wsdl:output>
-                    <soap:body use="literal" />
-                </wsdl:output>
-            </wsdl:operation>
-            <wsdl:operation name="Multiply">
-                <soap:operation soapAction="http://tempuri.org/Multiply" style="document" />
-                <wsdl:input>
-                    <soap:body use="literal" />
-                </wsdl:input>
-                <wsdl:output>
-                    <soap:body use="literal" />
-                </wsdl:output>
-            </wsdl:operation>
-            <wsdl:operation name="Divide">
-                <soap:operation soapAction="http://tempuri.org/Divide" style="document" />
                 <wsdl:input>
                     <soap:body use="literal" />
                 </wsdl:input>
@@ -182,33 +107,6 @@ Let's take the following WSDL:
                     <soap12:body use="literal" />
                 </wsdl:output>
             </wsdl:operation>
-            <wsdl:operation name="Subtract">
-                <soap12:operation soapAction="http://tempuri.org/Subtract" style="document" />
-                <wsdl:input>
-                    <soap12:body use="literal" />
-                </wsdl:input>
-                <wsdl:output>
-                    <soap12:body use="literal" />
-                </wsdl:output>
-            </wsdl:operation>
-            <wsdl:operation name="Multiply">
-                <soap12:operation soapAction="http://tempuri.org/Multiply" style="document" />
-                <wsdl:input>
-                    <soap12:body use="literal" />
-                </wsdl:input>
-                <wsdl:output>
-                    <soap12:body use="literal" />
-                </wsdl:output>
-            </wsdl:operation>
-            <wsdl:operation name="Divide">
-                <soap12:operation soapAction="http://tempuri.org/Divide" style="document" />
-                <wsdl:input>
-                    <soap12:body use="literal" />
-                </wsdl:input>
-                <wsdl:output>
-                    <soap12:body use="literal" />
-                </wsdl:output>
-            </wsdl:operation>
         </wsdl:binding>
         <wsdl:service name="Calculator">
             <wsdl:port name="CalculatorSoap" binding="tns:CalculatorSoap">
@@ -220,59 +118,46 @@ Let's take the following WSDL:
         </wsdl:service>
     </wsdl:definitions>
 
-The WSDL exposes math operations. 
+The WSDL must be read by the client (e.g with an http request) and its content used with SOAPService service. In the example app the WSDL is served from `assets` folder.
 
-Import NgxSoapModule in yout app.module:
+Import SOAPService and inject it in your component, then: 
 
-    import { NgxSoapModule } from 'ngx-soap';
-    
-    @NgModule({
-      imports: [
-        NgxSoapModule,
-        ...
-      ],
-      ...
-    })
-    export class AppModule {}
+1. get WSDL content 
+2. create the client with the WSDL content definitions
+3. call the operation with a JSON input. The client operation method is created dynamically (from the WSDL), therefore it cannot be part of the typescript definitions. You can extend typescript definitions or cast the client to `any` type for instance. The operation returns a callback with the following parameters: 
+    - err: error, if any
+    - wsurl: operation URL from WSDL to be used in the HTTP request
+    - headers: HTTP headers you may use in the HTTP request
+    - xml: the input body parsed as xml text to be used in the HTTP request
+4. call the operation URL from WSDL with operation parameters (wsurl, xml, headers)
 
-Import SOAPService and inject it in your component:
+        constructor( private http: Http, private soap: SOAPService) { }
 
-    import { SOAPService, Client } from 'ngx-soap';
+        sum() {
+          // get wsdl content
+          this.http.get('/assets/calculator.wsdl').subscribe(response => {
+          
+            // create the client for the wsdl
+            this.soap.createClient(response.text()).then((client: Client) => {
+              let input = {
+                intA: this.intA,
+                intB: this.intB
+              };
 
-    @Component({
-      template: `
-        A: <input name="intA" [(ngModel)]="intA">
-        B: <input name="intA" [(ngModel)]="intB">
-        Result: {{result}}
-        <button (click)="sum()"></button>
-        <pre>{{jsonResponse | json}}</pre>
-      `
-    })
-    export class MyComponent {
-      intA: string;
-      intB: string;
-      result: string;
+              // call the web service operation
+              (client as any).Add(input, (err, wsurl: string, headers: any, xml: string) => {
 
-      constructor(
-        private soap: SOAPService
-      ) { }
+                // to avoid CORS problems the app use a proxy (see proxy.conf.json)
+                wsurl = wsurl.replace("http://www.dneonline.com", "/calculator");
 
-      sum() {
-        this.http.get('/assets/calculator.wsdl').subscribe(response => {
-          this.soap.createClient(response.text()).then((client: Client) => {
-            let input = {
-              intA: this.intA,
-              intB: this.intB
-            };
-
-            (this.client as any).Add(input, (err, wsurl: string, headers: any, xml: string) => {
-              this.http.post(wsurl, xml, { headers: headers }).subscribe(
-                response => {
-                  let jsonResponse = this.client.parseResponseBody(response.text());
-                  this.result = jsonResponse.Body.AddResponse.AddResult;
-                }
-              );
+                // call the web service url
+                this.http.post(wsurl, xml, { headers: headers }).subscribe(
+                  response => {
+                    let jsonResponse = client.parseResponseBody(response.text());
+                    this.result = jsonResponse.Body.AddResponse.AddResult;
+                  }
+                );
+              });
+            });
           });
-        });
-      }
-    }
+        }
