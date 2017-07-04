@@ -1,6 +1,6 @@
 {
   "name": "ngx-soap",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "SOAP service for Angular4",
   "main": "bundles/ngx-soap.umd.js",
   "typings": "src/index.d.ts",
