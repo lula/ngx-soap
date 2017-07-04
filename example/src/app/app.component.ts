@@ -1,47 +1,110 @@
-import { Component } from '@angular/core';
-import { Http } from '@angular/http';
+import { Component, OnInit } from '@angular/core';
 import { SOAPService, Client } from 'ngx-soap';
+import { Http } from '@angular/http';
 
 @Component({
   selector: 'app-root',
-  template: `
-    A: <input name="intA" [(ngModel)]="intA">
-    B: <input name="intA" [(ngModel)]="intB">
-    <button (click)="sum()">Sum</button>
-
-    Result: {{result}}
-    <pre>{{jsonResponse | json}}</pre>
-  `
+  templateUrl: './app.component.html'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   intA: string;
   intB: string;
-  result: string;
+  jsonResponse: any;
+  xmlResponse: string;
+  message: string;
+  loading: boolean;
+  resultLabel: string;
+
+  private client: Client;
 
   constructor(
     private http: Http,
     private soap: SOAPService
   ) { }
 
-  sum() {
+  ngOnInit() {
     this.http.get('/assets/calculator.wsdl').subscribe(response => {
-      this.soap.createClient(response.text()).then((client: Client) => {
-        let input = {
-          intA: this.intA,
-          intB: this.intB
-        };
-
-        (client as any).Add(input, (err, wsurl: string, headers: any, xml: string) => {
-          wsurl = wsurl.replace("http://www.dneonline.com", "/calculator");
-          
-          this.http.post(wsurl, xml, { headers: headers }).subscribe(
-            response => {
-              let jsonResponse = client.parseResponseBody(response.text());
-              this.result = jsonResponse.Body.AddResponse.AddResult;
-            }
-          );
+      if (response && response.text()) {
+        this.soap.createClient(response.text()).then((client: Client) => {
+          this.client = client;
         });
-      });
+      }
     });
+  }
+
+  sum() {
+    this.clear();
+    this.loading = true;
+    this.checkNumbers()
+
+    this.resultLabel = 'A + B';
+    let body: CalculatorWS.Input = {
+      intA: this.intA,
+      intB: this.intB
+    };
+
+    (this.client as any).Add(body, (err, wsurl: string, headers: any, xml: string) => {
+      wsurl = wsurl.replace("http://www.dneonline.com", "/calculator");
+
+      this.http.post(wsurl, xml, { headers: headers }).subscribe(
+        response => {
+          this.xmlResponse = response.text();
+          this.jsonResponse = this.client.parseResponseBody(response.text());
+          try {
+            this.message = this.jsonResponse.Body.AddResponse.AddResult;
+          } catch (error) { }
+          this.loading = false;
+        },
+        err => {
+          console.log("Error calling ws", err);
+          this.loading = false;
+        }
+      );
+    });
+
+  }
+
+  subtract() {
+    this.clear();
+    this.loading = true;
+    this.checkNumbers()
+
+    this.resultLabel = 'A - B';
+
+    let body: CalculatorWS.Input = {
+      intA: this.intA,
+      intB: this.intB
+    };
+
+    (this.client as any).Subtract(body, (err, wsurl: string, headers: any, xml: string) => {
+      wsurl = wsurl.replace("http://www.dneonline.com", "/calculator");
+
+      this.http.post(wsurl, xml, { headers: headers }).subscribe(
+        response => {
+          this.xmlResponse = response.text();
+          this.jsonResponse = this.client.parseResponseBody(response.text());
+          try {
+            this.message = this.jsonResponse.Body.SubtractResponse.SubtractResult;
+          } catch (error) { }
+          this.loading = false;
+        },
+        err => {
+          console.log("Error calling ws", err);
+          this.loading = false;
+        }
+      );
+    });
+
+  }
+
+  checkNumbers() {
+    if (!+this.intA) this.intA = '0';
+    if (!+this.intB) this.intB = '0';
+  }
+
+  clear() {
+    this.message = undefined;
+    this.jsonResponse = undefined;
+    this.xmlResponse = undefined;
   }
 }
