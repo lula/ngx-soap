@@ -134,23 +134,20 @@ Import SOAPService and inject it in your component, then:
         constructor( private http: Http, private soap: SOAPService) { }
 
         sum() {
-          // get wsdl content
+          // 1. get wsdl content
           this.http.get('/assets/calculator.wsdl').subscribe(response => {
-          
-            // create the client for the wsdl
+            
+            // 2. create the client
             this.soap.createClient(response.text()).then((client: Client) => {
               let input = {
                 intA: this.intA,
                 intB: this.intB
               };
-
-              // call the web service operation
+            
+              // 3. call the web service operation
               (client as any).Add(input, (err, wsurl: string, headers: any, xml: string) => {
-
-                // to avoid CORS problems the app use a proxy (see proxy.conf.json)
-                wsurl = wsurl.replace("http://www.dneonline.com", "/calculator");
-
-                // call the web service url
+            
+                // 4. call the web service operation URL
                 this.http.post(wsurl, xml, { headers: headers }).subscribe(
                   response => {
                     let jsonResponse = client.parseResponseBody(response.text());
