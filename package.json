@@ -1,6 +1,6 @@
 {
   "name": "ngx-soap",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "SOAP service for Angular4",
   "main": "src/ngx-soap.module.js",
   "module": "src/ngx-soap.module.js",
