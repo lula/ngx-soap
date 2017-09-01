@@ -3,7 +3,7 @@ import commonjs from 'rollup-plugin-commonjs';
 import uglify from 'rollup-plugin-uglify';
 
 export default {
-  entry: 'dist/src/ngx-soap.module.js',
+  entry: 'dist/src/index.js',
   dest: 'dist/bundles/ngx-soap.umd.js',
   sourceMap: true,
   format: 'umd',

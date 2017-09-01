@@ -25,7 +25,7 @@
     }
   },
   "files": [
-    "./src/ngx-soap.module.ts"
+    "./src/index.ts"
   ],
   "angularCompilerOptions": {
     "strictMetadataEmit": true,
