@@ -34,7 +34,7 @@
     </md-card-header>
     <md-card-content>
       <md-input-container>
-        <input mdInput readonly value="{{message}}" placeholder="{{resultLabel}}">
+        <input mdInput readonly [(ngModel)]="message" placeholder="{{resultLabel}}">
       </md-input-container>
     </md-card-content>
   </md-card>
