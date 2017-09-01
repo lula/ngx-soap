@@ -14,7 +14,8 @@ export class AppComponent implements OnInit {
   message: string;
   loading: boolean;
   resultLabel: string;
-
+  showDiagnostic: boolean = false; 
+  
   private client: Client;
 
   constructor(
