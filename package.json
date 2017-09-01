@@ -2,14 +2,15 @@
   "name": "ngx-soap",
   "version": "0.1.5",
   "description": "SOAP service for Angular4",
-  "main": "bundles/ngx-soap.umd.js",
-  "typings": "src/index.d.ts",
+  "main": "src/ngx-soap.module.js",
+  "module": "src/ngx-soap.module.js",
+  "jsnext:main": "src/ngx-soap.module.js",
+  "typings": "src/ngx-soap.module.d.ts",
   "moduleName": "ngx-soap",
   "scripts": {
     "transpile": "ngc",
     "bundle": "rimraf dist && npm run transpile && rollup -c rollup.config.umd.js",
     "postbundle": "node tools/bundle-scripts/remove-code.js",
-    "minify": "uglifyjs dist/bundles/ngx-soap.umd.js --screw-ie8 --compress --mangle --comments --output dist/bundles/ngx-soap.umd.min.js",
     "build": "npm run bundle && npm run copy",
     "copy": "node tools/bundle-scripts/copy-files.js && node tools/bundle-scripts/cleanup.js"
   },
@@ -53,6 +54,7 @@
     "rollup": "^0.43.0",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-uglify": "^2.0.1",
     "rxjs": "^5.0.1",
     "sax": "^1.2.4",
     "selectn": "^1.1.2",
@@ -64,5 +66,6 @@
     "uuid": "^3.1.0",
     "zone": "^0.3.4",
     "zone.js": "^0.8.12"
-  }
+  },
+  "dependencies": {}
 }

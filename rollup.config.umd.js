@@ -1,8 +1,9 @@
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
+import uglify from 'rollup-plugin-uglify';
 
 export default {
-  entry: 'dist/src/index.js',
+  entry: 'dist/src/ngx-soap.module.js',
   dest: 'dist/bundles/ngx-soap.umd.js',
   sourceMap: true,
   format: 'umd',
@@ -14,7 +15,8 @@ export default {
     }),
     commonjs({
       include: 'node_modules/**'
-    })
+    }),
+    uglify()
   ],
   external: [
     '@angular/core', 
