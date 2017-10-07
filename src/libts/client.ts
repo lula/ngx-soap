@@ -113,7 +113,7 @@ export class Client {
     this.SOAPAction = SOAPAction;
   }
 
-  public callOperation(name: string, body: any): Promise<Operation> {
+  public operation(name: string, body: any): Promise<Operation> {
     return new Promise((resolve, reject) => {
       let operation: Function = (this as any)[name];
       if (operation) {

@@ -44,25 +44,30 @@ export class AppComponent implements OnInit {
       intB: this.intB
     };
 
-    (this.client as any).Add(body, (err, wsurl: string, headers: any, xml: string) => {
-      wsurl = wsurl.replace("http://www.dneonline.com", "/calculator");
-
-      this.http.post(wsurl, xml, { headers: headers }).subscribe(
-        response => {
-          this.xmlResponse = response.text();
-          this.jsonResponse = this.client.parseResponseBody(response.text());
-          try {
-            this.message = this.jsonResponse.Body.AddResponse.AddResult;
-          } catch (error) { }
-          this.loading = false;
-        },
-        err => {
-          console.log("Error calling ws", err);
-          this.loading = false;
+    this.client.operation('Add', body)
+      .then(operation => {
+        if(operation.error) {
+          console.log('Operation error', operation.error);
+          return;
         }
-      );
-    });
 
+        let url = operation.url.replace("http://www.dneonline.com", "/calculator");
+        this.http.post(url, operation.xml, { headers: operation.headers }).subscribe(
+          response => {
+            this.xmlResponse = response.text();
+            this.jsonResponse = this.client.parseResponseBody(response.text());
+            try {
+              this.message = this.jsonResponse.Body.AddResponse.AddResult;
+            } catch (error) { }
+            this.loading = false;
+          },
+          err => {
+            console.log("Error calling ws", err);
+            this.loading = false;
+          }
+        );
+      })
+      .catch(err => console.log('Error', err));
   }
 
   subtract() {
@@ -77,25 +82,24 @@ export class AppComponent implements OnInit {
       intB: this.intB
     };
 
-    (this.client as any).Subtract(body, (err, wsurl: string, headers: any, xml: string) => {
-      wsurl = wsurl.replace("http://www.dneonline.com", "/calculator");
-
-      this.http.post(wsurl, xml, { headers: headers }).subscribe(
-        response => {
-          this.xmlResponse = response.text();
-          this.jsonResponse = this.client.parseResponseBody(response.text());
-          try {
-            this.message = this.jsonResponse.Body.SubtractResponse.SubtractResult;
-          } catch (error) { }
-          this.loading = false;
-        },
-        err => {
-          console.log("Error calling ws", err);
-          this.loading = false;
-        }
-      );
-    });
-
+    this.client.operation("Subtract", body)
+      .then(operation => {
+        let url = operation.url.replace("http://www.dneonline.com", "/calculator");
+        this.http.post(url, operation.xml, { headers: operation.headers }).subscribe(
+          response => {
+            this.xmlResponse = response.text();
+            this.jsonResponse = this.client.parseResponseBody(response.text());
+            try {
+              this.message = this.jsonResponse.Body.SubtractResponse.SubtractResult;
+            } catch (error) { }
+            this.loading = false;
+          },
+          err => {
+            console.log("Error calling ws", err);
+            this.loading = false;
+          });
+      })
+      .catch(err => console.log("Error", err));
   }
 
   checkNumbers() {

@@ -123,7 +123,8 @@ Import SOAPService and inject it in your component, then:
     - wsurl: operation URL from WSDL to be used in the HTTP request
     - headers: HTTP headers you may use in the HTTP request
     - xml: the input body parsed as xml text to be used in the HTTP request
-4. call the operation URL from WSDL with operation parameters (wsurl, xml, headers)
+4. call the operation URL from WSDL with operation parameters (url, xml, headers)
+5. parse xml response into json
 
         constructor( private http: Http, private soap: SOAPService) { }
 
@@ -133,22 +134,40 @@ Import SOAPService and inject it in your component, then:
             
             // 2. create the client
             this.soap.createClient(response.text()).then((client: Client) => {
-              let input = {
+                
+              // 3. get the web service operation
+              let operationBody = {
                 intA: this.intA,
                 intB: this.intB
               };
-            
-              // 3. call the web service operation
-              (client as any).Add(input, (err, wsurl: string, headers: any, xml: string) => {
-            
-                // 4. call the web service operation URL
-                this.http.post(wsurl, xml, { headers: headers }).subscribe(
-                  response => {
-                    let jsonResponse = client.parseResponseBody(response.text());
-                    this.result = jsonResponse.Body.AddResponse.AddResult;
+
+              this.client.operation('Add', operationBody)
+                .then(operation => {
+                  if(operation.error) {
+                    console.log('Operation error', operation.error);
+                    return;
                   }
-                );
-              });
+
+                  // 4. call the web service operation
+                  let url = operation.url.replace("http://www.dneonline.com", "/calculator");
+                  this.http.post(url, operation.xml, { headers: operation.headers }).subscribe(
+                    response => {
+                      this.xmlResponse = response.text();
+
+                      // 5. parse xml response into json
+                      this.jsonResponse = this.client.parseResponseBody(response.text());
+                      try {
+                        this.message = this.jsonResponse.Body.AddResponse.AddResult;
+                      } catch (error) { }
+                        this.loading = false;
+                      },
+                      err => {
+                        console.log("Error calling ws", err);
+                        this.loading = false;
+                      }
+                    );
+                })
+                .catch(err => console.log('Error', err));
             });
           });
         }

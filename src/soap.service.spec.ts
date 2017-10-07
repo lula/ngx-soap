@@ -23,7 +23,7 @@ describe('Operation info', () => {
   var expectedOperation: Operation;
   beforeEach((done: any) => {
     createSoapClient(wsdl).then(client => {
-      client.callOperation('Add', {
+      client.operation('Add', {
         intA: '1',
         intB: '2'
       }).then(operation => {
@@ -49,7 +49,7 @@ describe('Operation request and response parsing', () => {
 
   beforeEach((done: any) => {
     createSoapClient(wsdl).then(client => {
-      client.callOperation('Add', operationBody).then(operation => {
+      client.operation('Add', operationBody).then(operation => {
         let protocol = (operation.url as string).split("//")[0];
         let host = (operation.url as string).split(protocol + "//")[1].split(":")[1] ?
           (operation.url as string).split(protocol + "//")[1].split(":")[0]
