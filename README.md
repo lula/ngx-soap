@@ -172,4 +172,10 @@ Import SOAPService and inject it in your component, then:
           });
         }
 
+Besides `this.client.operation` method to get operation data you can also call the operation method directly, like: 
+
+        (this.client as any).Subtract(body)
+          .then(operation => ...)
+          .catch(err => ...);
+
 See full [example app](https://github.com/lula/ngx-soap/tree/master/example) in `example` folder. 
