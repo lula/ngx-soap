@@ -1,8 +1,8 @@
 import { openWsdl } from './wsdl';
 import { Client } from "./client";
 
-export function createSoapClient(wsdlDef: any, options:any = {}): Promise<any> { 
-  return openWsdl(wsdlDef, options)
+export function createSoapClient(wsdl: string, options: any = {}): Promise<Client> { 
+  return openWsdl(wsdl, options)
     .then(wsdl => {
       return new Client(wsdl);
     })

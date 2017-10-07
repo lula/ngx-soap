@@ -5,6 +5,13 @@ import * as uuid from 'uuid';
 import { WSDL } from "./wsdl";
 import { Buffer } from "buffer";
 
+export interface Operation {
+  url?: any;
+  headers?: any;
+  xml?: any ;
+  error?: string;
+}
+
 export class Client {
   private endpoint: any;
   private bodyAttributes: any;
@@ -26,7 +33,7 @@ export class Client {
     this._initializeServices(endpoint);
   }
 
-  addSoapHeader(soapHeader: any, name: any, namespace: any, xmlns: any) {
+  public addSoapHeader(soapHeader: any, name: any, namespace: any, xmlns: any) {
     if (!this.soapHeaders) {
       this.soapHeaders = [];
     }
@@ -36,7 +43,7 @@ export class Client {
     return this.soapHeaders.push(soapHeader) - 1;
   }
 
-  changeSoapHeader(index: any, soapHeader: any, name: any, namespace: any, xmlns: any) {
+  public changeSoapHeader(index: any, soapHeader: any, name: any, namespace: any, xmlns: any) {
     if (!this.soapHeaders) {
       this.soapHeaders = [];
     }
@@ -46,15 +53,15 @@ export class Client {
     this.soapHeaders[index] = soapHeader;
   }
 
-  getSoapHeaders() {
+  public getSoapHeaders() {
     return this.soapHeaders;
   }
 
-  clearSoapHeaders() {
+  public clearSoapHeaders() {
     this.soapHeaders = null;
   }
 
-  addHttpHeader(name: any, value: any) {
+  public addHttpHeader(name: any, value: any) {
     if (!this.httpHeaders) {
       this.httpHeaders = {};
     }
@@ -62,15 +69,15 @@ export class Client {
     this.httpHeaders[name] = value;
   }
 
-  getHttpHeaders() {
+  public getHttpHeaders() {
     return this.httpHeaders;
   }
 
-  clearHttpHeaders() {
+  public clearHttpHeaders() {
     this.httpHeaders = {};
   }
 
-  addBodyAttribute(bodyAttribute: any, name: any, namespace: any, xmlns: any) {
+  public addBodyAttribute(bodyAttribute: any, name: string) {
     if (!this.bodyAttributes) {
       this.bodyAttributes = [];
     }
@@ -85,33 +92,44 @@ export class Client {
     this.bodyAttributes.push(bodyAttribute);
   }
 
-  getBodyAttributes() {
+  public getBodyAttributes() {
     return this.bodyAttributes;
   }
 
-  clearBodyAttributes() {
+  public clearBodyAttributes() {
     this.bodyAttributes = null;
   }
 
-  setEndpoint(endpoint: any) {
+  public setEndpoint(endpoint: any) {
     this.endpoint = endpoint;
     this._initializeServices(endpoint);
   }
 
-  describe() {
-    var types = this.wsdl.definitions.types;
-    return this.wsdl.describeServices();
-  }
-
-  setSecurity(security: any) {
+  public setSecurity(security: any) {
     this.security = security;
   }
 
-  setSOAPAction(SOAPAction: any) {
+  public setSOAPAction(SOAPAction: any) {
     this.SOAPAction = SOAPAction;
   }
 
-  parseResponseBody(body: string): any {
+  public callOperation(name: string, body: any): Promise<Operation> {
+    return new Promise((resolve, reject) => {
+      let operation: Function = (this as any)[name];
+      if (operation) {
+        resolve(operation.call(this, body));
+      } else {
+        reject("Operation " + name + " not found");
+      }
+    });
+  }
+
+  public describe() {
+    let types = this.wsdl.definitions.types;
+    return this.wsdl.describeServices();
+  }
+
+  public parseResponseBody(body: string): any {
     try {
       return this.wsdl.xmlToObject(body);
     } catch (error) {
@@ -170,24 +188,34 @@ export class Client {
   private _defineMethod(method: any, location: any) {
     var self = this;
     var temp;
-    return function (args: any, callback: any, options: any, extraHeaders: any) {
-      if (typeof args === 'function') {
-        callback = args;
-        args = {};
-      } else if (typeof options === 'function') {
-        temp = callback;
-        callback = options;
-        options = temp;
-      } else if (typeof extraHeaders === 'function') {
-        temp = callback;
-        callback = extraHeaders;
-        extraHeaders = options;
-        options = temp;
-      }
-      // return self._invoke(method, args, location);
-      self._invoke(method, args, location, function (error: any, result: any, raw: any, soapHeader: any) {
-        callback(error, result, raw, soapHeader);
-      }, options, extraHeaders);
+
+    return function (args: any, callback: any, options: any, extraHeaders: any): Promise<Operation> {
+      return new Promise((resolve, reject) => {
+        if (typeof args === 'function') {
+          callback = args;
+          args = {};
+        } else if (typeof options === 'function') {
+          temp = callback;
+          callback = options;
+          options = temp;
+        } else if (typeof extraHeaders === 'function') {
+          temp = callback;
+          callback = extraHeaders;
+          extraHeaders = options;
+          options = temp;
+        }
+
+        self._invoke(method, args, location, function (error: any, url: any, headers: any, xml: any) {          
+          if(error) { reject(error); }
+          else {
+            resolve({
+              url: url,
+              headers: headers,
+              xml: xml
+            })
+          };
+        }, options, extraHeaders);
+      });
     };
   }
 

@@ -101,20 +101,6 @@ export function openWsdl(wsdlDef: string, options: any = {}): Promise<WSDL> {
   return new Promise((resolve, reject) => {
     let wsdl = new WSDL(wsdlDef, options);
     resolve(wsdl.build());
-
-    // var request_headers = options.wsdl_headers;
-    // var request_options = options.wsdl_options;
-    // http.get(uri).subscribe(response => {
-    //   let wsdlDef = response.text();
-    //   if (!wsdlDef) reject("No wsdl found at url " + uri)
-
-    //   try {
-    //     let wsdl = new WSDL(http, wsdlDef, uri, options);
-    //     resolve(wsdl.build());
-    //   } catch (e) {
-    //     reject(e);
-    //   }
-    // });
   });
 }
 

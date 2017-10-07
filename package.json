@@ -1,6 +1,6 @@
 {
   "name": "ngx-soap",
-  "version": "0.2.1",
+  "version": "0.2.2-beta1",
   "description": "SOAP service for Angular4",
   "main": "src/index.js",
   "module": "src/index.js",
@@ -12,7 +12,9 @@
     "bundle": "rimraf dist && npm run transpile && rollup -c rollup.config.umd.js",
     "postbundle": "node tools/bundle-scripts/remove-code.js",
     "build": "npm run bundle && npm run copy",
-    "copy": "node tools/bundle-scripts/copy-files.js && node tools/bundle-scripts/cleanup.js"
+    "copy": "node tools/bundle-scripts/copy-files.js && node tools/bundle-scripts/cleanup.js",
+    "test": "jasmine",
+    "build:test": "rimraf spec/out && tsc -p tsconfig.spec.json && npm test"
   },
   "keywords": [
     "Angular",
@@ -33,11 +35,15 @@
     "url": "https://github.com/lula/ngx-soap.git"
   },
   "devDependencies": {
+    "@angular/common": "^4.2.3",
     "@angular/compiler": "^4.2.2",
     "@angular/compiler-cli": "^4.2.2",
     "@angular/core": "^4.2.2",
     "@angular/http": "^4.2.2",
+    "@angular/platform-browser": "^4.2.3",
     "@types/assert": "0.0.31",
+    "@types/jasmine": "^2.6.0",
+    "@types/jasminewd2": "^2.0.3",
     "@types/lodash": "^4.14.66",
     "@types/node": "^8.0.6",
     "@types/sax": "^1.0.0",
@@ -50,6 +56,8 @@
     "debug": "^2.6.8",
     "del": "^3.0.0",
     "events": "^1.1.1",
+    "jasmine": "^2.8.0",
+    "jasminewd2": "^2.2.0",
     "lodash": "^4.17.4",
     "rollup": "^0.43.0",
     "rollup-plugin-commonjs": "^8.0.2",
@@ -66,6 +74,5 @@
     "uuid": "^3.1.0",
     "zone": "^0.3.4",
     "zone.js": "^0.8.12"
-  },
-  "dependencies": {}
+  }
 }

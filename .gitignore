@@ -8,3 +8,4 @@ yarn.lock
 tools/bin
 tools/test
 dist
+spec/out

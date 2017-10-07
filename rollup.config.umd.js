@@ -30,14 +30,15 @@ export default {
     'sax',
     'crypto',
     'uuid'
-  ],
-  globals: {
-    '@angular/core': 'ng.core',
-    '@angular/http': 'ng.http',
-    'rxjs/Observable': 'Rx',
-    'rxjs/Subject': 'Rx',
-    'rxjs/observable/merge': 'Rx.Observable',
-    'rxjs/observable/share': 'Rx.Observable',
-    'rxjs/add/operator/map': 'Rx.Observable'
-  }
+  ]
+  // ,
+  // globals: {
+  //   '@angular/core': 'ng.core',
+  //   '@angular/http': 'ng.http',
+  //   'rxjs/Observable': 'Rx',
+  //   'rxjs/Subject': 'Rx',
+  //   'rxjs/observable/merge': 'Rx.Observable',
+  //   'rxjs/observable/share': 'Rx.Observable',
+  //   'rxjs/add/operator/map': 'Rx.Observable'
+  // }
 }
