@@ -141,7 +141,7 @@ Import SOAPService and inject it in your component, then:
                 intB: this.intB
               };
 
-              this.client.operation('Add', operationBody)
+              client.operation('Add', operationBody)
                 .then(operation => {
                   if(operation.error) {
                     console.log('Operation error', operation.error);
@@ -155,7 +155,7 @@ Import SOAPService and inject it in your component, then:
                       this.xmlResponse = response.text();
 
                       // 5. parse xml response into json
-                      this.jsonResponse = this.client.parseResponseBody(response.text());
+                      this.jsonResponse = client.parseResponseBody(response.text());
                       try {
                         this.message = this.jsonResponse.Body.AddResponse.AddResult;
                       } catch (error) { }
