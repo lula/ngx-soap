@@ -1,10 +1,11 @@
-import { openWsdl } from './wsdl';
-import { Client } from "./client";
+import { openWsdl, WSDLOptions } from './wsdl';
+import { Client, ClientOptions } from "./client";
 
-export function createSoapClient(wsdl: string, options: any = {}): Promise<Client> { 
-  return openWsdl(wsdl, options)
-    .then(wsdl => {
-      return new Client(wsdl);
-    })
-    .catch(err => {throw new Error(err)});
+export function createSoapClient(wsdlDef: string, clientOptions: ClientOptions = {}): Client { 
+  // TODO: to be released? Uh?
+  let wsdlOptions: WSDLOptions = {};
+  
+  let wsdl = openWsdl(wsdlDef, wsdlOptions);
+  return new Client(wsdl, clientOptions);
+
 }

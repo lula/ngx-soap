@@ -6,6 +6,6 @@ body {
   margin: 0;
 }
 
-md-card {
-  margin: 10px;
+.container {
+  padding: 10px;
 }

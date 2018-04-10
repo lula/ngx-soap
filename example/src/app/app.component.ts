@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { SOAPService, Client } from 'ngx-soap';
-import { Http } from '@angular/http';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
@@ -14,21 +14,19 @@ export class AppComponent implements OnInit {
   message: string;
   loading: boolean;
   resultLabel: string;
-  showDiagnostic: boolean = false; 
-  
+  showDiagnostic: boolean;
+
   private client: Client;
 
   constructor(
-    private http: Http,
+    private http: HttpClient,
     private soap: SOAPService
   ) { }
 
   ngOnInit() {
-    this.http.get('/assets/calculator.wsdl').subscribe(response => {
-      if (response && response.text()) {
-        this.soap.createClient(response.text()).then((client: Client) => {
-          this.client = client;
-        });
+    this.http.get('/assets/calculator.wsdl', {responseType: 'text'}).subscribe(response => {
+      if (response) {
+        this.client = this.soap.createClient(response);
       }
     });
   }
@@ -39,30 +37,30 @@ export class AppComponent implements OnInit {
     this.checkNumbers()
 
     this.resultLabel = 'A + B';
-    let body: CalculatorWS.Input = {
+    const body: CalculatorWS.Input = {
       intA: this.intA,
       intB: this.intB
     };
 
     this.client.operation('Add', body)
       .then(operation => {
-        if(operation.error) {
+        if (operation.error) {
           console.log('Operation error', operation.error);
           return;
         }
 
-        let url = operation.url.replace("http://www.dneonline.com", "/calculator");
-        this.http.post(url, operation.xml, { headers: operation.headers }).subscribe(
+        const url = operation.url.replace('http://www.dneonline.com', '/calculator');
+        this.http.post(url, operation.xml, { headers: operation.headers, responseType: 'text' }).subscribe(
           response => {
-            this.xmlResponse = response.text();
-            this.jsonResponse = this.client.parseResponseBody(response.text());
+            this.xmlResponse = response;
+            this.jsonResponse = this.client.parseResponseBody(response);
             try {
               this.message = this.jsonResponse.Body.AddResponse.AddResult;
             } catch (error) { }
             this.loading = false;
           },
           err => {
-            console.log("Error calling ws", err);
+            console.log('Error calling ws', err);
             this.loading = false;
           }
         );
@@ -77,34 +75,34 @@ export class AppComponent implements OnInit {
 
     this.resultLabel = 'A - B';
 
-    let body: CalculatorWS.Input = {
+    const body: CalculatorWS.Input = {
       intA: this.intA,
       intB: this.intB
     };
 
-    this.client.operation("Subtract", body)
+    this.client.operation('Subtract', body)
       .then(operation => {
-        let url = operation.url.replace("http://www.dneonline.com", "/calculator");
-        this.http.post(url, operation.xml, { headers: operation.headers }).subscribe(
+        const url = operation.url.replace('http://www.dneonline.com', '/calculator');
+        this.http.post(url, operation.xml, { headers: operation.headers, responseType: 'text' }).subscribe(
           response => {
-            this.xmlResponse = response.text();
-            this.jsonResponse = this.client.parseResponseBody(response.text());
+            this.xmlResponse = response;
+            this.jsonResponse = this.client.parseResponseBody(response);
             try {
               this.message = this.jsonResponse.Body.SubtractResponse.SubtractResult;
             } catch (error) { }
             this.loading = false;
           },
           err => {
-            console.log("Error calling ws", err);
+            console.log('Error calling ws', err);
             this.loading = false;
           });
       })
-      .catch(err => console.log("Error", err));
+      .catch(err => console.log('Error', err));
   }
 
   checkNumbers() {
-    if (!+this.intA) this.intA = '0';
-    if (!+this.intB) this.intB = '0';
+    if (!+this.intA) { this.intA = '0' };
+    if (!+this.intB) { this.intB = '0' };
   }
 
   clear() {

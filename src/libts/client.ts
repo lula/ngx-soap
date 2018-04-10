@@ -12,28 +12,36 @@ export interface Operation {
   error?: string;
 }
 
+export interface ClientOptions {
+  attributesKey?: string;
+  envelopeKey?: string;
+  ignoredNamespaces?: { namespaces?: string[] | string, override?: boolean };
+  // overrideRootElement?: any;
+  forceSoap12Headers?: boolean;
+}
+
 export class Client {
-  private endpoint: any;
+  private endpoint: string;
   private bodyAttributes: any;
   private lastRequestHeaders: any;
   private lastEndpoint: any;
   private lastRequest: any;
   private lastMessage: string;
   private security: any;
-  private httpHeaders: any = {};
-  private streamAllowed: any;
+  private httpHeaders: { [name: string]: string } = {};
+  // private streamAllowed: any;
   private SOAPAction: any;
   private soapHeaders: any;
   private wsdl: WSDL;
   
-  constructor(wsdl: WSDL, endpoint?: any, options?: any) {
+  constructor(wsdl: WSDL, options?: ClientOptions, endpoint?: string) {
     options = options || {};
     this.wsdl = wsdl;
     this._initializeOptions(options);
     this._initializeServices(endpoint);
   }
 
-  public addSoapHeader(soapHeader: any, name: any, namespace: any, xmlns: any) {
+  public addSoapHeader(soapHeader: any|any[], name: string|null, namespace: any, xmlns: any) {
     if (!this.soapHeaders) {
       this.soapHeaders = [];
     }
@@ -61,15 +69,24 @@ export class Client {
     this.soapHeaders = null;
   }
 
-  public addHttpHeader(name: any, value: any) {
+  public addHttpHeaders(headers: { [key: string]: any}) {
+    headers.keys().forEach((key: string) => {
+      let value: string = headers[key];
+      if (value) {
+        this.addHttpHeader(key, value);
+      }
+    });
+  }
+
+  public addHttpHeader(name: string, value: string) {
     if (!this.httpHeaders) {
       this.httpHeaders = {};
     }
-
+    
     this.httpHeaders[name] = value;
   }
 
-  public getHttpHeaders() {
+  public getHttpHeaders(): {[name: string]: string} {
     return this.httpHeaders;
   }
 
@@ -138,15 +155,16 @@ export class Client {
   }
 
   private _initializeServices(endpoint: any) {
-    var definitions = this.wsdl.definitions,
-      services = definitions.services;
+    let definitions = this.wsdl.definitions;
+    let services = definitions.services;
+
     for (var name in services) {
       (this as any)[name] = this._defineService(services[name], endpoint);
     }
   }
 
-  private _initializeOptions(options: any = {}) {
-    this.streamAllowed = options.stream;
+  private _initializeOptions(options: ClientOptions = {}) {
+    // this.streamAllowed = options.stream;
     this.wsdl.options.attributesKey = options.attributesKey || 'attributes';
     this.wsdl.options.envelopeKey = options.envelopeKey || 'soap';
     if (options.ignoredNamespaces !== undefined) {
@@ -158,26 +176,31 @@ export class Client {
         }
       }
     }
-    if (options.overrideRootElement !== undefined) {
-      this.wsdl.options.overrideRootElement = options.overrideRootElement;
-    }
+
+    //TODO: understand overrideRootElement
+    // if (options.overrideRootElement !== undefined) {
+    //   this.wsdl.options.overrideRootElement = options.overrideRootElement;
+    // }
     this.wsdl.options.forceSoap12Headers = !!options.forceSoap12Headers;
   }
 
-  private _defineService(service: any, endpoint: any) {
-    var ports = service.ports,
-      def: any = {};
+  private _defineService(service: any, endpoint: string) {
+    let ports = service.ports;
+    let def: any = {};
+
     for (var name in ports) {
       def[name] = this._definePort(ports[name], endpoint ? endpoint : ports[name].location);
     }
+    
     return def;
   }
 
-  private _definePort(port: any, endpoint: any) {
-    var location = endpoint,
-      binding = port.binding,
-      methods = binding.methods,
-      def: any = {};
+  private _definePort(port: any, endpoint: string) {
+    let location = endpoint;
+    let binding = port.binding;
+    let methods = binding.methods;
+    let def: any = {};
+
     for (var name in methods) {
       def[name] = this._defineMethod(methods[name], location);
       (this as any)[name] = def[name];
@@ -185,7 +208,7 @@ export class Client {
     return def;
   }
 
-  private _defineMethod(method: any, location: any) {
+  private _defineMethod(method: any, location: string) {
     var self = this;
     var temp;
 
@@ -219,7 +242,7 @@ export class Client {
     };
   }
 
-  private _invoke(method: any, args: any, location: any, callback: any, options?: any, extraHeaders?: any) {
+  private _invoke(method: any, args: any, location: string, callback: any, options?: any, extraHeaders?: any) {
     var self = this,
       name = method.$name,
       input = method.input,

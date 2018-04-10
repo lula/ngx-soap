@@ -97,11 +97,20 @@ function deepMerge(destination: any, source: any) {
   });
 }
 
-export function openWsdl(wsdlDef: string, options: any = {}): Promise<WSDL> {
-  return new Promise((resolve, reject) => {
-    let wsdl = new WSDL(wsdlDef, options);
-    resolve(wsdl.build());
-  });
+export function openWsdl(wsdlDef: string, options: any = {}): WSDL {
+  let wsdl = new WSDL(wsdlDef, options);
+  return wsdl.build();
+}
+
+export interface WSDLOptions {
+  ignoredNamespaces?: { namespaces?: string[]|string, override?: boolean};
+  valueKey?: string;
+  xmlKey?: string;
+  escapeXML?: boolean;
+  ignoreBaseNameSpaces?: boolean;
+  // forceSoap12Headers?: any;
+  // customDeserializer?: any;
+  // overrideRootElement?: any;
 }
 
 export class WSDL {
@@ -120,63 +129,64 @@ export class WSDL {
   xmlKey = '$xml';
   xmlnsInEnvelope: any;
 
-  constructor(definition: string, options: any) {
+  constructor(definition: string, options: WSDLOptions) {
     this.definition = definition;
     // this.uri = uri;
     this._includesWsdl = [];
     this._initializeOptions(options);
   }
 
-  build(): Promise<any> {
-    return this._fromXML(stripBom(this.definition))
-      .then(() => this.processIncludes())
-      .then(definitions => {
-        var name;
-        this.definitions = definitions;
+  build(): WSDL {
+    let definitions = this._fromXML(stripBom(this.definition));
 
-        this.definitions.deleteFixedAttrs();
-        var services = this.services = this.definitions.services;
-        if (services) {
-          for (name in services) {
-            services[name].postProcess(this.definitions);
-          }
+    this.processIncludes();
+
+    var name;
+    this.definitions = definitions;
+
+    this.definitions.deleteFixedAttrs();
+    var services = this.services = this.definitions.services;
+    if (services) {
+      for (name in services) {
+        services[name].postProcess(this.definitions);
+      }
+    }
+    var complexTypes = this.definitions.complexTypes;
+    if (complexTypes) {
+      for (name in complexTypes) {
+        complexTypes[name].deleteFixedAttrs();
+      }
+    }
+
+    // for document style, for every binding, prepare input message element name to (methodName, output message element name) mapping
+    var bindings = this.definitions.bindings;
+    for (var bindingName in bindings) {
+      var binding = bindings[bindingName];
+      if (typeof binding.style === 'undefined') {
+        binding.style = 'document';
+      }
+      if (binding.style !== 'document') continue;
+      var methods = binding.methods;
+      var topEls: any = binding.topElements = {};
+      for (var methodName in methods) {
+        if (methods[methodName].input) {
+          var inputName = methods[methodName].input.$name;
+          var outputName = "";
+          if (methods[methodName].output)
+            outputName = methods[methodName].output.$name;
+          topEls[inputName] = { "methodName": methodName, "outputName": outputName };
         }
-        var complexTypes = this.definitions.complexTypes;
-        if (complexTypes) {
-          for (name in complexTypes) {
-            complexTypes[name].deleteFixedAttrs();
-          }
-        }
+      }
+    }
 
-        // for document style, for every binding, prepare input message element name to (methodName, output message element name) mapping
-        var bindings = this.definitions.bindings;
-        for (var bindingName in bindings) {
-          var binding = bindings[bindingName];
-          if (typeof binding.style === 'undefined') {
-            binding.style = 'document';
-          }
-          if (binding.style !== 'document') continue;
-          var methods = binding.methods;
-          var topEls: any = binding.topElements = {};
-          for (var methodName in methods) {
-            if (methods[methodName].input) {
-              var inputName = methods[methodName].input.$name;
-              var outputName = "";
-              if (methods[methodName].output)
-                outputName = methods[methodName].output.$name;
-              topEls[inputName] = { "methodName": methodName, "outputName": outputName };
-            }
-          }
-        }
+    this.xmlnsInEnvelope = this._xmlnsMap();
 
-        this.xmlnsInEnvelope = this._xmlnsMap();
-
-        return this;
-      })
-      .catch(err => console.log("Build error", err));
+    return this;
   }
 
-  processIncludes(): Promise<any> {
+  
+
+  processIncludes(): any {
     var schemas = this.definitions.schemas;
     var includes: any[] = [];
 
@@ -201,14 +211,14 @@ export class WSDL {
     return this.xml || '';
   }
 
-  objectToXML(obj: any, name: any, nsPrefix: any, nsURI: any, isFirst: any = {}, xmlnsAttr: any = {}, schemaObject?: any, nsContext?: any): string {
+  objectToXML(obj: any, name: string|null, namespace: any|null, nsURI: string, isFirst: boolean = false, xmlnsAttr: any = {}, schemaObject?: any, nsContext?: any): string {
     var self = this;
     var schema = this.definitions.schemas[nsURI];
 
-    var parentNsPrefix = nsPrefix ? nsPrefix.parent : undefined;
+    var parentNsPrefix = namespace ? namespace.parent : undefined;
     if (typeof parentNsPrefix !== 'undefined') {
       //we got the parentNsPrefix for our array. setting the namespace-variable back to the current namespace string
-      nsPrefix = nsPrefix.current;
+      namespace = namespace.current;
     }
 
     parentNsPrefix = noColonNameSpace(parentNsPrefix);
@@ -219,7 +229,7 @@ export class WSDL {
     var soapHeader = !schema;
     var qualified = schema && schema.$elementFormDefault === 'qualified';
     var parts = [];
-    var prefixNamespace = (nsPrefix || qualified) && nsPrefix !== TNS_PREFIX;
+    var prefixNamespace = (namespace || qualified) && namespace !== TNS_PREFIX;
 
     var xmlnsAttrib = '';
     if (nsURI && isFirst) {
@@ -228,9 +238,9 @@ export class WSDL {
           xmlnsAttrib += ' ' + attribute.name + '="' + attribute.value + '"';
         });
       } else {
-        if (prefixNamespace && !this.isIgnoredNameSpace(nsPrefix)) {
+        if (prefixNamespace && !this.isIgnoredNameSpace(namespace)) {
           // resolve the prefix namespace
-          xmlnsAttrib += ' xmlns:' + nsPrefix + '="' + nsURI + '"';
+          xmlnsAttrib += ' xmlns:' + namespace + '="' + nsURI + '"';
         }
         // only add default namespace if the schema elementFormDefault is qualified
         if (qualified || soapHeader) xmlnsAttrib += ' xmlns="' + nsURI + '"';
@@ -239,7 +249,7 @@ export class WSDL {
 
     if (!nsContext) {
       nsContext = new NamespaceContext();
-      nsContext.declareNamespace(nsPrefix, nsURI);
+      nsContext.declareNamespace(namespace, nsURI);
     } else {
       nsContext.pushContext();
     }
@@ -253,8 +263,8 @@ export class WSDL {
 
     if (self.options.overrideRootElement && isFirst) {
       ns = self.options.overrideRootElement.namespace;
-    } else if (prefixNamespace && (qualified || isFirst || soapHeader) && !this.isIgnoredNameSpace(nsPrefix)) {
-      ns = nsPrefix;
+    } else if (prefixNamespace && (qualified || isFirst || soapHeader) && !this.isIgnoredNameSpace(namespace)) {
+      ns = namespace;
     }
 
     var i, n;
@@ -266,7 +276,7 @@ export class WSDL {
           correctOuterNsPrefix = parentNsPrefix || ns; //using the parent namespace prefix if given
 
         parts.push(['<', appendColon(correctOuterNsPrefix), name, arrayAttr, xmlnsAttrib, '>'].join(''));
-        parts.push(self.objectToXML(item, name, nsPrefix, nsURI, false, null, schemaObject, nsContext));
+        parts.push(self.objectToXML(item, name, namespace, nsURI, false, null, schemaObject, nsContext));
         parts.push(['</', appendColon(correctOuterNsPrefix), name, '>'].join(''));
       }
     } else if (typeof obj === 'object') {
@@ -308,7 +318,7 @@ export class WSDL {
         }
 
         if (isFirst) {
-          value = self.objectToXML(child, name, nsPrefix, nsURI, false, null, schemaObject, nsContext);
+          value = self.objectToXML(child, name, namespace, nsURI, false, null, schemaObject, nsContext);
         } else {
 
           if (self.definitions.schemas) {
@@ -336,12 +346,12 @@ export class WSDL {
                     childNsURI = childSchemaObject.$targetNamespace;
                     childNsPrefix = nsContext.registerNamespace(childNsURI);
                     if (this.isIgnoredNameSpace(childNsPrefix)) {
-                      childNsPrefix = nsPrefix;
+                      childNsPrefix = namespace;
                     }
                   } else {
                     childNsPrefix = elementQName.prefix;
                     if (this.isIgnoredNameSpace(childNsPrefix)) {
-                      childNsPrefix = nsPrefix;
+                      childNsPrefix = namespace;
                     }
                     childNsURI = schema.xmlns[childNsPrefix] || self.definitions.xmlns[childNsPrefix];
                   }
@@ -387,7 +397,7 @@ export class WSDL {
                 }
 
                 if (childSchemaObject.$baseNameSpace && this.options.ignoreBaseNameSpaces) {
-                  childNsPrefix = nsPrefix;
+                  childNsPrefix = namespace;
                   childNsURI = nsURI;
                 }
 
@@ -427,17 +437,17 @@ export class WSDL {
                   name = nonSubNameSpace + name;
                 }
 
-                value = self.objectToXML(child, name, nsPrefix, nsURI, false, null, null, nsContext);
+                value = self.objectToXML(child, name, namespace, nsURI, false, null, null, nsContext);
               }
             } else {
-              value = self.objectToXML(child, name, nsPrefix, nsURI, false, null, null, nsContext);
+              value = self.objectToXML(child, name, namespace, nsURI, false, null, null, nsContext);
             }
           }
         }
 
         ns = noColonNameSpace(ns);
         if (prefixNamespace && !qualified && isFirst && !self.options.overrideRootElement) {
-          ns = nsPrefix;
+          ns = namespace;
         } else if (this.isIgnoredNameSpace(ns)) {
           ns = '';
         }
@@ -997,39 +1007,11 @@ export class WSDL {
     }
   }
 
-  private _processNextInclude(includes: any[]): Promise<any> {
-    return new Promise((resolve, reject) => {
-      resolve(this.definitions);
-
-      // var include = includes.shift();
-      // var options;
-      // if (!include) { resolve(this.definitions) }
-
-      // var includePath = resolveUrl(this.uri || '', include.location);
-
-      // options = _.assign({}, this.options);
-      // // follow supplied ignoredNamespaces option
-      // options.ignoredNamespaces = this._originalIgnoredNamespaces || this.options.ignoredNamespaces;
-
-      // return openWsdl(includePath, options)
-      //   .then(wsdl => {
-      //     this._includesWsdl.push(wsdl);
-
-      //     if (wsdl.definitions instanceof DefinitionsElement) {
-      //       _.merge(this.definitions, wsdl.definitions, function (a: any, b: any) {
-      //         return (a instanceof SchemaElement) ? a.merge(b) : undefined;
-      //       });
-      //     } else {
-      //       this.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace] = deepMerge(this.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace], wsdl.definitions);
-      //     }
-
-      //     return this._processNextInclude(includes);
-      //   })
-      //   .catch(err => reject(err));
-    });
+  private _processNextInclude(includes: any[]): any {
+    this.definitions
   }
 
-  private _initializeOptions(options: any) {
+  private _initializeOptions(options: WSDLOptions) {
     this._originalIgnoredNamespaces = (options || {}).ignoredNamespaces;
     this.options = {};
 
@@ -1053,12 +1035,14 @@ export class WSDL {
     } else {
       this.options.escapeXML = true;
     }
+   
     // Allow any request headers to keep passing through
-    this.options.wsdl_headers = options.wsdl_headers;
-    this.options.wsdl_options = options.wsdl_options;
-    if (options.httpClient) {
-      this.options.httpClient = options.httpClient;
-    }
+    // this.options.wsdl_headers = options.wsdl_headers;
+    // this.options.wsdl_options = options.wsdl_options;
+    
+    // if (options.httpClient) {
+    //   this.options.httpClient = options.httpClient;
+    // }
 
     // // The supplied request-object should be passed through
     // if (options.request) {
@@ -1073,24 +1057,24 @@ export class WSDL {
     }
 
     // Works only in client
-    this.options.forceSoap12Headers = options.forceSoap12Headers;
-    this.options.customDeserializer = options.customDeserializer;
+    // this.options.forceSoap12Headers = options.forceSoap12Headers;
+    // TODO: understand customDeserializer
+    // this.options.customDeserializer = options.customDeserializer;
 
-    if (options.overrideRootElement !== undefined) {
-      this.options.overrideRootElement = options.overrideRootElement;
-    }
+    // TODO: understand overrideRootElement
+    // if (options.overrideRootElement !== undefined) {
+    //   this.options.overrideRootElement = options.overrideRootElement;
+    // }
   }
 
-  private _fromXML(xml: any): Promise<any> {
-    return new Promise((resolve, reject) => {
-      this.definitions = this._parse(xml);
-      this.definitions.descriptions = {
-        types: {}
-      };
+  private _fromXML(xml: any): any {
+    this.definitions = this._parse(xml);
+    this.definitions.descriptions = {
+      types: {}
+    };
 
-      this.xml = xml;
-      resolve(this.definitions);
-    });
+    this.xml = xml;
+    return this.definitions;
   }
 
   private _parse(xml: any): Element {

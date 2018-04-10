@@ -1,62 +1,60 @@
-<md-toolbar color="primary">
+<mat-toolbar color="primary">
   SOAP Calculator app
   <span style="flex: 1 1 auto"></span>
-  <button md-button (click)="showDiagnostic = !showDiagnostic">
+  <button mat-button (click)="showDiagnostic = !showDiagnostic">
     <ng-container *ngIf="!showDiagnostic">Show Diagnostic</ng-container>
     <ng-container *ngIf="showDiagnostic">Hide Diagnostic</ng-container>
-  </button>  
-</md-toolbar>
+  </button>
+</mat-toolbar>
 
-<md-progress-bar mode="indeterminate" *ngIf="loading" color="accent"></md-progress-bar>
+<mat-progress-bar mode="indeterminate" *ngIf="loading" color="accent"></mat-progress-bar>
 
-<div style="display: flex; flex: 1 1 auto">
-  <md-card style="flex: 1">
-    <md-card-header>
-      <md-card-title>Operation</md-card-title>
-    </md-card-header>
-    <md-card-content>
-      <md-input-container>
-        <input mdInput name="intA" [(ngModel)]="intA" placeholder="A">
-      </md-input-container>
-      <md-input-container>
-        <input mdInput name="intB" [(ngModel)]="intB" placeholder="B">
-      </md-input-container>
-    </md-card-content>
+<div fxLayout="row" fxLayoutGap="20px" class="container">
+  <mat-card fxFlex>
+    <mat-card-header>
+      <mat-card-title>Operation</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-input-container>
+        <input matInput name="intA" [(ngModel)]="intA" placeholder="A">
+      </mat-input-container>
+      <mat-input-container>
+        <input matInput name="intB" [(ngModel)]="intB" placeholder="B">
+      </mat-input-container>
+    </mat-card-content>
 
-    <md-card-actions align="end">
-      <button md-raised-button color="primary" (click)="sum()" [disabled]="loading">Sum</button>
-      <button md-raised-button color="primary" (click)="subtract()" [disabled]="loading">Sub</button>
-    </md-card-actions>
-  </md-card>
-  <md-card style="flex: 1">
-    <md-card-header>
-      <md-card-title>Result</md-card-title>
-    </md-card-header>
-    <md-card-content>
-      <md-input-container>
-        <input mdInput readonly [(ngModel)]="message" placeholder="{{resultLabel}}">
-      </md-input-container>
-    </md-card-content>
-  </md-card>
+    <mat-card-actions align="end">
+      <button mat-raised-button color="primary" (click)="sum()" [disabled]="loading">Sum</button>
+      <button mat-raised-button color="primary" (click)="subtract()" [disabled]="loading">Sub</button>
+    </mat-card-actions>
+  </mat-card>
+  <mat-card fxFlex>
+    <mat-card-header>
+      <mat-card-title>Result</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-input-container>
+        <input matInput readonly [(ngModel)]="message" placeholder="{{resultLabel}}">
+      </mat-input-container>
+    </mat-card-content>
+  </mat-card>
 </div>
 
-<div *ngIf="showDiagnostic">
-  <div style="display: flex; flex: 1 1 auto">
-    <md-card style="flex: 1">
-      <md-card-header>
-        <md-card-title>XML Response</md-card-title>
-      </md-card-header>
-      <md-card-content>
-        {{ xmlResponse }}
-      </md-card-content>
-    </md-card>
-    <md-card style="flex: 1">
-      <md-card-header>
-        <md-card-title>JSON Response</md-card-title>
-      </md-card-header>
-      <md-card-content>
-        <pre>{{ jsonResponse | json }}</pre>
-      </md-card-content>
-    </md-card>
-  </div>
+<div fxLayout="row" fxLayoutGap="20px" class="container" *ngIf="showDiagnostic">
+  <mat-card fxFlex>
+    <mat-card-header>
+      <mat-card-title>XML Response</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      {{ xmlResponse }}
+    </mat-card-content>
+  </mat-card>
+  <mat-card fxFlex>
+    <mat-card-header>
+      <mat-card-title>JSON Response</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <pre>{{ jsonResponse | json }}</pre>
+    </mat-card-content>
+  </mat-card>
 </div>

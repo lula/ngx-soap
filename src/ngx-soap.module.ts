@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
-import { HttpModule } from '@angular/http';
+import { HttpClientModule } from '@angular/common/http';
 import { SOAPService } from './soap.service';
 
 @NgModule({
-  imports: [ HttpModule ],
+  imports: [ HttpClientModule ],
   providers: [ SOAPService ]
 })
 export class NgxSoapModule { }

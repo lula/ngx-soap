@@ -1,9 +1,10 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
+import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MdButtonModule, MdInputModule, MdCardModule, MdProgressBarModule, MdToolbarModule } from '@angular/material';
+import { MatButtonModule, MatInputModule, MatCardModule, MatProgressBarModule, MatToolbarModule } from '@angular/material';
+import { FlexLayoutModule } from '@angular/flex-layout';
 import { NgxSoapModule } from 'ngx-soap';
 import { AppComponent } from './app.component';
 
@@ -11,13 +12,14 @@ import { AppComponent } from './app.component';
   imports: [
     BrowserModule,
     FormsModule,
-    HttpModule,
+    HttpClientModule,
     BrowserAnimationsModule,
-    MdInputModule,
-    MdButtonModule,
-    MdCardModule,
-    MdProgressBarModule,
-    MdToolbarModule,
+    FlexLayoutModule,
+    MatInputModule,
+    MatButtonModule,
+    MatCardModule,
+    MatProgressBarModule,
+    MatToolbarModule,
     NgxSoapModule
   ],
   declarations: [
