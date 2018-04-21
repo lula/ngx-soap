@@ -140,11 +140,6 @@ Import SOAPService and inject it in your component, then:
         }
 
         sum() {
-            this.clear();
-            this.loading = true;
-            this.checkNumbers()
-
-            this.resultLabel = 'A + B';
             const body: CalculatorWS.Input = {
                 intA: 1,
                 intB: 2
