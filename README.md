@@ -116,7 +116,7 @@ The WSDL must be read by the client (e.g with an http request) and its content u
 
 Import SOAPService and inject it in your component, then: 
 
-1. get WSDL content 
+1. get WSDL content
 2. create the client with the WSDL content definitions
 3. call the operation with a JSON input. The client operation method is created dynamically (from the WSDL), therefore it cannot be part of the typescript definitions. You can extend typescript definitions or cast the client to `any` type for instance. The operation returns a callback with the following parameters: 
     - err: error, if any
@@ -126,51 +126,59 @@ Import SOAPService and inject it in your component, then:
 4. call the operation URL from WSDL with operation parameters (url, xml, headers)
 5. parse xml response into json
 
+```
         constructor( private http: Http, private soap: SOAPService) { }
 
+        ngOnInit() {
+            // 1. get wsdl content
+            this.http.get('/assets/calculator.wsdl', {responseType: 'text'}).subscribe(response => {
+            if (response) {
+                // 2. create the client
+                this.client = this.soap.createClient(response);
+            }
+            });
+        }
+
         sum() {
-          // 1. get wsdl content
-          this.http.get('/assets/calculator.wsdl').subscribe(response => {
-            
-            // 2. create the client
-            this.soap.createClient(response.text()).then((client: Client) => {
-                
-              // 3. get the web service operation
-              let operationBody = {
-                intA: this.intA,
-                intB: this.intB
-              };
+            this.clear();
+            this.loading = true;
+            this.checkNumbers()
 
-              client.operation('Add', operationBody)
+            this.resultLabel = 'A + B';
+            const body: CalculatorWS.Input = {
+                intA: 1,
+                intB: 2
+            };
+
+            // call the operation
+            this.client.operation('Add', body)
                 .then(operation => {
-                  if(operation.error) {
-                    console.log('Operation error', operation.error);
-                    return;
-                  }
+                    if (operation.error) {
+                        console.log('Operation error', operation.error);
+                        return;
+                    }
 
-                  // 4. call the web service operation
-                  let url = operation.url.replace("http://www.dneonline.com", "/calculator");
-                  this.http.post(url, operation.xml, { headers: operation.headers }).subscribe(
-                    response => {
-                      this.xmlResponse = response.text();
+                    const url = operation.url.replace('http://www.dneonline.com', '/calculator');
+                    this.http.post(url, operation.xml, { headers: operation.headers, responseType: 'text' }).subscribe(
+                        response => {
+                            const xmlResponse = response;
 
-                      // 5. parse xml response into json
-                      this.jsonResponse = client.parseResponseBody(response.text());
-                      try {
-                        this.message = this.jsonResponse.Body.AddResponse.AddResult;
-                      } catch (error) { }
-                        this.loading = false;
-                      },
-                      err => {
-                        console.log("Error calling ws", err);
-                        this.loading = false;
-                      }
+                            // 5. parse xml response into json
+                            const jsonResponse = this.client.parseResponseBody(response);
+                            try {
+                                const message = this.jsonResponse.Body.AddResponse.AddResult;
+                            } catch (error) {
+                                console.log(error);
+                            }
+                        },
+                        err => {
+                            console.log('Error calling ws', err);
+                        }
                     );
                 })
                 .catch(err => console.log('Error', err));
-            });
-          });
         }
+```
 
 Besides `this.client.operation` method to get operation data you can also call the operation method directly, like: 
 
