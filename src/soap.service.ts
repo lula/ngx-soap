@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Observable } from "rxjs/Observable";
-import 'rxjs/add/operator/map';
 import { createSoapClient } from "./libts/soap";
 import { Client, ClientOptions} from "./libts/client";
 import { HttpClient } from '@angular/common/http';
