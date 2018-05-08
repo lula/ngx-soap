@@ -160,8 +160,9 @@ Import SOAPService and inject it in your component, then:
 
                             // 5. parse xml response into json
                             const jsonResponse = this.client.parseResponseBody(response);
+
                             try {
-                                const message = this.jsonResponse.Body.AddResponse.AddResult;
+                                const message = jsonResponse.Body.AddResponse.AddResult;
                             } catch (error) {
                                 console.log(error);
                             }
