@@ -22,10 +22,10 @@ export interface ClientOptions {
 
 export class Client {
   private endpoint: string;
-  private bodyAttributes: any;
-  private lastRequestHeaders: any;
-  private lastEndpoint: any;
-  private lastRequest: any;
+  private bodyAttributes: string[] | null;
+  // private lastRequestHeaders: any;
+  private lastEndpoint: string;
+  private lastRequest: string;
   private lastMessage: string;
   private security: any;
   private httpHeaders: { [name: string]: string } = {};
