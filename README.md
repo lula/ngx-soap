@@ -1,6 +1,6 @@
 # ngx-soap
 
-Simple SOAP client for Angular 5 based on amazing [node-soap](https://github.com/vpulim/node-soap) library which apparently should only work in a node ambient and not in browsers.
+Simple SOAP client for Angular 6 based on amazing [node-soap](https://github.com/vpulim/node-soap) library which apparently should only work in a node ambient and not in browsers.
 
 Project has been recreated from scratch with Angualr 6 CLI.
 
