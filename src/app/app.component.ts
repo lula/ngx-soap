@@ -20,12 +20,12 @@ export class AppComponent {
   client: Client;
 
   constructor(private soap: NgxSoapService) {
-    this.soap.createClient('assets/calculator.wsdl').subscribe(
-      client => {
-        console.log('Client', client);
-        this.client = client;
-      },
-      err => console.log('Error', err));
+    this.soap.createClient('assets/calculator.wsdl')
+    .then(client => {
+      console.log('Client', client);
+      this.client = client;
+    })
+    .catch(err => console.log('Error', err));
   }
 
   sum() {

@@ -5,8 +5,6 @@
 
 import * as wsdl from './wsdl';
 import { security } from './security';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { Client } from './client';
 export { Client } from './client';
 export { security } from './security';
@@ -50,7 +48,7 @@ function _requestWSDL(url, options) {
   // }
 }
 
-export function createClient(url, options, endpoint): Observable<any> {
+export async function createClient(url, options, endpoint): Promise<any> {
   // if (typeof options === 'function') {
   //   endpoint = callback;
   //   callback = options;
@@ -59,15 +57,15 @@ export function createClient(url, options, endpoint): Observable<any> {
   if (typeof options === 'undefined') {
     options = {};
   }
-  console.log("createClientAsync", options)
+  console.log("createClient", options)
   endpoint = options.endpoint || endpoint;
   // _requestWSDL(url, options, function(err, wsdl) {
   //   callback(err, wsdl && new Client(wsdl, endpoint, options));
   // });
 
-  return _requestWSDL(url, options).pipe(
-    map(wsdl => new Client(wsdl, endpoint, options))
-  );
+  const wsdl = await _requestWSDL(url, options);
+  const client = new Client(wsdl, endpoint, options);
+  return client;
 }
 
 // export function createClientAsync(url, options, endpoint): Observable<any> {

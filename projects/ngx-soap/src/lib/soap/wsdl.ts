@@ -9,8 +9,7 @@
 
 import * as sax from 'sax';
 import { HttpClient } from '@angular/common/http';
-import { map, switchMap } from 'rxjs/operators';
-import { NamespaceContext } from './nscontext';
+import { NamespaceContext }  from './nscontext';
 
 import * as url from 'url';
 import { ok as assert } from 'assert';
@@ -28,7 +27,8 @@ const stripBom = (x: string): string => {
 
 import * as _ from 'lodash';
 import * as utils from './utils';
-import { from, Observable } from 'rxjs';
+
+
 let TNS_PREFIX = utils.TNS_PREFIX;
 let findPrefix = utils.findPrefix;
 
@@ -46,7 +46,7 @@ let Primitives = {
   negativeInteger: 1,
   nonNegativeInteger: 1,
   positiveInteger: 1,
-  nonPositiveInteger:1,
+  nonPositiveInteger: 1,
   unsignedByte: 1,
   unsignedInt: 1,
   unsignedLong: 1,
@@ -69,13 +69,13 @@ let Primitives = {
 
 function splitQName(nsName) {
   let i = typeof nsName === 'string' ? nsName.indexOf(':') : -1;
-  return i < 0 ? {prefix: TNS_PREFIX, name: nsName} :
-  {prefix: nsName.substring(0, i), name: nsName.substring(i + 1)};
+  return i < 0 ? { prefix: TNS_PREFIX, name: nsName } :
+    { prefix: nsName.substring(0, i), name: nsName.substring(i + 1) };
 }
 
 function xmlEscape(obj) {
   if (typeof (obj) === 'string') {
-    if (obj.substr(0,9) === '<![CDATA[' && obj.substr(-3) === "]]>") {
+    if (obj.substr(0, 9) === '<![CDATA[' && obj.substr(-3) === "]]>") {
       return obj;
     }
     return obj
@@ -97,12 +97,12 @@ function trim(text) {
 }
 
 function deepMerge(destination, source) {
-  return _.mergeWith(destination || {}, source, function(a, b) {
-      return _.isArray(a) ? a.concat(b) : undefined;
-    });
+  return _.mergeWith(destination || {}, source, function (a, b) {
+    return _.isArray(a) ? a.concat(b) : undefined;
+  });
 }
 
-let Element: any = function(nsName, attrs, options) {
+let Element: any = function (nsName, attrs, options) {
   let parts = splitQName(nsName);
 
   this.nsName = nsName;
@@ -119,7 +119,7 @@ let Element: any = function(nsName, attrs, options) {
       this.xmlns[match[1] ? match[1] : TNS_PREFIX] = attrs[key];
     }
     else {
-      if(key === 'value') {
+      if (key === 'value') {
         this[this.valueKey] = attrs[key];
       } else {
         this['$' + key] = attrs[key];
@@ -133,7 +133,7 @@ let Element: any = function(nsName, attrs, options) {
 };
 
 Element.prototype._initializeOptions = function (options) {
-  if(options) {
+  if (options) {
     this.valueKey = options.valueKey || '$value';
     this.xmlKey = options.xmlKey || '$xml';
     this.ignoredNamespaces = options.ignoredNamespaces || [];
@@ -144,7 +144,7 @@ Element.prototype._initializeOptions = function (options) {
   }
 };
 
-Element.prototype.deleteFixedAttrs = function() {
+Element.prototype.deleteFixedAttrs = function () {
   this.children && this.children.length === 0 && delete this.children;
   this.xmlns && Object.keys(this.xmlns).length === 0 && delete this.xmlns;
   delete this.nsName;
@@ -154,7 +154,7 @@ Element.prototype.deleteFixedAttrs = function() {
 
 Element.prototype.allowedChildren = [];
 
-Element.prototype.startElement = function(stack, nsName, attrs, options) {
+Element.prototype.startElement = function (stack, nsName, attrs, options) {
   if (!this.allowedChildren) {
     return;
   }
@@ -171,7 +171,7 @@ Element.prototype.startElement = function(stack, nsName, attrs, options) {
 
 };
 
-Element.prototype.endElement = function(stack, nsName) {
+Element.prototype.endElement = function (stack, nsName) {
   if (this.nsName === nsName) {
     if (stack.length < 2)
       return;
@@ -186,24 +186,24 @@ Element.prototype.endElement = function(stack, nsName) {
   }
 };
 
-Element.prototype.addChild = function(child) {
+Element.prototype.addChild = function (child) {
   return;
 };
 
-Element.prototype.unexpected = function(name) {
+Element.prototype.unexpected = function (name) {
   throw new Error('Found unexpected element (' + name + ') inside ' + this.nsName);
 };
 
-Element.prototype.description = function(definitions) {
+Element.prototype.description = function (definitions) {
   return this.$name || this.name;
 };
 
-Element.prototype.init = function() {
+Element.prototype.init = function () {
 };
 
-Element.createSubClass = function() {
+Element.createSubClass = function () {
   let root = this;
-  let subElement = function() {
+  let subElement = function () {
     root.apply(this, arguments);
     this.init();
   };
@@ -248,11 +248,11 @@ let ElementTypeMap = {
   restriction: [RestrictionElement, 'enumeration all choice sequence'],
   extension: [ExtensionElement, 'all sequence choice'],
   choice: [ChoiceElement, 'element sequence choice any'],
-    // group: [GroupElement, 'element group'],
+  // group: [GroupElement, 'element group'],
   enumeration: [EnumerationElement, ''],
-  complexType: [ComplexTypeElement,  'annotation sequence all complexContent simpleContent choice'],
-  complexContent: [ComplexContentElement,  'extension'],
-  simpleContent: [SimpleContentElement,  'extension'],
+  complexType: [ComplexTypeElement, 'annotation sequence all complexContent simpleContent choice'],
+  complexContent: [ComplexContentElement, 'extension'],
+  simpleContent: [SimpleContentElement, 'extension'],
   sequence: [SequenceElement, 'element sequence choice any'],
   all: [AllElement, 'element choice'],
 
@@ -272,8 +272,8 @@ let ElementTypeMap = {
 function mapElementTypes(types) {
   let rtn = {};
   types = types.split(' ');
-  types.forEach(function(type) {
-    rtn[type.replace(/^_/, '')] = (ElementTypeMap[type] || [Element]) [0];
+  types.forEach(function (type) {
+    rtn[type.replace(/^_/, '')] = (ElementTypeMap[type] || [Element])[0];
   });
   return rtn;
 }
@@ -283,23 +283,23 @@ for (let n in ElementTypeMap) {
   v[0].prototype.allowedChildren = mapElementTypes(v[1]);
 }
 
-MessageElement.prototype.init = function() {
+MessageElement.prototype.init = function () {
   this.element = null;
   this.parts = null;
 };
 
-SchemaElement.prototype.init = function() {
+SchemaElement.prototype.init = function () {
   this.complexTypes = {};
   this.types = {};
   this.elements = {};
   this.includes = [];
 };
 
-TypesElement.prototype.init = function() {
+TypesElement.prototype.init = function () {
   this.schemas = {};
 };
 
-OperationElement.prototype.init = function() {
+OperationElement.prototype.init = function () {
   this.input = null;
   this.output = null;
   this.inputSoap = null;
@@ -308,26 +308,26 @@ OperationElement.prototype.init = function() {
   this.soapAction = '';
 };
 
-PortTypeElement.prototype.init = function() {
+PortTypeElement.prototype.init = function () {
   this.methods = {};
 };
 
-BindingElement.prototype.init = function() {
+BindingElement.prototype.init = function () {
   this.transport = '';
   this.style = '';
   this.methods = {};
 };
 
-PortElement.prototype.init = function() {
+PortElement.prototype.init = function () {
   this.location = null;
 };
 
-ServiceElement.prototype.init = function() {
+ServiceElement.prototype.init = function () {
   this.ports = {};
 };
 
-DefinitionsElement.prototype.init = function() {
-  if (this.name !== 'definitions')this.unexpected(this.nsName);
+DefinitionsElement.prototype.init = function () {
+  if (this.name !== 'definitions') this.unexpected(this.nsName);
   this.messages = {};
   this.portTypes = {};
   this.bindings = {};
@@ -335,10 +335,10 @@ DefinitionsElement.prototype.init = function() {
   this.schemas = {};
 };
 
-DocumentationElement.prototype.init = function() {
+DocumentationElement.prototype.init = function () {
 };
 
-SchemaElement.prototype.merge = function(source) {
+SchemaElement.prototype.merge = function (source) {
   assert(source instanceof SchemaElement);
   if (this.$targetNamespace === source.$targetNamespace) {
     _.merge(this.complexTypes, source.complexTypes);
@@ -350,7 +350,7 @@ SchemaElement.prototype.merge = function(source) {
 };
 
 
-SchemaElement.prototype.addChild = function(child) {
+SchemaElement.prototype.addChild = function (child) {
   if (child.$name in Primitives)
     return;
   if (child.name === 'include' || child.name === 'import') {
@@ -380,14 +380,14 @@ TypesElement.prototype.addChild = function (child) {
 
   let targetNamespace = child.$targetNamespace;
 
-  if(!this.schemas.hasOwnProperty(targetNamespace)) {
+  if (!this.schemas.hasOwnProperty(targetNamespace)) {
     this.schemas[targetNamespace] = child;
   } else {
-    console.error('Target-Namespace "'+ targetNamespace +'" already in use by another Schema!');
+    console.error('Target-Namespace "' + targetNamespace + '" already in use by another Schema!');
   }
 };
 
-InputElement.prototype.addChild = function(child) {
+InputElement.prototype.addChild = function (child) {
   if (child.name === 'body') {
     this.use = child.$use;
     if (this.use === 'encoded') {
@@ -397,7 +397,7 @@ InputElement.prototype.addChild = function(child) {
   }
 };
 
-OutputElement.prototype.addChild = function(child) {
+OutputElement.prototype.addChild = function (child) {
   if (child.name === 'body') {
     this.use = child.$use;
     if (this.use === 'encoded') {
@@ -407,7 +407,7 @@ OutputElement.prototype.addChild = function(child) {
   }
 };
 
-OperationElement.prototype.addChild = function(child) {
+OperationElement.prototype.addChild = function (child) {
   if (child.name === 'operation') {
     this.soapAction = child.$soapAction || '';
     this.style = child.$style || '';
@@ -415,7 +415,7 @@ OperationElement.prototype.addChild = function(child) {
   }
 };
 
-BindingElement.prototype.addChild = function(child) {
+BindingElement.prototype.addChild = function (child) {
   if (child.name === 'binding') {
     this.transport = child.$transport;
     this.style = child.$style;
@@ -423,13 +423,13 @@ BindingElement.prototype.addChild = function(child) {
   }
 };
 
-PortElement.prototype.addChild = function(child) {
+PortElement.prototype.addChild = function (child) {
   if (child.name === 'address' && typeof (child.$location) !== 'undefined') {
     this.location = child.$location;
   }
 };
 
-DefinitionsElement.prototype.addChild = function(child) {
+DefinitionsElement.prototype.addChild = function (child) {
   let self = this;
   if (child instanceof TypesElement) {
     // Merge types.schemas into definitions.schemas
@@ -458,7 +458,7 @@ DefinitionsElement.prototype.addChild = function(child) {
   this.children.pop();
 };
 
-MessageElement.prototype.postProcess = function(definitions) {
+MessageElement.prototype.postProcess = function (definitions) {
   let part = null;
   let child = undefined;
   let children = this.children || [];
@@ -480,7 +480,7 @@ MessageElement.prototype.postProcess = function(definitions) {
 
   if (part.$element) {
     let lookupTypes = [],
-        elementChildren ;
+      elementChildren;
 
     delete this.parts;
 
@@ -488,7 +488,7 @@ MessageElement.prototype.postProcess = function(definitions) {
     ns = nsName.prefix;
     let schema = definitions.schemas[definitions.xmlns[ns]];
     this.element = schema.elements[nsName.name];
-    if(!this.element) {
+    if (!this.element) {
       // debug(nsName.name + " is not present in wsdl and cannot be processed correctly.");
       return;
     }
@@ -511,11 +511,11 @@ MessageElement.prototype.postProcess = function(definitions) {
     // if nested lookup types where found, prepare them for furter usage
     if (lookupTypes.length > 0) {
       lookupTypes = lookupTypes.
-          join('_').
-          split('_').
-          filter(function removeEmptyLookupTypes (type) {
-            return type !== '^';
-          });
+        join('_').
+        split('_').
+        filter(function removeEmptyLookupTypes(type) {
+          return type !== '^';
+        });
 
       let schemaXmlns = definitions.schemas[this.element.targetNamespace].xmlns;
 
@@ -532,7 +532,7 @@ MessageElement.prototype.postProcess = function(definitions) {
 
       if (typeNs) {
         if (type.name in Primitives) {
-            // this.element = this.element.$type;
+          // this.element = this.element.$type;
         }
         else {
           // first check local mapping of ns alias to namespace
@@ -597,11 +597,11 @@ MessageElement.prototype.postProcess = function(definitions) {
  */
 MessageElement.prototype._createLookupTypeObject = function (nsString, xmlns) {
   let splittedNSString = splitQName(nsString),
-      nsAlias = splittedNSString.prefix,
-      splittedName = splittedNSString.name.split('#'),
-      type = splittedName[0],
-      name = splittedName[1],
-      lookupTypeObj: any = {};
+    nsAlias = splittedNSString.prefix,
+    splittedName = splittedNSString.name.split('#'),
+    type = splittedName[0],
+    name = splittedName[1],
+    lookupTypeObj: any = {};
 
   lookupTypeObj.$namespace = xmlns[nsAlias];
   lookupTypeObj.$type = nsAlias + ':' + type;
@@ -622,7 +622,7 @@ MessageElement.prototype._createLookupTypeObject = function (nsString, xmlns) {
  */
 MessageElement.prototype._getNestedLookupTypeString = function (element) {
   let resolvedType = '^',
-      excluded = this.ignoredNamespaces.concat('xs'); // do not process $type values wich start with
+    excluded = this.ignoredNamespaces.concat('xs'); // do not process $type values wich start with
 
   if (element.hasOwnProperty('$type') && typeof element.$type === 'string') {
     if (excluded.indexOf(element.$type.split(':')[0]) === -1) {
@@ -645,7 +645,7 @@ MessageElement.prototype._getNestedLookupTypeString = function (element) {
   return resolvedType;
 };
 
-OperationElement.prototype.postProcess = function(definitions, tag) {
+OperationElement.prototype.postProcess = function (definitions, tag) {
   let children = this.children;
   for (let i = 0, child; child = children[i]; i++) {
     if (child.name !== 'input' && child.name !== 'output')
@@ -670,7 +670,7 @@ OperationElement.prototype.postProcess = function(definitions, tag) {
   this.deleteFixedAttrs();
 };
 
-PortTypeElement.prototype.postProcess = function(definitions) {
+PortTypeElement.prototype.postProcess = function (definitions) {
   let children = this.children;
   if (typeof children === 'undefined')
     return;
@@ -685,12 +685,12 @@ PortTypeElement.prototype.postProcess = function(definitions) {
   this.deleteFixedAttrs();
 };
 
-BindingElement.prototype.postProcess = function(definitions) {
+BindingElement.prototype.postProcess = function (definitions) {
   let type = splitQName(this.$type).name,
     portType = definitions.portTypes[type],
     style = this.style,
     children = this.children;
-  if (portType){
+  if (portType) {
     portType.postProcess(definitions);
     this.methods = portType.methods;
 
@@ -717,7 +717,7 @@ BindingElement.prototype.postProcess = function(definitions) {
   this.deleteFixedAttrs();
 };
 
-ServiceElement.prototype.postProcess = function(definitions) {
+ServiceElement.prototype.postProcess = function (definitions) {
   let children = this.children,
     bindings = definitions.bindings;
   if (children && children.length > 0) {
@@ -741,7 +741,7 @@ ServiceElement.prototype.postProcess = function(definitions) {
 };
 
 
-SimpleTypeElement.prototype.description = function(definitions) {
+SimpleTypeElement.prototype.description = function (definitions) {
   let children = this.children;
   for (let i = 0, child; child = children[i]; i++) {
     if (child instanceof RestrictionElement)
@@ -750,12 +750,12 @@ SimpleTypeElement.prototype.description = function(definitions) {
   return {};
 };
 
-RestrictionElement.prototype.description = function(definitions, xmlns) {
+RestrictionElement.prototype.description = function (definitions, xmlns) {
   let children = this.children;
   let desc;
-  for (let i=0, child; child=children[i]; i++) {
+  for (let i = 0, child; child = children[i]; i++) {
     if (child instanceof SequenceElement ||
-            child instanceof ChoiceElement) {
+      child instanceof ChoiceElement) {
       desc = child.description(definitions, xmlns);
       break;
     }
@@ -765,25 +765,25 @@ RestrictionElement.prototype.description = function(definitions, xmlns) {
       typeName = type.name,
       ns = xmlns && xmlns[type.prefix] || definitions.xmlns[type.prefix],
       schema = definitions.schemas[ns],
-      typeElement = schema && ( schema.complexTypes[typeName] || schema.types[typeName] || schema.elements[typeName] );
+      typeElement = schema && (schema.complexTypes[typeName] || schema.types[typeName] || schema.elements[typeName]);
 
-    desc.getBase = function() {
+    desc.getBase = function () {
       return typeElement.description(definitions, schema.xmlns);
     };
     return desc;
   }
 
-    // then simple element
+  // then simple element
   let base = this.$base ? this.$base + "|" : "";
-  return base + this.children.map(function(child) {
+  return base + this.children.map(function (child) {
     return child.description();
   }).join(",");
 };
 
-ExtensionElement.prototype.description = function(definitions, xmlns) {
+ExtensionElement.prototype.description = function (definitions, xmlns) {
   let children = this.children;
   let desc = {};
-  for (let i=0, child; child=children[i]; i++) {
+  for (let i = 0, child; child = children[i]; i++) {
     if (child instanceof SequenceElement ||
       child instanceof ChoiceElement) {
       desc = child.description(definitions, xmlns);
@@ -799,8 +799,8 @@ ExtensionElement.prototype.description = function(definitions, xmlns) {
       return this.$base;
     }
     else {
-      let typeElement = schema && ( schema.complexTypes[typeName] ||
-        schema.types[typeName] || schema.elements[typeName] );
+      let typeElement = schema && (schema.complexTypes[typeName] ||
+        schema.types[typeName] || schema.elements[typeName]);
 
       if (typeElement) {
         let base = typeElement.description(definitions, schema.xmlns);
@@ -811,13 +811,13 @@ ExtensionElement.prototype.description = function(definitions, xmlns) {
   return desc;
 };
 
-EnumerationElement.prototype.description = function() {
+EnumerationElement.prototype.description = function () {
   return this[this.valueKey];
 };
 
-ComplexTypeElement.prototype.description = function(definitions, xmlns) {
+ComplexTypeElement.prototype.description = function (definitions, xmlns) {
   let children = this.children || [];
-  for (let i=0, child; child=children[i]; i++) {
+  for (let i = 0, child; child = children[i]; i++) {
     if (child instanceof ChoiceElement ||
       child instanceof SequenceElement ||
       child instanceof AllElement ||
@@ -830,7 +830,7 @@ ComplexTypeElement.prototype.description = function(definitions, xmlns) {
   return {};
 };
 
-ComplexContentElement.prototype.description = function(definitions, xmlns) {
+ComplexContentElement.prototype.description = function (definitions, xmlns) {
   let children = this.children;
   for (let i = 0, child; child = children[i]; i++) {
     if (child instanceof ExtensionElement) {
@@ -840,7 +840,7 @@ ComplexContentElement.prototype.description = function(definitions, xmlns) {
   return {};
 };
 
-SimpleContentElement.prototype.description = function(definitions, xmlns) {
+SimpleContentElement.prototype.description = function (definitions, xmlns) {
   let children = this.children;
   for (let i = 0, child; child = children[i]; i++) {
     if (child instanceof ExtensionElement) {
@@ -850,7 +850,7 @@ SimpleContentElement.prototype.description = function(definitions, xmlns) {
   return {};
 };
 
-ElementElement.prototype.description = function(definitions, xmlns) {
+ElementElement.prototype.description = function (definitions, xmlns) {
   let element = {},
     name = this.$name;
   let isMany = !this.$maxOccurs ? false : (isNaN(this.$maxOccurs) ? (this.$maxOccurs === 'unbounded') : (this.$maxOccurs > 1));
@@ -867,7 +867,7 @@ ElementElement.prototype.description = function(definitions, xmlns) {
     let typeName = type.name,
       ns = xmlns && xmlns[type.prefix] || definitions.xmlns[type.prefix],
       schema = definitions.schemas[ns],
-      typeElement = schema && ( this.$type? schema.complexTypes[typeName] || schema.types[typeName] : schema.elements[typeName] );
+      typeElement = schema && (this.$type ? schema.complexTypes[typeName] || schema.types[typeName] : schema.elements[typeName]);
 
     if (ns && definitions.schemas[ns]) {
       xmlns = definitions.schemas[ns].xmlns;
@@ -930,25 +930,25 @@ ElementElement.prototype.description = function(definitions, xmlns) {
 };
 
 AllElement.prototype.description =
-SequenceElement.prototype.description = function(definitions, xmlns) {
-  let children = this.children;
-  let sequence = {};
-  for (let i = 0, child; child = children[i]; i++) {
-    if (child instanceof AnyElement) {
-      continue;
+  SequenceElement.prototype.description = function (definitions, xmlns) {
+    let children = this.children;
+    let sequence = {};
+    for (let i = 0, child; child = children[i]; i++) {
+      if (child instanceof AnyElement) {
+        continue;
+      }
+      let description = child.description(definitions, xmlns);
+      for (let key in description) {
+        sequence[key] = description[key];
+      }
     }
-    let description = child.description(definitions, xmlns);
-    for (let key in description) {
-      sequence[key] = description[key];
-    }
-  }
-  return sequence;
-};
+    return sequence;
+  };
 
-ChoiceElement.prototype.description = function(definitions, xmlns) {
+ChoiceElement.prototype.description = function (definitions, xmlns) {
   let children = this.children;
   let choice = {};
-  for (let i=0, child; child=children[i]; i++) {
+  for (let i = 0, child; child = children[i]; i++) {
     let description = child.description(definitions, xmlns);
     for (let key in description) {
       choice[key] = description[key];
@@ -957,7 +957,7 @@ ChoiceElement.prototype.description = function(definitions, xmlns) {
   return choice;
 };
 
-MessageElement.prototype.description = function(definitions) {
+MessageElement.prototype.description = function (definitions) {
   if (this.element) {
     return this.element && this.element.description(definitions);
   }
@@ -966,7 +966,7 @@ MessageElement.prototype.description = function(definitions) {
   return desc;
 };
 
-PortTypeElement.prototype.description = function(definitions) {
+PortTypeElement.prototype.description = function (definitions) {
   let methods = {};
   for (let name in this.methods) {
     let method = this.methods[name];
@@ -975,7 +975,7 @@ PortTypeElement.prototype.description = function(definitions) {
   return methods;
 };
 
-OperationElement.prototype.description = function(definitions) {
+OperationElement.prototype.description = function (definitions) {
   let inputDesc = this.input ? this.input.description(definitions) : null;
   let outputDesc = this.output ? this.output.description(definitions) : null;
   return {
@@ -984,7 +984,7 @@ OperationElement.prototype.description = function(definitions) {
   };
 };
 
-BindingElement.prototype.description = function(definitions) {
+BindingElement.prototype.description = function (definitions) {
   let methods = {};
   for (let name in this.methods) {
     let method = this.methods[name];
@@ -993,7 +993,7 @@ BindingElement.prototype.description = function(definitions) {
   return methods;
 };
 
-ServiceElement.prototype.description = function(definitions) {
+ServiceElement.prototype.description = function (definitions) {
   let ports = {};
   for (let name in this.ports) {
     let port = this.ports[name];
@@ -1002,12 +1002,12 @@ ServiceElement.prototype.description = function(definitions) {
   return ports;
 };
 
-export let WSDL = function(definition, uri, options) {
+export let WSDL = function (definition, uri, options) {
   let self = this,
-      fromFunc;
+    fromFunc;
 
   this.uri = uri;
-  this.callback = function() {
+  this.callback = function () {
   };
   this._includesWsdl = [];
 
@@ -1034,22 +1034,17 @@ export let WSDL = function(definition, uri, options) {
       return self.callback(e.message);
     }
 
-    self.processIncludes(function(err) {
-      let name;
-      if (err) {
-        return self.callback(err);
-      }
-
+    self.processIncludes().then(() => {
       self.definitions.deleteFixedAttrs();
       let services = self.services = self.definitions.services;
       if (services) {
-        for (name in services) {
+        for (const name in services) {
           services[name].postProcess(self.definitions);
         }
       }
       let complexTypes = self.definitions.complexTypes;
       if (complexTypes) {
-        for (name in complexTypes) {
+        for (const name in complexTypes) {
           complexTypes[name].deleteFixedAttrs();
         }
       }
@@ -1068,19 +1063,18 @@ export let WSDL = function(definition, uri, options) {
         for (let methodName in methods) {
           if (methods[methodName].input) {
             let inputName = methods[methodName].input.$name;
-            let outputName="";
-            if(methods[methodName].output )
+            let outputName = "";
+            if (methods[methodName].output)
               outputName = methods[methodName].output.$name;
-            topEls[inputName] = {"methodName": methodName, "outputName": outputName};
+            topEls[inputName] = { "methodName": methodName, "outputName": outputName };
           }
         }
       }
 
       // prepare soap envelope xmlns definition string
       self.xmlnsInEnvelope = self._xmlnsMap();
-
-      self.callback(err, self);
-    });
+      self.callback(null, self);
+    }).catch(err => self.callback(err));
 
   });
 
@@ -1156,7 +1150,7 @@ WSDL.prototype._initializeOptions = function (options) {
   let ignoredNamespaces = options ? options.ignoredNamespaces : null;
 
   if (ignoredNamespaces &&
-      (Array.isArray(ignoredNamespaces.namespaces) || typeof ignoredNamespaces.namespaces === 'string')) {
+    (Array.isArray(ignoredNamespaces.namespaces) || typeof ignoredNamespaces.namespaces === 'string')) {
     if (ignoredNamespaces.override) {
       this.options.ignoredNamespaces = ignoredNamespaces.namespaces;
     } else {
@@ -1216,24 +1210,24 @@ WSDL.prototype._initializeOptions = function (options) {
   this.options.useEmptyTag = !!options.useEmptyTag;
 };
 
-WSDL.prototype.onReady = function(callback) {
+WSDL.prototype.onReady = function (callback) {
   if (callback)
     this.callback = callback;
 };
 
-WSDL.prototype._processNextInclude = function(includes, callback) {
+WSDL.prototype._processNextInclude = async function (includes) {
   let self = this,
     include = includes.shift(),
     options;
 
   if (!include)
-    return callback();
+    return; // callback();
 
   let includePath;
   if (!/^https?:/.test(self.uri) && !/^https?:/.test(include.location)) {
     // includePath = path.resolve(path.dirname(self.uri), include.location);
   } else {
-    includePath = url.resolve(self.uri||'', include.location);
+    includePath = url.resolve(self.uri || '', include.location);
   }
 
   options = _.assign({}, this.options);
@@ -1241,27 +1235,40 @@ WSDL.prototype._processNextInclude = function(includes, callback) {
   options.ignoredNamespaces = this._originalIgnoredNamespaces || this.options.ignoredNamespaces;
   options.WSDL_CACHE = this.WSDL_CACHE;
 
-  open_wsdl_recursive(includePath, options, function(err, wsdl) {
-    if (err) {
-      return callback(err);
-    }
+  const wsdl = await open_wsdl_recursive(includePath, options)
+  self._includesWsdl.push(wsdl);
 
-    self._includesWsdl.push(wsdl);
-
-    if (wsdl.definitions instanceof DefinitionsElement) {
-      _.mergeWith(self.definitions, wsdl.definitions, function(a,b) {
-        return (a instanceof SchemaElement) ? a.merge(b) : undefined;
-      });
-    } else {
-      self.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace] = deepMerge(self.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace], wsdl.definitions);
-    }
-    self._processNextInclude(includes, function(err) {
-      callback(err);
+  if (wsdl.definitions instanceof DefinitionsElement) {
+    _.mergeWith(self.definitions, wsdl.definitions, function (a, b) {
+      return (a instanceof SchemaElement) ? a.merge(b) : undefined;
     });
-  });
+  } else {
+    self.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace] = deepMerge(self.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace], wsdl.definitions);
+  }
+
+  return self._processNextInclude(includes);
+
+  // open_wsdl_recursive(includePath, options, function(err, wsdl) {
+  //   if (err) {
+  //     return callback(err);
+  //   }
+
+  //   self._includesWsdl.push(wsdl);
+
+  //   if (wsdl.definitions instanceof DefinitionsElement) {
+  //     _.mergeWith(self.definitions, wsdl.definitions, function(a,b) {
+  //       return (a instanceof SchemaElement) ? a.merge(b) : undefined;
+  //     });
+  //   } else {
+  //     self.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace] = deepMerge(self.definitions.schemas[include.namespace || wsdl.definitions.$targetNamespace], wsdl.definitions);
+  //   }
+  //   self._processNextInclude(includes, function(err) {
+  //     callback(err);
+  //   });
+  // });
 };
 
-WSDL.prototype.processIncludes = function(callback) {
+WSDL.prototype.processIncludes = async function () {
   let schemas = this.definitions.schemas,
     includes = [];
 
@@ -1270,10 +1277,10 @@ WSDL.prototype.processIncludes = function(callback) {
     includes = includes.concat(schema.includes || []);
   }
 
-  this._processNextInclude(includes, callback);
+  return this._processNextInclude(includes);
 };
 
-WSDL.prototype.describeServices = function() {
+WSDL.prototype.describeServices = function () {
   let services = {};
   for (let name in this.services) {
     let service = this.services[name];
@@ -1282,11 +1289,11 @@ WSDL.prototype.describeServices = function() {
   return services;
 };
 
-WSDL.prototype.toXML = function() {
+WSDL.prototype.toXML = function () {
   return this.xml || '';
 };
 
-WSDL.prototype.xmlToObject = function(xml, callback) {
+WSDL.prototype.xmlToObject = function (xml, callback) {
   let self = this;
   let p = typeof callback === 'function' ? {} : sax.parser(true);
   let objectName = null;
@@ -1310,14 +1317,14 @@ WSDL.prototype.xmlToObject = function(xml, callback) {
       }
     }
   };
-  let stack: any[] = [{name: null, object: root, schema: schema}];
+  let stack: any[] = [{ name: null, object: root, schema: schema }];
   let xmlns: any = {};
 
   let refs = {}, id; // {id:{hrefs:[],obj:}, ...}
 
-  p.onopentag = function(node) {
+  p.onopentag = function (node) {
     let nsName = node.name;
-    let attrs: any  = node.attributes;
+    let attrs: any = node.attributes;
     let name = splitQName(nsName).name,
       attributeName,
       top = stack[stack.length - 1],
@@ -1374,13 +1381,13 @@ WSDL.prototype.xmlToObject = function(xml, callback) {
     if (attrs.href) {
       id = attrs.href.substr(1);
       if (!refs[id]) {
-        refs[id] = {hrefs: [], obj: null};
+        refs[id] = { hrefs: [], obj: null };
       }
-      refs[id].hrefs.push({par: top.object, key: name, obj: obj});
+      refs[id].hrefs.push({ par: top.object, key: name, obj: obj });
     }
     if (id = attrs.id) {
       if (!refs[id]) {
-        refs[id] = {hrefs: [], obj: null};
+        refs[id] = { hrefs: [], obj: null };
       }
     }
 
@@ -1394,11 +1401,11 @@ WSDL.prototype.xmlToObject = function(xml, callback) {
       elementAttributes[attributeName] = attrs[attributeName];
     }
 
-    for(attributeName in elementAttributes){
+    for (attributeName in elementAttributes) {
       let res = splitQName(attributeName);
       if (res.name === 'nil' && xmlns[res.prefix] === 'http://www.w3.org/2001/XMLSchema-instance' && elementAttributes[attributeName] &&
-          (elementAttributes[attributeName].toLowerCase() === 'true' || elementAttributes[attributeName] === '1')
-        ) {
+        (elementAttributes[attributeName].toLowerCase() === 'true' || elementAttributes[attributeName] === '1')
+      ) {
         hasNilAttribute = true;
         break;
       }
@@ -1430,14 +1437,15 @@ WSDL.prototype.xmlToObject = function(xml, callback) {
       name = name + '[]';
     }
     stack.push({
-      name: originalName, 
-      object: obj, 
-      schema: (xsiTypeSchema || (topSchema && topSchema[name])), 
-      id: attrs.id, 
-      nil: hasNilAttribute});
+      name: originalName,
+      object: obj,
+      schema: (xsiTypeSchema || (topSchema && topSchema[name])),
+      id: attrs.id,
+      nil: hasNilAttribute
+    });
   };
 
-  p.onclosetag = function(nsName) {
+  p.onclosetag = function (nsName) {
     let cur: any = stack.pop(),
       obj = cur.object,
       top = stack[stack.length - 1],
@@ -1446,7 +1454,7 @@ WSDL.prototype.xmlToObject = function(xml, callback) {
       name = splitQName(nsName).name;
 
     if (typeof cur.schema === 'string' && (cur.schema === 'string' || (<string>cur.schema).split(':')[1] === 'string')) {
-      if (typeof obj === 'object' &&  Object.keys(obj).length === 0) obj = cur.object = '';
+      if (typeof obj === 'object' && Object.keys(obj).length === 0) obj = cur.object = '';
     }
 
     if (cur.nil === true) {
@@ -1500,7 +1508,7 @@ WSDL.prototype.xmlToObject = function(xml, callback) {
     }
   };
 
-  p.onerror = function(e) {
+  p.onerror = function (e) {
     p.resume();
     throw {
       Fault: {
@@ -1512,7 +1520,7 @@ WSDL.prototype.xmlToObject = function(xml, callback) {
     };
   };
 
-  p.ontext = function(text) {
+  p.ontext = function (text) {
     let originalText = text;
     text = trim(text);
     if (!text.length) {
@@ -1560,18 +1568,18 @@ WSDL.prototype.xmlToObject = function(xml, callback) {
     saxStream.on('cdata', p.oncdata);
     saxStream.on('text', p.ontext);
     xml.pipe(saxStream)
-    .on('error', function (err) {
-      callback(err);
-    })
-    .on('end', function () {
-      let r;
-      try {
-        r = finish();
-      } catch (e) {
-        return callback(e);
-      }
-      callback(null, r);
-    });
+      .on('error', function (err) {
+        callback(err);
+      })
+      .on('end', function () {
+        let r;
+        try {
+          r = finish();
+        } catch (e) {
+          return callback(e);
+        }
+        callback(null, r);
+      });
     return;
   }
   p.write(xml).close();
@@ -1615,7 +1623,7 @@ WSDL.prototype.xmlToObject = function(xml, callback) {
  * @param {String} qname Local or qualified name
  * @returns {*} The XSD type/element definition
  */
-WSDL.prototype.findSchemaObject = function(nsURI, qname) {
+WSDL.prototype.findSchemaObject = function (nsURI, qname) {
   if (!nsURI || !qname) {
     return null;
   }
@@ -1646,7 +1654,7 @@ WSDL.prototype.findSchemaObject = function(nsURI, qname) {
  * @param {String} nsURI
  * @param {String} type
  */
-WSDL.prototype.objectToDocumentXML = function(name, params, nsPrefix, nsURI, type) {
+WSDL.prototype.objectToDocumentXML = function (name, params, nsPrefix, nsURI, type) {
   //If user supplies XML already, just use that.  XML Declaration should not be present.
   if (params && params._xml) {
     return params._xml;
@@ -1665,7 +1673,7 @@ WSDL.prototype.objectToDocumentXML = function(name, params, nsPrefix, nsURI, typ
  * @param {String} nsURI
  * @returns {string}
  */
-WSDL.prototype.objectToRpcXML = function(name, params, nsPrefix, nsURI,isParts) {
+WSDL.prototype.objectToRpcXML = function (name, params, nsPrefix, nsURI, isParts) {
   let parts = [];
   let defs = this.definitions;
   let nsAttrName = '_xmlns';
@@ -1691,7 +1699,7 @@ WSDL.prototype.objectToRpcXML = function(name, params, nsPrefix, nsURI,isParts) 
           attributes.push(' ' + n + '=' + '"' + attrs[n] + '"');
         }
       }
-      parts.push(['<', prefixedKey ].concat(attributes).concat('>').join(''));
+      parts.push(['<', prefixedKey].concat(attributes).concat('>').join(''));
       parts.push((typeof value === 'object') ? this.objectToXML(value, key, nsPrefix, nsURI) : xmlEscape(value));
       parts.push(['</', prefixedKey, '>'].join(''));
     }
@@ -1709,11 +1717,11 @@ function noColonNameSpace(ns) {
   return (ns && ns.charAt(ns.length - 1) === ':') ? ns.substring(0, ns.length - 1) : ns;
 }
 
-WSDL.prototype.isIgnoredNameSpace = function(ns) {
+WSDL.prototype.isIgnoredNameSpace = function (ns) {
   return this.options.ignoredNamespaces.indexOf(ns) > -1;
 };
 
-WSDL.prototype.filterOutIgnoredNameSpace = function(ns) {
+WSDL.prototype.filterOutIgnoredNameSpace = function (ns) {
   let namespace = noColonNameSpace(ns);
   return this.isIgnoredNameSpace(namespace) ? '' : namespace;
 };
@@ -1733,7 +1741,7 @@ WSDL.prototype.filterOutIgnoredNameSpace = function(ns) {
  * @param {?} parameterTypeObject
  * @param {NamespaceContext} nsContext Namespace context
  */
-WSDL.prototype.objectToXML = function(obj, name, nsPrefix, nsURI, isFirst, xmlnsAttr, schemaObject, nsContext) {
+WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmlnsAttr, schemaObject, nsContext) {
   let self = this;
   let schema = this.definitions.schemas[nsURI];
 
@@ -1755,8 +1763,8 @@ WSDL.prototype.objectToXML = function(obj, name, nsPrefix, nsURI, isFirst, xmlns
 
   let xmlnsAttrib = '';
   if (nsURI && isFirst) {
-    if(self.options.overrideRootElement && self.options.overrideRootElement.xmlnsAttributes) {
-      self.options.overrideRootElement.xmlnsAttributes.forEach(function(attribute) {
+    if (self.options.overrideRootElement && self.options.overrideRootElement.xmlnsAttributes) {
+      self.options.overrideRootElement.xmlnsAttributes.forEach(function (attribute) {
         xmlnsAttrib += ' ' + attribute.name + '="' + attribute.value + '"';
       });
     } else {
@@ -1795,7 +1803,7 @@ WSDL.prototype.objectToXML = function(obj, name, nsPrefix, nsURI, isFirst, xmlns
     for (i = 0, n = obj.length; i < n; i++) {
       let item = obj[i];
       let arrayAttr = self.processAttributes(item, nsContext),
-          correctOuterNsPrefix = parentNsPrefix || ns; //using the parent namespace prefix if given
+        correctOuterNsPrefix = parentNsPrefix || ns; //using the parent namespace prefix if given
 
       let body = self.objectToXML(item, name, nsPrefix, nsURI, false, null, schemaObject, nsContext);
 
@@ -1807,11 +1815,11 @@ WSDL.prototype.objectToXML = function(obj, name, nsPrefix, nsURI, isFirst, xmlns
         parts.push(openingTagParts.join(''));
       } else {
         openingTagParts.push('>');
-        if(self.options.namespaceArrayElements || i === 0) {
+        if (self.options.namespaceArrayElements || i === 0) {
           parts.push(openingTagParts.join(''));
         }
         parts.push(body);
-        if(self.options.namespaceArrayElements || i === n-1) {
+        if (self.options.namespaceArrayElements || i === n - 1) {
           parts.push(['</', appendColon(correctOuterNsPrefix), name, '>'].join(''));
         }
       }
@@ -1824,7 +1832,7 @@ WSDL.prototype.objectToXML = function(obj, name, nsPrefix, nsURI, isFirst, xmlns
         continue;
       }
       //Its the value of a xml object. Return it directly.
-      if (name === self.options.xmlKey){
+      if (name === self.options.xmlKey) {
         nsContext.popContext();
         return obj[name];
       }
@@ -1849,7 +1857,7 @@ WSDL.prototype.objectToXML = function(obj, name, nsPrefix, nsURI, isFirst, xmlns
       if (nameWithNsRegex) {
         nonSubNameSpace = nameWithNsRegex[1] + ':';
         name = nameWithNsRegex[2];
-      } else if(name[0] === ':'){
+      } else if (name[0] === ':') {
         emptyNonSubNameSpace = true;
         name = name.substr(1);
       }
@@ -1864,7 +1872,7 @@ WSDL.prototype.objectToXML = function(obj, name, nsPrefix, nsURI, isFirst, xmlns
             //find sub namespace if not a primitive
             if (childSchemaObject &&
               ((childSchemaObject.$type && (childSchemaObject.$type.indexOf('xsd:') === -1)) ||
-              childSchemaObject.$ref || childSchemaObject.$name)) {
+                childSchemaObject.$ref || childSchemaObject.$name)) {
               /*if the base name space of the children is not in the ingoredSchemaNamspaces we use it.
                This is because in some services the child nodes do not need the baseNameSpace.
                */
@@ -1970,7 +1978,7 @@ WSDL.prototype.objectToXML = function(obj, name, nsPrefix, nsURI, isFirst, xmlns
               value = self.objectToXML(child, name, obj[self.options.attributesKey].xsi_type.prefix,
                 obj[self.options.attributesKey].xsi_type.xmlns, false, null, null, nsContext);
             } else {
-              if(Array.isArray(child)) {
+              if (Array.isArray(child)) {
                 name = nonSubNameSpace + name;
               }
 
@@ -2013,10 +2021,10 @@ WSDL.prototype.objectToXML = function(obj, name, nsPrefix, nsURI, isFirst, xmlns
   return parts.join('');
 };
 
-WSDL.prototype.processAttributes = function(child, nsContext) {
+WSDL.prototype.processAttributes = function (child, nsContext) {
   let attr = '';
 
-  if(child === null) {
+  if (child === null) {
     child = [];
   }
 
@@ -2059,7 +2067,7 @@ WSDL.prototype.processAttributes = function(child, nsContext) {
  * @param nsURI
  * @returns {*}
  */
-WSDL.prototype.findSchemaType = function(name, nsURI) {
+WSDL.prototype.findSchemaType = function (name, nsURI) {
   if (!this.definitions.schemas || !name || !nsURI) {
     return null;
   }
@@ -2072,7 +2080,7 @@ WSDL.prototype.findSchemaType = function(name, nsURI) {
   return schema.complexTypes[name];
 };
 
-WSDL.prototype.findChildSchemaObject = function(parameterTypeObj, childName, backtrace) {
+WSDL.prototype.findChildSchemaObject = function (parameterTypeObj, childName, backtrace) {
   if (!parameterTypeObj || !childName) {
     return null;
   }
@@ -2089,17 +2097,17 @@ WSDL.prototype.findChildSchemaObject = function(parameterTypeObj, childName, bac
   }
 
   let found = null,
-      i = 0,
-      child,
-      ref;
+    i = 0,
+    child,
+    ref;
 
   if (Array.isArray(parameterTypeObj.$lookupTypes) && parameterTypeObj.$lookupTypes.length) {
     let types = parameterTypeObj.$lookupTypes;
 
-    for(i = 0; i < types.length; i++) {
+    for (i = 0; i < types.length; i++) {
       let typeObj = types[i];
 
-      if(typeObj.$name === childName) {
+      if (typeObj.$name === childName) {
         found = typeObj;
         break;
       }
@@ -2168,18 +2176,18 @@ WSDL.prototype.findChildSchemaObject = function(parameterTypeObj, childName, bac
   return found;
 };
 
-WSDL.prototype._parse = function(xml) {
+WSDL.prototype._parse = function (xml) {
   let self = this,
     p = sax.parser(true),
     stack = [],
     root = null,
     types = null,
     schema = null,
-      options = self.options;
+    options = self.options;
 
-  p.onopentag = function(node) {
+  p.onopentag = function (node) {
     let nsName = node.name;
-    let attrs  = node.attributes;
+    let attrs = node.attributes;
 
     let top = stack[stack.length - 1];
     let name;
@@ -2212,7 +2220,7 @@ WSDL.prototype._parse = function(xml) {
     }
   };
 
-  p.onclosetag = function(name) {
+  p.onclosetag = function (name) {
     let top = stack[stack.length - 1];
     assert(top, 'Unmatched close tag: ' + name);
 
@@ -2224,21 +2232,21 @@ WSDL.prototype._parse = function(xml) {
   return root;
 };
 
-WSDL.prototype._fromXML = function(xml) {
+WSDL.prototype._fromXML = function (xml) {
   this.definitions = this._parse(xml);
   this.definitions.descriptions = {
-    types:{}
+    types: {}
   };
   this.xml = xml;
 };
 
-WSDL.prototype._fromServices = function(services) {
+WSDL.prototype._fromServices = function (services) {
 
 };
 
 
 
-WSDL.prototype._xmlnsMap = function() {
+WSDL.prototype._xmlnsMap = function () {
   let xmlns = this.definitions.xmlns;
   let str = '';
   for (let alias in xmlns) {
@@ -2247,12 +2255,12 @@ WSDL.prototype._xmlnsMap = function() {
     }
     let ns = xmlns[alias];
     switch (ns) {
-      case "http://xml.apache.org/xml-soap" : // apachesoap
-      case "http://schemas.xmlsoap.org/wsdl/" : // wsdl
-      case "http://schemas.xmlsoap.org/wsdl/soap/" : // wsdlsoap
+      case "http://xml.apache.org/xml-soap": // apachesoap
+      case "http://schemas.xmlsoap.org/wsdl/": // wsdl
+      case "http://schemas.xmlsoap.org/wsdl/soap/": // wsdlsoap
       case "http://schemas.xmlsoap.org/wsdl/soap12/": // wsdlsoap12
-      case "http://schemas.xmlsoap.org/soap/encoding/" : // soapenc
-      case "http://www.w3.org/2001/XMLSchema" : // xsd
+      case "http://schemas.xmlsoap.org/soap/encoding/": // soapenc
+      case "http://www.w3.org/2001/XMLSchema": // xsd
         continue;
     }
     if (~ns.indexOf('http://schemas.xmlsoap.org/')) {
@@ -2287,25 +2295,26 @@ WSDL.prototype._xmlnsMap = function() {
  * By the time file A starts processing its includes its definitions will be already loaded,
  * this is the only thing that B will depend on when "opening" A
  */
-function open_wsdl_recursive(uri, options, callback) {
-  // let fromCache,
-  //     WSDL_CACHE;
+function open_wsdl_recursive(uri, options): Promise<any> {
+  let fromCache,
+    WSDL_CACHE;
 
   // if (typeof options === 'function') {
   //   callback = options;
   //   options = {};
   // }
 
-  // WSDL_CACHE = options.WSDL_CACHE;
+  WSDL_CACHE = options.WSDL_CACHE;
 
-  // if (fromCache = WSDL_CACHE[ uri ]) {
-  //   return callback.call(fromCache, null, fromCache);
-  // }
+  if (fromCache = WSDL_CACHE[uri]) {
+    // return callback.call(fromCache, null, fromCache);
+    return fromCache;
+  }
 
-  // return open_wsdl(uri, options, callback);
+  return open_wsdl(uri, options);
 }
 
-export function open_wsdl(uri, options): Observable<any> {
+export async function open_wsdl(uri, options): Promise<any> {
   // if (typeof options === 'function') {
   //   callback = options;
   //   options = {};
@@ -2351,15 +2360,13 @@ export function open_wsdl(uri, options): Observable<any> {
 
   console.log('Reading url: %s', uri);
   const httpClient: HttpClient = options.httpClient;
-  return httpClient.get(uri, { responseType: 'text' }).pipe(
-    switchMap(wsdlDef => {
-      return from(new Promise((resolve, reject) => {
-        const wsdl = new WSDL(wsdlDef, uri, options);
-        WSDL_CACHE[ uri ] = wsdl;
-        wsdl.WSDL_CACHE = WSDL_CACHE;
-        wsdl.onReady(resolve(wsdl));
-      }));
-    })
-  );
-
+  const wsdlDef = await httpClient.get(uri, { responseType: 'text' }).toPromise();
+  const wsdlObj = await new Promise((resolve) => {
+    const wsdl = new WSDL(wsdlDef, uri, options);
+    WSDL_CACHE[uri] = wsdl;
+    wsdl.WSDL_CACHE = WSDL_CACHE;
+    wsdl.onReady(resolve(wsdl));
+  });
+  console.log("wsdl", wsdlObj)
+  return wsdlObj;
 }

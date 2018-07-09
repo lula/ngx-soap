@@ -14,7 +14,7 @@ import * as _ from 'lodash';
 // import concatStream from 'concat-stream';
 import uuid4 from 'uuid/v4';
 import { Observable } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 const nonIdentifierChars = /[^a-z$_0-9]/i;
 
