@@ -8,7 +8,7 @@ Project has been recreated from scratch with Angualr 6 CLI.
 
 1. install ngx-soap and dependencies
 
-    `npm install --save ngx-soap crypto buffer concat-stream core-js crypto-browserify events httpntlm lodash sax stream uuid'`
+    `npm install --save ngx-soap buffer concat-stream core-js crypto-browserify events lodash sax stream uuid'`
 2. Add NgxSoapModule to your app module like:
     ```
     import { NgxSoapModule } from 'ngx-soap';
