@@ -4,7 +4,21 @@ Simple SOAP client for Angular 6 based on amazing [node-soap](https://github.com
 
 Project has been recreated from scratch with Angualr 6 CLI.
 
-To test:
+## npm
+
+1. install ngx-soap and dependencies
+
+    `npm install --save ngx-soap crypto buffer concat-stream core-js crypto-browserify events httpntlm lodash sax stream uuid'`
+2. Add NgxSoapModule to your app module like:
+    ```
+    import { NgxSoapModule } from 'ngx-soap';
+    ...
+        @NgModule({
+            imports: [ NgxSoapModule, ... ]
+        ...
+    ```
+
+## Local tests
 
 1. `git clone -b angular6-cli-ilb https://github.com/lula/ngx-soap.git`
 2. `cd ngx-soap && npm install`
