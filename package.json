@@ -52,7 +52,7 @@
     "buffer": "^5.1.0",
     "concat-stream": "^1.6.2",
     "core-js": "^2.5.4",
-    "crypto-browserify": "^3.12.0",
+    "crypto-js": "^3.1.9-1",
     "events": "^3.0.0",
     "httpntlm": "^1.7.6",
     "lodash": "^4.17.10",

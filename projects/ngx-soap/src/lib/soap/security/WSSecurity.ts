@@ -1,10 +1,15 @@
 "use strict";
 
-var crypto = require('crypto');
-var passwordDigest = require('../utils').passwordDigest;
+// var crypto = require('crypto');
+import sha1 from 'crypto-js/sha1';
+import Base64 from 'crypto-js/enc-base64';
+
+// var passwordDigest = require('../utils').passwordDigest;
+import { passwordDigest } from '../utils';
+
 var validPasswordTypes = ['PasswordDigest', 'PasswordText'];
 
-function WSSecurity(username, password, options) {
+export function WSSecurity(username, password, options) {
   options = options || {};
   this._username = username;
   this._password = password;
@@ -61,9 +66,10 @@ WSSecurity.prototype.toXML = function() {
   var password, nonce;
   if (this._hasNonce || this._passwordType !== 'PasswordText') {
     // nonce = base64 ( sha1 ( created + random ) )
-    var nHash = crypto.createHash('sha1');
-    nHash.update(created + Math.random());
-    nonce = nHash.digest('base64');
+    // var nHash = crypto.createHash('sha1');
+    // nHash.update(created + Math.random());
+    // nonce = nHash.digest('base64');
+    nonce = Base64.stringify(sha1(created + Math.random(), ''));
   }
   if (this._passwordType === 'PasswordText') {
     password = "<wsse:Password Type=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText\">" + this._password + "</wsse:Password>";
@@ -87,4 +93,4 @@ WSSecurity.prototype.toXML = function() {
     "</wsse:Security>";
 };
 
-module.exports = WSSecurity;
+// module.exports = WSSecurity;

@@ -1,12 +1,16 @@
 "use strict";
 
-var fs = require('fs');
+// var fs = require('fs');
 // var path = require('path');
 // var ejs = require('ejs');
-var SignedXml = require('xml-crypto').SignedXml;
-var uuid4 = require('uuid/v4');
-var wsseSecurityHeaderTemplate;
-var wsseSecurityTokenTemplate;
+// var SignedXml = require('xml-crypto').SignedXml;
+// var uuid4 = require('uuid/v4');
+
+import { SignedXml } from 'xml-crypto';
+import uuid4 from 'uuid/v4';
+
+let wsseSecurityHeaderTemplate;
+let wsseSecurityTokenTemplate;
 
 function addMinutes(date, minutes) {
   return new Date(date.getTime() + minutes * 60000);
@@ -34,7 +38,7 @@ function generateId() {
   return uuid4().replace(/-/gm, '');
 }
 
-function WSSecurityCert(privatePEM, publicP12PEM, password) {
+export function WSSecurityCert(privatePEM, publicP12PEM, password) {
   this.publicP12PEM = publicP12PEM.toString().replace('-----BEGIN CERTIFICATE-----', '').replace('-----END CERTIFICATE-----', '').replace(/(\r\n|\n|\r)/gm, '');
 
   this.signer = new SignedXml();
@@ -51,7 +55,12 @@ function WSSecurityCert(privatePEM, publicP12PEM, password) {
       // wsseSecurityTokenTemplate = ejs.compile(fs.readFileSync(path.join(__dirname, 'templates', 'wsse-security-token.ejs')).toString());
     }
 
-    return wsseSecurityTokenTemplate({ x509Id: _this.x509Id });
+    // return wsseSecurityTokenTemplate({ x509Id: _this.x509Id });
+    return `
+      <wsse:SecurityTokenReference>
+        <wsse:Reference URI="#${this.x509Id}" ValueType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3"/>
+      </wsse:SecurityTokenReference>
+    `;
   };
 }
 
@@ -63,12 +72,27 @@ WSSecurityCert.prototype.postProcess = function (xml, envelopeKey) {
     // wsseSecurityHeaderTemplate = ejs.compile(fs.readFileSync(path.join(__dirname, 'templates', 'wsse-security-header.ejs')).toString());
   }
 
-  var secHeader = wsseSecurityHeaderTemplate({
-    binaryToken: this.publicP12PEM,
-    created: this.created,
-    expires: this.expires,
-    id: this.x509Id
-  });
+  // var secHeader = wsseSecurityHeaderTemplate({
+  //   binaryToken: this.publicP12PEM,
+  //   created: this.created,
+  //   expires: this.expires,
+  //   id: this.x509Id
+  // });
+
+  var secHeader = `
+    <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+                  xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+                  soap:mustUnderstand="1">
+      <wsse:BinarySecurityToken   
+          EncodingType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary" 
+          ValueType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3" 
+          wsu:Id="${this.x509Id}">${this.publicP12PEM}</wsse:BinarySecurityToken>
+      <Timestamp xmlns="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" Id="_1"> 
+        <Created>${this.created}</Created>
+        <Expires>${this.expires}</Expires>
+      </Timestamp>
+    </wsse:Security>
+  `;
 
   var xmlWithSec = insertStr(secHeader, xml, xml.indexOf('</soap:Header>'));
 
@@ -83,4 +107,4 @@ WSSecurityCert.prototype.postProcess = function (xml, envelopeKey) {
   return insertStr(this.signer.getSignatureXml(), xmlWithSec, xmlWithSec.indexOf('</wsse:Security>'));
 };
 
-module.exports = WSSecurityCert;
+// module.exports = WSSecurityCert;

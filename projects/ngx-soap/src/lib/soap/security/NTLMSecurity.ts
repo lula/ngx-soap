@@ -1,8 +1,9 @@
 "use strict";
 
-var _ = require('lodash');
+// var _ = require('lodash');
+import * as _ from 'lodash';
 
-function NTLMSecurity(username, password, domain, workstation) {
+export function NTLMSecurity(username, password, domain, workstation) {
   if (typeof username === "object") {
     this.defaults = username;
     this.defaults.ntlm = true;
@@ -29,4 +30,4 @@ NTLMSecurity.prototype.addOptions = function (options) {
   _.merge(options, this.defaults);
 };
 
-module.exports = NTLMSecurity;
+// module.exports = NTLMSecurity;

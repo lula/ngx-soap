@@ -1,14 +1,11 @@
-// import { createHash } from 'crypto-browserify';
+import sha1 from 'crypto-js/sha1';
+import Base64 from 'crypto-js/enc-base64';
 import { Buffer } from 'buffer';
 
-// export const passwordDigest = function passwordDigest(nonce, created, password) {
-//   // digest = base64 ( sha1 ( nonce + created + password ) )
-//   const pwHash = createHash('sha1');
-//   const rawNonce = new Buffer(nonce || '', 'base64').toString('binary');
-//   pwHash.update(rawNonce + created + password);
-//   return pwHash.digest('base64');
-// };
-
+export const passwordDigest = function passwordDigest(nonce, created, password) {
+  const rawNonce = new Buffer(nonce || '', 'base64').toString('binary');
+  return Base64.stringify(sha1(rawNonce + created + password, ''));
+};
 
 export const TNS_PREFIX = '__tns__'; // Prefix for targetNamespace
 

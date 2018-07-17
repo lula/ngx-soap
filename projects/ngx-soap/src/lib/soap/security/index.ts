@@ -1,22 +1,17 @@
 "use strict";
 
-// module.exports = {
-//   BasicAuthSecurity: require('./BasicAuthSecurity')
-// , NTLMSecurity: require('./NTLMSecurity')
-// , ClientSSLSecurity: require('./ClientSSLSecurity')
-// , ClientSSLSecurityPFX: require('./ClientSSLSecurityPFX')
-// , WSSecurity: require('./WSSecurity')
-// , BearerSecurity: require('./BearerSecurity')
-// , WSSecurityCert: require('./WSSecurityCert')
-// };
-
 import { BasicAuthSecurity } from './BasicAuthSecurity';
+import { WSSecurity } from './WSSecurity';
+// import { WSSecurityCert } from './WSSecurityCert';
+import { BearerSecurity } from './BearerSecurity';
+import { NTLMSecurity } from './NTLMSecurity';
+
 export const security = { 
   BasicAuthSecurity,
-  NTLMSecurity: {},
-  ClientSSLSecurity: {},
-  ClientSSLSecurityPFX: {},
-  WSSecurity: {},
-  BearerSecurity: {},
-  WSSecurityCert: {}
+  BearerSecurity,
+  WSSecurity,
+  // WSSecurityCert,
+  NTLMSecurity,
+  // ClientSSLSecurity,
+  // ClientSSLSecurityPFX
 };

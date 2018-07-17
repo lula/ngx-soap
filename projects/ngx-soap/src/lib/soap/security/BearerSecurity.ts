@@ -1,8 +1,9 @@
 "use strict";
 
-var _ = require('lodash');
+// var _ = require('lodash');
+import * as _ from 'lodash';
 
-function BearerSecurity(token, defaults) {
+export function BearerSecurity(token, defaults) {
 	this._token = token;
 	this.defaults = {};
 	_.merge(this.defaults, defaults);
@@ -20,4 +21,4 @@ BearerSecurity.prototype.addOptions = function(options) {
   _.merge(options, this.defaults);
 };
 
-module.exports = BearerSecurity;
+// module.exports = BearerSecurity;
