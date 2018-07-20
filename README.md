@@ -26,3 +26,4 @@ Project has been recreated from scratch with Angualr 6 CLI.
 4. `ng serve`
 
 See example app under `src/app`
+
