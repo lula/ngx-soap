@@ -135,7 +135,7 @@ export interface IOptions extends IWsdlBaseOptions {
     endpoint?: string;
     envelopeKey?: string;
     httpClient?: HttpClient;
-    request?: (options: any, callback?: (error: any, res: any, body: any) => void) => void;
+    // request?: (options: any, callback?: (error: any, res: any, body: any) => void) => void;
     stream?: boolean;
     // wsdl options that only work for client
     forceSoap12Headers?: boolean;
@@ -186,11 +186,7 @@ export interface Client extends EventEmitter {
     setSecurity(security: ISecurity): void;
     wsdl: WSDL;
     [method: string]: ISoapMethod | WSDL | Function;
-}
-
-export interface ISecurity {
-    addOptions(options: any): void;
-    toXML(): string;
+    call(method: string, body: any, options?: any, extraHeaders?: any): Observable<ISoapMethodResponse>;
 }
 
 export interface ISoapMethod {
@@ -203,4 +199,42 @@ export interface ISoapMethodResponse {
     responseBody: string,
     xml: string;
     result: any;
+}
+
+export interface ISecurity {
+    addOptions(options: any): void;
+    toXML(): string;
+}
+
+export interface BasicAuthSecurity extends ISecurity {
+    constructor(username: string, password: string, defaults?: any);
+    addHeaders(headers: any): void;
+    addOptions(options: any): void;
+    toXML(): string;
+}
+
+export interface BearerSecurity extends ISecurity {
+    constructor(token: string, defaults?: any);
+    addHeaders(headers: any): void;
+    addOptions(options: any): void;
+    toXML(): string;
+}
+
+export interface WSSecurity extends ISecurity {
+    constructor(username: string, password: string, options?: any);
+    addOptions(options: any): void;
+    toXML(): string;
+}
+
+export interface WSSecurityCert extends ISecurity {
+    constructor(privatePEM: any, publicP12PEM: any, password: any);
+    addOptions(options: any): void;
+    toXML(): string;
+}
+
+export interface NTLMSecurity extends ISecurity {
+    constructor(username: string, password: string, domain: string, workstation);
+    addHeaders(headers: any): void;
+    addOptions(options: any): void;
+    toXML(): string;
 }

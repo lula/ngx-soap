@@ -172,24 +172,7 @@ Client.prototype._definePort = function(port, endpoint) {
 Client.prototype._defineMethod = function(method, location) {
   const self = this;
   let temp = null;
-  return function(args, callback, options, extraHeaders): Observable<any> {
-    if (typeof args === 'function') {
-      callback = args;
-      args = {};
-    } else if (typeof options === 'function') {
-      temp = callback;
-      callback = options;
-      options = temp;
-    } else if (typeof extraHeaders === 'function') {
-      temp = callback;
-      callback = extraHeaders;
-      extraHeaders = options;
-      options = temp;
-    }
-    // self._invoke(method, args, location, function(error, result, rawResponse, soapHeader, rawRequest) {
-    //   callback(error, result, rawResponse, soapHeader, rawRequest);
-    // }, options, extraHeaders);
-
+  return function(args, options, extraHeaders): Observable<any> {
     return self._invoke(method, args, location, options, extraHeaders);
   };
 };
@@ -302,51 +285,6 @@ Client.prototype._invoke = function(method, args, location, options, extraHeader
     }
   };
 
-  // if (this.streamAllowed && typeof self.httpClient.requestStream === 'function') {
-  //   callback = _.once(callback);
-  //   const startTime = Date.now();
-  //   req = self.httpClient.requestStream(location, xml, headers, options, self);
-  //   self.lastRequestHeaders = req.headers;
-  //   const onError = function onError(err) {
-  //     self.lastResponse = null;
-  //     self.lastResponseHeaders = null;
-  //     self.lastElapsedTime = null;
-  //     self.emit('response', null, null, eid);
-  //     callback(err, undefined, undefined, undefined, xml);
-  //   };
-  //   req.on('error', onError);
-  //   req.on('response', function (response) {
-  //     response.on('error', onError);
-  //     // When the output element cannot be looked up in the wsdl, play it safe and
-  //     // don't stream
-  //     if(response.statusCode !== 200 || !output || !output.$lookupTypes) {
-  //       console.log("TODO! response handling");
-  //       // response.pipe(concatStream({encoding: 'string'}, function (body) {
-  //       //   self.lastResponse = body;
-  //       //   self.lastResponseHeaders = response && response.headers;
-  //       //   self.lastElapsedTime = Date.now() - startTime;
-  //       //   self.emit('response', body, response, eid);
-  //       //   return parseSync(body, response);
-  //       // }));
-  //       return;
-  //     }
-  //     self.wsdl.xmlToObject(response, function (error, obj) {
-  //       self.lastResponse = response;
-  //       self.lastResponseHeaders = response && response.headers;
-  //       self.lastElapsedTime = Date.now() - startTime;
-  //       self.emit('response', '<stream>', response, eid);
-  //       if (error) {
-  //         error.response = response;
-  //         error.body = '<stream>';
-  //         self.emit('soapError', error, eid);
-  //         return callback(error, response, undefined, undefined, xml);
-  //       }
-  //       return finish(obj, '<stream>', response);
-  //     });
-  //   });
-  //   return;
-  // }
-
   return (<HttpClient>self.httpClient).post(location, xml, {
     headers: headers,
     responseType: 'text', observe: 'response' }).pipe(
@@ -358,19 +296,6 @@ Client.prototype._invoke = function(method, args, location, options, extraHeader
       return parseSync(response.body, response)
     })
   );
-
-  // req = self.httpClient.request(location, xml, function(err, response, body) {
-  //   self.lastResponse = body;
-  //   self.lastResponseHeaders = response && response.headers;
-  //   self.lastElapsedTime = response && response.elapsedTime;
-  //   self.emit('response', body, response, eid);
-
-  //   if (err) {
-  //     callback(err, undefined, undefined, undefined, xml);
-  //   } else {
-  //     return parseSync(body, response);
-  //   }
-  // }, headers, options, self);
 
   function parseSync(body, response: HttpResponse<any>) {
     let obj;
@@ -384,13 +309,13 @@ Client.prototype._invoke = function(method, args, location, options, extraHeader
         //  If the response is JSON then return it as-is.
         const json = _.isObject(body) ? body : tryJSONparse(body);
         if (json) {
-          return { err: null, response, responseBody: json, header: undefined, xml } //callback(null, response, json, undefined, xml);
+          return { err: null, response, responseBody: json, header: undefined, xml };
         }
       }
       error.response = response;
       error.body = body;
       self.emit('soapError', error, eid);
-      throw error; //callback(error, response, body, undefined, xml);
+      throw error;
     }
     return finish(obj, body, response);
   }
@@ -400,13 +325,12 @@ Client.prototype._invoke = function(method, args, location, options, extraHeader
 
     if (!output){
       // one-way, no output expected
-      return { err: null, response: null, responseBody, header: obj.Header, xml }; //callback(null, null, body, obj.Header, xml);
+      return { err: null, response: null, responseBody, header: obj.Header, xml };
     }
 
     // If it's not HTML and Soap Body is empty
     if (!obj.html && !obj.Body) {
       return  { err: null, obj, responseBody, header: obj.Header, xml }; 
-      //callback(null, obj, body, obj.Header);
     }
 
     if( typeof obj.Body !== 'object' ) {
@@ -414,7 +338,6 @@ Client.prototype._invoke = function(method, args, location, options, extraHeader
       error.response = response;
       error.body = responseBody;
       return { err: error, obj, responseBody, header: undefined, xml }; 
-      //callback(error, obj, body, undefined, xml);
     }
 
     result = obj.Body[output.$name];
@@ -433,10 +356,14 @@ Client.prototype._invoke = function(method, args, location, options, extraHeader
     }
     
     return { err: null, result, responseBody, header: obj.Header, xml }; 
-    //callback(null, result, body, obj.Header, xml);
   }
 
   // // Added mostly for testability, but possibly useful for debugging
   // if(req && req.headers && !options.ntlm) //fixes an issue when req or req.headers is undefined, doesn't apply to ntlm requests
   //   self.lastRequestHeaders = req.headers;
 };
+
+Client.prototype.call = function (method: string, body: any, options?: any, extraHeaders?: any): Observable<any> {
+  console.log(method, body)
+  return (<Function>this[method]).call(this, body, options, extraHeaders);
+}
