@@ -1,3 +1,11 @@
+# 0.3.0-beta1
+Project recreated with Angualr 6 CLI.
+
+...
+
+# 0.2.2-beta6
+Call operation with client method.
+
 # 0.2.2-beta3
 ### Breaking Changes
 Web Service operations have no callback anymore. Callback has been replaced by a Promise.

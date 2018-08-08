@@ -1,34 +1,28 @@
 {
+  "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": ".",
-    "declaration": true,
-    "stripInternal": true,
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "strictNullChecks": true,
-    "noImplicitAny": true,
     "target": "es5",
-    "module": "es2015",
-    "moduleResolution": "node",
-    "rootDir": "src",
-    "outDir": "dist/src",
-    "sourceMap": true,
-    "inlineSources": true,
-    "skipLibCheck": true,
+    "typeRoots": [
+      "node_modules/@types"
+    ],
     "lib": [
-      "es2015", 
+      "es2017",
       "dom"
     ],
     "paths": {
-      "@angular/core": ["node_modules/@angular/core"],
-      "rxjs/*": ["node_modules/rxjs/*"]
+      "ngx-soap": [
+        "dist/ngx-soap"
+      ],
+      "ngx-soap/*": [
+        "dist/ngx-soap/*"
+      ]
     }
-  },
-  "files": [
-    "./src/index.ts"
-  ],
-  "angularCompilerOptions": {
-    "strictMetadataEmit": true,
-    "genDir": "dist"
   }
 }
