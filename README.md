@@ -18,9 +18,41 @@ Project has been recreated from scratch with Angualr 6 CLI.
     import { NgxSoapModule } from 'ngx-soap';
     ...
         @NgModule({
-            imports: [ NgxSoapModule, ... ]
+            imports: [ ..., NgxSoapModule, ... ]
         ...
     ```
+    
+3. Inject NgxSoapService in your component:
+
+    ```
+    ...
+    import { NgxSoapService, Client, ISoapMethodResponse } from 'ngx-soap';
+    ...
+    
+    @Component({
+      selector: 'app-root',
+      templateUrl: './app.component.html',
+      styleUrls: ['./app.component.css']
+    })
+    export class AppComponent {
+        client: Client;
+        intA = 2;
+        intB = 3;
+        
+        constructor(private soap: NgxSoapService) {
+            this.soap.createClient('assets/calculator.wsdl').subscribe(client => this.client = client);
+        }
+        
+        sum() {
+            const body = {
+              intA: this.intA,
+              intB: this.intB
+            };
+            (<any>this.client).Add(body).subscribe((res: ISoapMethodResponse) => this.message = res.result.AddResult);
+        }
+    }
+    ```
+
 
 ## Local tests
 
