@@ -357,13 +357,12 @@ Client.prototype._invoke = function(method, args, location, options, extraHeader
     
     return { err: null, result, responseBody, header: obj.Header, xml }; 
   }
-
-  // // Added mostly for testability, but possibly useful for debugging
-  // if(req && req.headers && !options.ntlm) //fixes an issue when req or req.headers is undefined, doesn't apply to ntlm requests
-  //   self.lastRequestHeaders = req.headers;
 };
 
 Client.prototype.call = function (method: string, body: any, options?: any, extraHeaders?: any): Observable<any> {
-  console.log(method, body)
+  if (!this[method]) {
+    throw new Error(`Method ${method} not found`);
+  }
+
   return (<Function>this[method]).call(this, body, options, extraHeaders);
 }
