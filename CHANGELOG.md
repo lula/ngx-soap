@@ -1,4 +1,8 @@
-# CHANGELOG 
+# CHANGELOG
+
+## 0.5.0-beta.6
+
+Export security classes.
 
 ## 0.5.0-beta.5
 
