@@ -10,10 +10,12 @@ export {
   ISoapMethodResponse,
   BasicAuthSecurity,
   BearerSecurity,
-  WSSecurityCert,
+  // WSSecurityCert,
   WSSecurity,
   NTLMSecurity
 } from './soap/interfaces';
+
+export { security } from './soap/security'
 
 @Injectable({
   providedIn: 'root'
