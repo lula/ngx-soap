@@ -2,7 +2,7 @@
 
 ## 0.5.0-beta.6
 
-Export security classes.
+Export security classes. ([commit 4b48395](https://github.com/lula/ngx-soap/commit/4b483952c31880ad837ae92f209f06666291ff90))
 
 ## 0.5.0-beta.5
 
