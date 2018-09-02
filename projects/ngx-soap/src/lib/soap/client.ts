@@ -13,7 +13,7 @@ import { findPrefix } from './utils';
 import * as _ from 'lodash';
 // import concatStream from 'concat-stream';
 import uuid4 from 'uuid/v4';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 const nonIdentifierChars = /[^a-z$_0-9]/i;
@@ -285,6 +285,8 @@ Client.prototype._invoke = function(method, args, location, options, extraHeader
     }
   };
 
+  console.log('url:', location)
+  
   return (<HttpClient>self.httpClient).post(location, xml, {
     headers: headers,
     responseType: 'text', observe: 'response' }).pipe(
@@ -361,7 +363,7 @@ Client.prototype._invoke = function(method, args, location, options, extraHeader
 
 Client.prototype.call = function (method: string, body: any, options?: any, extraHeaders?: any): Observable<any> {
   if (!this[method]) {
-    throw new Error(`Method ${method} not found`);
+    return throwError(`Method ${method} not found`);
   }
 
   return (<Function>this[method]).call(this, body, options, extraHeaders);
