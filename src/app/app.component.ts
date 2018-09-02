@@ -34,12 +34,12 @@ export class AppComponent {
     };
 
     this.client.call('Add', body).subscribe(res => {
-      console.log('method response', res);
-      this.xmlResponse = res.xml;
+      this.xmlResponse = res.responseBody;
       this.message = res.result.AddResult;
       this.loading = false;
     }, err => console.log(err));
 
+    // OR:
     // (<any>this.client).Add(body).subscribe(
     //   (res: ISoapMethodResponse) => {
     //     console.log('method response', res);
