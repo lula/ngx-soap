@@ -26,6 +26,14 @@ module.exports = function (config) {
     logLevel: config.LOG_INFO,
     autoWatch: true,
     browsers: ['Chrome'],
-    singleRun: false
+    singleRun: false,
+    proxies: {
+      '/calculator': {
+        'target': "http://www.dneonline.com",
+        'secure': false,
+        'changeOrigin': true,
+        'pathRewrite': {"^/calculator": ""}
+      }
+    }
   });
 };
