@@ -54,12 +54,12 @@ Project has been recreated from scratch with Angualr 6 CLI.
     ```
 
 
-## Local tests
+## Local development
 
 1. `git clone -b angular6-cli-ilb https://github.com/lula/ngx-soap.git`
 2. `cd ngx-soap && npm install`
 3. `ng build ngx-soap`
-4. `ng serve`
+4. `ng test ngx-soap`
+5. `ng serve --proxy-config proxy.conf.json`
 
 See example app under `src/app`
-
