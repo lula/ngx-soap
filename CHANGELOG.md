@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.5.0-beta.7
+
+Client events have been removed due to problems with Angular prod bundle. See issue [#29](https://github.com/lula/ngx-soap/issues/29).
+
+If you have used in your project you should remain on beta 6 release. Just remember to turn angular bundler optimization off if you want to bundle your project with --prod option. Also, in this case, please inform me so that I know events were actually used, and I'll consider to reintroduce them.
+
 ## 0.5.0-beta.6
 
 Export security classes. ([commit 4b48395](https://github.com/lula/ngx-soap/commit/4b483952c31880ad837ae92f209f06666291ff90))
