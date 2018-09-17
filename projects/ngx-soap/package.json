@@ -1,6 +1,20 @@
 {
   "name": "ngx-soap",
-  "version": "0.5.0-beta.6",
+  "version": "0.5.0-beta.7",
+  "description": "SOAP service for Angular",
+  "homepage": "https://github.com/lula/ngx-soap",
+  "author": "Luca Lulani",
+  "license": "MIT",
+  "keywords": [
+    "Angular",
+    "Angular2",
+    "Angular4",
+    "Angular5",
+    "Angular6",
+    "@angular",
+    "SOAP",
+    "WSDL"
+  ],
   "peerDependencies": {
     "@angular/common": "^6.0.0-rc.0 || ^6.0.0",
     "@angular/core": "^6.0.0-rc.0 || ^6.0.0",
