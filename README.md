@@ -1,6 +1,6 @@
 # ngx-soap
 
-Simple SOAP client for Angular 6 based on amazing [node-soap](https://github.com/vpulim/node-soap).
+Simple SOAP client for Angular 6/7 based on amazing [node-soap](https://github.com/vpulim/node-soap).
 
 Project has been recreated from scratch with Angualr 6 CLI.
 
