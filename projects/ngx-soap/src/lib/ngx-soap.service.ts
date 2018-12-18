@@ -15,7 +15,7 @@ export {
   NTLMSecurity
 } from './soap/interfaces';
 
-export { security } from './soap/security'
+export { security } from './soap/security/security'
 
 @Injectable({
   providedIn: 'root'

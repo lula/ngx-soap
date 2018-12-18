@@ -3,7 +3,9 @@ import { HttpClientModule, HttpRequest, HttpParams } from '@angular/common/http'
 import { HttpTestingController, HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { NgxSoapService } from './ngx-soap.service';
-import { ISoapMethodResponse, NgxSoapModule } from 'ngx-soap';
+import { ISoapMethodResponse } from './soap/interfaces';
+import { NgxSoapModule } from './ngx-soap.module';
+
 
 const PROXIED_CALCULATOR_WSDL = `<?xml version="1.0" encoding="utf-8"?>
 <wsdl:definitions 
