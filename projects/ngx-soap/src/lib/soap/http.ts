@@ -5,7 +5,7 @@
 
 import * as url from 'url';
 const req = null; // require('request');
-// import * as httpNtlm from 'httpntlm';
+import * as httpNtlm from 'httpntlm';
 import { Buffer } from 'buffer';
 
 const VERSION = '0.0.0'; //require('../package.json').version;
@@ -113,18 +113,18 @@ HttpClient.prototype.request = function(rurl, data, callback, exheaders, exoptio
     // // sadly when using ntlm nothing to return
     // // Not sure if this can be handled in a cleaner way rather than an if/else,
     // // will to tidy up if I get chance later, patches welcome - insanityinside
-    // options.url = rurl;
-    // httpNtlm[options.method.toLowerCase()](options, function (err, res) {
-    //   if (err) {
-    //     return callback(err);
-    //   }
-    //   // if result is stream
-    //   if( typeof res.body !== 'string') {
-    //     res.body = res.body.toString();
-    //   }
-    //   res.body = self.handleResponse(req, res, res.body);
-    //   callback(null, res, res.body);
-    // });
+    options.url = rurl;
+    httpNtlm[options.method.toLowerCase()](options, function (err, res) {
+      if (err) {
+        return callback(err);
+      }
+      // if result is stream
+      if( typeof res.body !== 'string') {
+        res.body = res.body.toString();
+      }
+      res.body = self.handleResponse(req, res, res.body);
+      callback(null, res, res.body);
+    });
   } else {
     req = self._request(options, function (err, res, body) {
       if (err) {

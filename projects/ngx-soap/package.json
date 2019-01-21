@@ -1,6 +1,6 @@
 {
   "name": "ngx-soap",
-  "version": "0.6.0",
+  "version": "0.6.1-beta.0",
   "description": "SOAP service for Angular",
   "homepage": "https://github.com/lula/ngx-soap",
   "author": "Luca Lulani",
