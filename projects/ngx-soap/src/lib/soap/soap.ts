@@ -15,16 +15,20 @@ export const WSDL = wsdl.WSDL;
 const cache = {}; // TODO some caching?
 
 const getFromCache = async (url, options) => {
-  console.log('Getting from cache', url);
+  // console.log('Getting from cache', url);
+  // console.log('Cache', cache)
   if (cache[url]) {
-    console.log('Found in cache', url);
+    // console.log('Found in cache', url);
     return cache[url];
   } else {
-    return wsdl.open_wsdl(url, options)
+    return wsdl.open_wsdl(url, options).then(wsdl => {
+      cache[url] = wsdl;
+      return wsdl;
+    })
   }
 };
 
-function _requestWSDL(url, options) {
+async function _requestWSDL(url, options) {
   if (options.disableCache === true) {
     return wsdl.open_wsdl(url, options);
   } else {
@@ -37,7 +41,7 @@ export async function createClient(url, options, endpoint): Promise<any> {
   if (typeof options === 'undefined') {
     options = {};
   }
-  console.log("createClient", options)
+  // console.log("createClient", options)
   endpoint = options.endpoint || endpoint;
   
   const wsdl = await _requestWSDL(url, options);
