@@ -32,7 +32,7 @@ export interface ISoapFault12 {
     Fault: {
         Code: { Value: string; Subcode?: { Value: string; }; };
         Reason: { Text: string; };
-        statusCode?: number;
+        Detail:{};
     };
 }
 

@@ -282,7 +282,7 @@ Client.prototype._invoke = function(method, args, location, options, extraHeader
     }
   };
 
-  console.log('url:', location)
+  //console.log('url:', location)
   
   return (<HttpClient>self.httpClient).post(location, xml, {
     headers: headers,
@@ -292,6 +292,7 @@ Client.prototype._invoke = function(method, args, location, options, extraHeader
       self.lastResponseHeaders = response && response.headers;
       // self.lastElapsedTime = response && response.elapsedTime;
       // self.emit('response', response.body, response, eid);
+      //console.log('responce body before sync', response.body);
       return parseSync(response.body, response)
     })
   );
@@ -300,6 +301,7 @@ Client.prototype._invoke = function(method, args, location, options, extraHeader
     let obj;
     try {
       obj = self.wsdl.xmlToObject(body);
+      //console.log('parsed body',obj);
     } catch (error) {
       //  When the output element cannot be looked up in the wsdl and the body is JSON
       //  instead of sending the error, we pass the body in the response.

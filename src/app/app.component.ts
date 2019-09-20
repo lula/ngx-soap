@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NgxSoapService, ISoapMethod, Client, ISoapMethodResponse } from 'ngx-soap';
 
 @Component({
@@ -6,7 +6,7 @@ import { NgxSoapService, ISoapMethod, Client, ISoapMethodResponse } from 'ngx-so
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   intA: number;
   intB: number;
   loading: boolean;
@@ -18,15 +18,43 @@ export class AppComponent {
   client: Client;
 
   constructor(private soap: NgxSoapService) {
-    this.soap.createClient('assets/calculator.wsdl')
+    this.soap.createClient('https://support.arhofoms.ru/ws/disp-observation/test/', {
+      forceSoap12Headers: true,
+      returnFault: true
+    })
       .then(client => {
         console.log('Client', client);
         this.client = client;
-      })
-      .catch(err => console.log('Error', err));
+        const body={
+          year: '2019',
+          paging:{
+            start: -1,
+            qty: 2
+          }
+        };
+        const header = {
+          'svc-req:message-id': 'value',
+          'svc-req:auth': {
+            'svc-req:username': 290104,
+            'svc-req:password': 290104
+          }
+        };
+        this.client.addSoapHeader(header);
+        this.client.call('GetObservations-v1',body).subscribe(
+          (result:ISoapMethodResponse) => {
+            console.table(result.result);
+          },
+          (error) => {console.warn(error);}
+      )})
+      .catch(err => console.warn('Error', err));
+    
+    
+  }
+  ngOnInit(){
+    
   }
 
-  sum() {
+  /* sum() {
     this.loading = true;
     const body = {
       intA: this.intA,
@@ -37,34 +65,7 @@ export class AppComponent {
       this.xmlResponse = res.responseBody;
       this.message = res.result.AddResult;
       this.loading = false;
-    }, err => console.log(err));
+    }, err => console.log(err));    
+  } */
 
-    // OR:
-    // (<any>this.client).Add(body).subscribe(
-    //   (res: ISoapMethodResponse) => {
-    //     console.log('method response', res);
-    //     this.xmlResponse = res.xml;
-    //     this.message = res.result.AddResult;
-    //     this.loading = false;
-    //   },
-    //   err => console.log(err)
-    // );
-  }
-
-  subtract() {
-    this.loading = true;
-    const body = {
-      intA: this.intA,
-      intB: this.intB
-    };
-    (<any>this.client).Subtract(body).subscribe(
-      (res: ISoapMethodResponse) => {
-        console.log('method response', res);
-        this.xmlResponse = res.xml;
-        this.message = res.result.SubtractResult;
-        this.loading = false;
-      },
-      err => console.log(err)
-    );
-  }
 }

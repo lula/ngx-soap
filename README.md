@@ -1,14 +1,16 @@
 # ngx-soap
 
-Simple SOAP client for Angular 6/7 based on amazing [node-soap](https://github.com/vpulim/node-soap).
+Simple SOAP client for Angular 8 based on amazing [node-soap](https://github.com/vpulim/node-soap).
 
-Project has been recreated from scratch with Angualr 6 CLI.
+Project has been recreated from scratch with Angualr 8 CLI.
+Support WSDL1.1 and WSDL 1.2
+
 
 ## npm
 
 1. install ngx-soap and dependencies
 
-    `npm install --save ngx-soap`
+    `npm install --save redmoonrus/ngx-soap`
 
     `npm install --save buffer concat-stream core-js crypto-js events lodash sax stream uuid`
 
@@ -40,7 +42,8 @@ Project has been recreated from scratch with Angualr 6 CLI.
         intB = 3;
         
         constructor(private soap: NgxSoapService) {
-            this.soap.createClient('assets/calculator.wsdl').subscribe(client => this.client = client);
+            this.soap.createClient('assets/calculator.wsdl', {forceSoap12Headers: true,returnFault: true})
+            .subscribe(client => this.client = client);
         }
         
         sum() {
@@ -48,7 +51,8 @@ Project has been recreated from scratch with Angualr 6 CLI.
               intA: this.intA,
               intB: this.intB
             };
-            (<any>this.client).Add(body).subscribe((res: ISoapMethodResponse) => this.message = res.result.AddResult);
+            (<any>this.client).Add(body).subscribe((res: ISoapMethodResponse) => this.message = res.result.AddResult,
+            (err) => console.log(err.Reason.Text + ' ' + err.Details));
         }
     }
     ```
