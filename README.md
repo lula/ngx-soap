@@ -56,7 +56,7 @@ Project has been recreated from scratch with Angualr 6 CLI.
 
 ## Local development
 
-1. `git clone -b angular6-cli-ilb https://github.com/lula/ngx-soap.git`
+1. `git clone https://github.com/redmoonrus/ngx-soap.git`
 2. `cd ngx-soap && npm install`
 3. `ng build ngx-soap`
 4. `ng test ngx-soap`
