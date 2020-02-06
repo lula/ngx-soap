@@ -5,18 +5,17 @@
 
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import * as assert from 'assert';
-// import * as events from 'events';
-// import * as util from 'util';
 import { findPrefix } from './utils';
 import * as _ from 'lodash';
 import uuid4 from 'uuid/v4';
-import { Observable, throwError } from 'rxjs';
-import { map } from 'rxjs/operators';
+import {from, Observable, throwError} from 'rxjs';
+import {flatMap, map} from 'rxjs/operators';
+import {Multipart} from "./multipart";
+import {SoapAttachment} from "./soapAttachment";
 
 const nonIdentifierChars = /[^a-z$_0-9]/i;
 
 export const Client = function(wsdl, endpoint, options) {
-  // events.EventEmitter.call(this);
   options = options || {};
   this.wsdl = wsdl;
   this._initializeOptions(options);
@@ -28,7 +27,6 @@ export const Client = function(wsdl, endpoint, options) {
   }
   Promise.all([this, promiseOptions]);
 };
-// util.inherits(Client, events.EventEmitter);
 
 Client.prototype.addSoapHeader = function(soapHeader, name, namespace, xmlns) {
   if (!this.soapHeaders) {
@@ -268,11 +266,6 @@ Client.prototype._invoke = function(method, args, location, options, extraHeader
   self.lastRequest = xml;
   self.lastEndpoint = location;
 
-  const eid = options.exchangeId || uuid4();
-
-  // self.emit('message', message, eid);
-  // self.emit('request', xml, eid);
-
   const tryJSONparse = function(body) {
     try {
       return JSON.parse(body);
@@ -282,19 +275,62 @@ Client.prototype._invoke = function(method, args, location, options, extraHeader
     }
   };
 
-  console.log('url:', location)
-  
-  return (<HttpClient>self.httpClient).post(location, xml, {
-    headers: headers,
-    responseType: 'text', observe: 'response' }).pipe(
-    map((response: HttpResponse<any>) => {
-      self.lastResponse = response.body;
-      self.lastResponseHeaders = response && response.headers;
-      // self.lastElapsedTime = response && response.elapsedTime;
-      // self.emit('response', response.body, response, eid);
-      return parseSync(response.body, response)
-    })
-  );
+  return from(SoapAttachment.fromFormFiles(options.attachments)).pipe(
+    map((soapAttachments: SoapAttachment[]) => {
+
+      if (!soapAttachments.length) {
+        return xml;
+      }
+
+      if (options.forceMTOM || soapAttachments.length > 0) {
+        const start = uuid4();
+        const boundry = uuid4();
+        let action = null;
+        if (headers['Content-Type'].indexOf('action') > -1) {
+          for (const ct of headers['Content-Type'].split('; ')) {
+            if (ct.indexOf('action') > -1) {
+              action = ct;
+            }
+          }
+        }
+
+        headers['Content-Type'] =
+          'multipart/related; type="application/xop+xml"; start="<' + start + '>"; start-info="text/xml"; boundary="' + boundry + '"';
+        if (action) {
+          headers['Content-Type'] = headers['Content-Type'] + '; ' + action;
+        }
+
+        const multipart: any[] = [{
+          'Content-Type': 'application/xop+xml; charset=UTF-8; type="text/xml"',
+          'Content-ID': '<' + start + '>',
+          'body': xml,
+        }];
+
+        soapAttachments.forEach((attachment: SoapAttachment) => {
+          multipart.push({
+            'Content-Type': attachment.mimetype + ';',
+            'Content-Transfer-Encoding': 'binary',
+            'Content-ID': '<' + (attachment.contentId || attachment.name) + '>',
+            'Content-Disposition': 'attachment; name="' + attachment.name + '"; filename="' + attachment.name + '"',
+            'body': attachment.body,
+          });
+        });
+
+        return new Multipart().build(multipart, boundry);
+      }
+    }),
+    flatMap((body: any) =>
+      (<HttpClient>self.httpClient).post(location, body, {
+        headers: headers,
+        responseType: 'text', observe: 'response' }).pipe(
+          map((response: HttpResponse<any>) => {
+            self.lastResponse = response.body;
+            self.lastResponseHeaders = response && response.headers;
+            return parseSync(response.body, response)
+          })
+        )
+      )
+    );
 
   function parseSync(body, response: HttpResponse<any>) {
     let obj;
@@ -329,14 +365,14 @@ Client.prototype._invoke = function(method, args, location, options, extraHeader
 
     // If it's not HTML and Soap Body is empty
     if (!obj.html && !obj.Body) {
-      return  { err: null, obj, responseBody, header: obj.Header, xml }; 
+      return  { err: null, obj, responseBody, header: obj.Header, xml };
     }
 
     if( typeof obj.Body !== 'object' ) {
       const error: any = new Error('Cannot parse response');
       error.response = response;
       error.body = responseBody;
-      return { err: error, obj, responseBody, header: undefined, xml }; 
+      return { err: error, obj, responseBody, header: undefined, xml };
     }
 
     result = obj.Body[output.$name];
@@ -353,8 +389,8 @@ Client.prototype._invoke = function(method, args, location, options, extraHeader
         }
       });
     }
-    
-    return { err: null, result, responseBody, header: obj.Header, xml }; 
+
+    return { err: null, result, responseBody, header: obj.Header, xml };
   }
 };
 
