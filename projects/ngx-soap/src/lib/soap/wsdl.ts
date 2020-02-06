@@ -10,10 +10,10 @@
 import * as sax from 'sax';
 import { HttpClient } from '@angular/common/http';
 import { NamespaceContext }  from './nscontext';
-
+import * as _ from 'lodash';
+import * as utils from './utils';
 import * as url from 'url';
 import { ok as assert } from 'assert';
-// import stripBom from 'strip-bom';
 
 const stripBom = (x: string): string => {
   // Catches EFBBBF (UTF-8 BOM) because the buffer-to-string
@@ -25,8 +25,7 @@ const stripBom = (x: string): string => {
   return x;
 }
 
-import * as _ from 'lodash';
-import * as utils from './utils';
+
 
 
 let TNS_PREFIX = utils.TNS_PREFIX;
@@ -2358,7 +2357,6 @@ export async function open_wsdl(uri, options): Promise<any> {
   // }
   // return wsdl;
 
-  console.log('Reading url: %s', uri);
   const httpClient: HttpClient = options.httpClient;
   const wsdlDef = await httpClient.get(uri, { responseType: 'text' }).toPromise();
   const wsdlObj = await new Promise((resolve) => {
@@ -2367,6 +2365,5 @@ export async function open_wsdl(uri, options): Promise<any> {
     wsdl.WSDL_CACHE = WSDL_CACHE;
     wsdl.onReady(resolve(wsdl));
   });
-  console.log("wsdl", wsdlObj)
   return wsdlObj;
 }
