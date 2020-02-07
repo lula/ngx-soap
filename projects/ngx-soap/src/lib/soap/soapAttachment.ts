@@ -13,20 +13,20 @@ export class SoapAttachment {
       files = Array.from(files);
     }
 
-    const promisses = files.map((file) => {
+    const promisses = files.map((file: any) => {
       return new Promise(function(resolve) {
         const reader = new FileReader();
         reader.readAsArrayBuffer(file);
         reader.onload = function (e) {
           const arrayBuffer = (e.target as any).result;
           const bytes = new Uint8Array(arrayBuffer);
-          const attachment = new SoapAttachment(file.type, file.name, file.name, bytes);
+          const attachment = new SoapAttachment(file.type, file.contentId || file.name, file.name, bytes);
           resolve(attachment);
         }
       });
-   });
+    });
 
-   return Promise.all(promisses);
+    return Promise.all(promisses);
   }
 
 }
