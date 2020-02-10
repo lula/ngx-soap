@@ -21,11 +21,11 @@ export class SoapAttachment {
         reader.onload = function (e) {
           const arrayBuffer = (e.target as any).result;
           const bytes = new Uint8Array(arrayBuffer);
-          const attachment = new SoapAttachment(file.type, file.name, file.name, bytes);
+          const attachment = new SoapAttachment(file.type, file.contentId || file.name, file.name, bytes);
           resolve(attachment);
         }
       });
-   });
+    });
 
    return Promise.all(promises);
   }
