@@ -1,19 +1,20 @@
 export class SoapAttachment {
 
-  constructor(public mimetype: string,
-              public contentId: string,
-              public name: string,
-              public body: any
+  constructor(
+    public mimetype: string,
+    public contentId: string,
+    public name: string,
+    public body: any
   ) {
 
   }
 
-  static fromFormFiles(files: FileList | File[]): Promise<any> {
+  static fromFormFiles(files: FileList | File[] = []): Promise<any> {
     if (files instanceof FileList) {
       files = Array.from(files);
     }
 
-    const promisses = files.map((file: any) => {
+    const promises = files.map((file) => {
       return new Promise(function(resolve) {
         const reader = new FileReader();
         reader.readAsArrayBuffer(file);
@@ -26,7 +27,7 @@ export class SoapAttachment {
       });
     });
 
-    return Promise.all(promisses);
+   return Promise.all(promises);
   }
 
 }
