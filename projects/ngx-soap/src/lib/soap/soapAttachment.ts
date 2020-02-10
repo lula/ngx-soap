@@ -14,7 +14,7 @@ export class SoapAttachment {
       files = Array.from(files);
     }
 
-    const promises = files.map((file) => {
+    const promises = files.map((file: any) => {
       return new Promise(function(resolve) {
         const reader = new FileReader();
         reader.readAsArrayBuffer(file);
