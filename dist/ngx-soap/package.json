@@ -29,5 +29,18 @@
     "sax": "^1.2.4",
     "stream": "0.0.2",
     "uuid": "^3.4.0"
+  },
+  "main": "bundles/ngx-soap.umd.js",
+  "module": "fesm5/ngx-soap.js",
+  "es2015": "fesm2015/ngx-soap.js",
+  "esm5": "esm5/ngx-soap.js",
+  "esm2015": "esm2015/ngx-soap.js",
+  "fesm5": "fesm5/ngx-soap.js",
+  "fesm2015": "fesm2015/ngx-soap.js",
+  "typings": "ngx-soap.d.ts",
+  "metadata": "ngx-soap.metadata.json",
+  "sideEffects": false,
+  "dependencies": {
+    "tslib": "^1.9.0"
   }
 }

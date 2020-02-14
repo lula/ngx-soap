@@ -1297,7 +1297,8 @@ WSDL.prototype.xmlToObject = function (xml, callback) {
   let p = typeof callback === 'function' ? {} : sax.parser(true);
   let objectName = null;
   let root: any = {};
-  let schema = {
+  let schema = {};
+  /*let schema = {
     Envelope: {
       Header: {
         Security: {
@@ -1315,8 +1316,56 @@ WSDL.prototype.xmlToObject = function (xml, callback) {
         }
       }
     }
-  };
-  let stack: any[] = [{ name: null, object: root, schema: schema }];
+  };*/
+  if(!this.options.forceSoap12Headers){
+    schema ={
+      Envelope: {
+        Header: {
+          Security: {
+            UsernameToken: {
+              Username:'string',
+              Password:'string'
+            }
+          }
+        },
+        Body:{
+          Fault: {
+            faultcode: 'string',
+            faultstring: 'string',
+            detail:'string'
+          }
+        }
+      }
+    }
+  } else {
+    schema = {
+      Envelope: {
+        Header: {
+          Security: {
+            UsernameToken: {
+              Username: 'string',
+              Password: 'string'
+            }
+          }
+        },
+        Body: {
+          Code: {
+            Value: 'string',
+            Subcode:
+                {
+                  Value: 'string'
+                }
+          },
+          Reason: {Text: 'string'},
+          statusCode: 'number',
+          Detail: 'object'
+        }
+
+      }
+
+    }
+  }
+      let stack: any[] = [{ name: null, object: root, schema: schema }];
   let xmlns: any = {};
 
   let refs = {}, id; // {id:{hrefs:[],obj:}, ...}
@@ -1596,19 +1645,27 @@ WSDL.prototype.xmlToObject = function (xml, callback) {
 
     if (root.Envelope) {
       let body = root.Envelope.Body;
+      let error: any;
       if (body && body.Fault) {
-        let code = body.Fault.faultcode && body.Fault.faultcode.$value;
-        let string = body.Fault.faultstring && body.Fault.faultstring.$value;
-        let detail = body.Fault.detail && body.Fault.detail.$value;
+        if(!body.Fault.Code) {
+          let code = body.Fault.faultcode && body.Fault.faultcode.$value;
+          let string = body.Fault.faultstring && body.Fault.faultstring.$value;
+          let detail = body.Fault.detail && body.Fault.detail.$value;
 
-        code = code || body.Fault.faultcode;
-        string = string || body.Fault.faultstring;
-        detail = detail || body.Fault.detail;
+          code = code || body.Fault.faultcode;
+          string = string || body.Fault.faultstring;
+          detail = detail || body.Fault.detail;
 
-        let error: any = new Error(code + ': ' + string + (detail ? ': ' + detail : ''));
+          let error: any = new Error(code + ': ' + string + (detail ? ': ' + detail : ''));
+        } else {
+          let code = body.Fault.Code.Value;
+          let string = body.Fault.Reason.Text.$value;
+          let detail = body.Fault.Detail.info;
+          error = new Error(code + ': ' + string + (detail ? ': ' + detail : ''));
+        }
 
         error.root = root;
-        throw error;
+        throw body.Fault;
       }
       return root.Envelope;
     }
