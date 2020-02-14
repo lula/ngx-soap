@@ -18,14 +18,14 @@ export class AppComponent implements OnInit {
   client: Client;
 
   constructor(private soap: NgxSoapService) {
-    this.soap.createClient('https://support.arhofoms.ru/ws/disp-observation/test/', {
+    this.soap.createClient('', {
       forceSoap12Headers: true,
       returnFault: true
     })
       .then(client => {
         console.log('Client', client);
         this.client = client;
-        const body={
+        const body = {
           year: '2019',
           paging:{
             start: -1,
@@ -35,8 +35,8 @@ export class AppComponent implements OnInit {
         const header = {
           'svc-req:message-id': 'value',
           'svc-req:auth': {
-            'svc-req:username': 290104,
-            'svc-req:password': 290104
+            'svc-req:username': '',
+            'svc-req:password': ''
           }
         };
         this.client.addSoapHeader(header);
