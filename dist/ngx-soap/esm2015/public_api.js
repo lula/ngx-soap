@@ -1,0 +1,6 @@
+/*
+ * Public API Surface of ngx-soap
+ */
+export * from './lib/ngx-soap.service';
+export * from './lib/ngx-soap.module';
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHVibGljX2FwaS5qcyIsInNvdXJjZVJvb3QiOiJuZzovL25neC1zb2FwLyIsInNvdXJjZXMiOlsicHVibGljX2FwaS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTs7R0FFRztBQUVILGNBQWMsd0JBQXdCLENBQUM7QUFDdkMsY0FBYyx1QkFBdUIsQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBQdWJsaWMgQVBJIFN1cmZhY2Ugb2Ygbmd4LXNvYXBcbiAqL1xuXG5leHBvcnQgKiBmcm9tICcuL2xpYi9uZ3gtc29hcC5zZXJ2aWNlJztcbmV4cG9ydCAqIGZyb20gJy4vbGliL25neC1zb2FwLm1vZHVsZSc7XG4iXX0=

@@ -7,5 +7,4 @@ yarn.lock
 *.iml
 tools/bin
 tools/test
-dist
 spec/out
