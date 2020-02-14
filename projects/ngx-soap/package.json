@@ -29,5 +29,9 @@
     "sax": "^1.2.4",
     "stream": "0.0.2",
     "uuid": "^3.4.0"
+  },
+  "ngPackage": {
+    "dest": "../../dist/ngx-soap",
+    "deleteDestPath": false
   }
 }
