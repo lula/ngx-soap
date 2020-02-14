@@ -5,8 +5,8 @@
 
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import * as assert from 'assert';
-// import * as events from 'events';
-// import * as util from 'util';
+ import * as events from 'events';
+ import * as util from 'util';
 import { findPrefix } from './utils';
 import * as _ from 'lodash';
 import uuid4 from 'uuid/v4';
@@ -16,7 +16,7 @@ import { map } from 'rxjs/operators';
 const nonIdentifierChars = /[^a-z$_0-9]/i;
 
 export const Client = function(wsdl, endpoint, options) {
-  // events.EventEmitter.call(this);
+  events.EventEmitter.call(this);
   options = options || {};
   this.wsdl = wsdl;
   this._initializeOptions(options);
@@ -28,7 +28,7 @@ export const Client = function(wsdl, endpoint, options) {
   }
   Promise.all([this, promiseOptions]);
 };
-// util.inherits(Client, events.EventEmitter);
+ util.inherits(Client, events.EventEmitter);
 
 Client.prototype.addSoapHeader = function(soapHeader, name, namespace, xmlns) {
   if (!this.soapHeaders) {

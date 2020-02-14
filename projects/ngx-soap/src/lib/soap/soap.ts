@@ -6,8 +6,6 @@
 import * as wsdl from './wsdl';
 import { security } from './security/security';
 import { Client } from './client';
-export { Client } from './client';
-export { security  } from './security/security';
 
 export { passwordDigest } from './utils'
 export const WSDL = wsdl.WSDL;
@@ -27,6 +25,7 @@ const getFromCache = async (url, options) => {
     })
   }
 };
+
 
 async function _requestWSDL(url, options) {
   if (options.disableCache === true) {

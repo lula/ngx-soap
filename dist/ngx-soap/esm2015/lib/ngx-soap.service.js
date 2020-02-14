@@ -1,7 +1,3 @@
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 import { Injectable } from '@angular/core';
 import { createClient } from './soap/soap';
 import { HttpClient } from '@angular/common/http';
@@ -9,38 +5,20 @@ import * as i0 from "@angular/core";
 import * as i1 from "@angular/common/http";
 export { security } from './soap/security/security';
 export class NgxSoapService {
-    /**
-     * @param {?} http
-     */
     constructor(http) {
         this.http = http;
     }
-    /**
-     * @param {?} wsdlUrl
-     * @param {?=} options
-     * @param {?=} endpoint
-     * @return {?}
-     */
     createClient(wsdlUrl, options = {}, endpoint) {
         options.httpClient = this.http;
         return createClient(wsdlUrl, options, endpoint);
     }
 }
-NgxSoapService.decorators = [
-    { type: Injectable, args: [{
+NgxSoapService.ɵfac = function NgxSoapService_Factory(t) { return new (t || NgxSoapService)(i0.ɵɵinject(i1.HttpClient)); };
+NgxSoapService.ɵprov = i0.ɵɵdefineInjectable({ token: NgxSoapService, factory: NgxSoapService.ɵfac, providedIn: 'root' });
+/*@__PURE__*/ (function () { i0.ɵsetClassMetadata(NgxSoapService, [{
+        type: Injectable,
+        args: [{
                 providedIn: 'root'
-            },] }
-];
-/** @nocollapse */
-NgxSoapService.ctorParameters = () => [
-    { type: HttpClient }
-];
-/** @nocollapse */ NgxSoapService.ngInjectableDef = i0.ɵɵdefineInjectable({ factory: function NgxSoapService_Factory() { return new NgxSoapService(i0.ɵɵinject(i1.HttpClient)); }, token: NgxSoapService, providedIn: "root" });
-if (false) {
-    /**
-     * @type {?}
-     * @private
-     */
-    NgxSoapService.prototype.http;
-}
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibmd4LXNvYXAuc2VydmljZS5qcyIsInNvdXJjZVJvb3QiOiJuZzovL25neC1zb2FwLyIsInNvdXJjZXMiOlsibGliL25neC1zb2FwLnNlcnZpY2UudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7OztBQUFBLE9BQU8sRUFBRSxVQUFVLEVBQUUsTUFBTSxlQUFlLENBQUM7QUFDM0MsT0FBTyxFQUFFLFlBQVksRUFBRSxNQUFNLGFBQWEsQ0FBQztBQUMzQyxPQUFPLEVBQUUsVUFBVSxFQUFFLE1BQU0sc0JBQXNCLENBQUM7OztBQWVsRCxPQUFPLEVBQUUsUUFBUSxFQUFFLE1BQU0sMEJBQTBCLENBQUE7QUFLbkQsTUFBTSxPQUFPLGNBQWM7Ozs7SUFFekIsWUFBb0IsSUFBZ0I7UUFBaEIsU0FBSSxHQUFKLElBQUksQ0FBWTtJQUFJLENBQUM7Ozs7Ozs7SUFFekMsWUFBWSxDQUFDLE9BQWUsRUFBRSxVQUFlLEVBQUUsRUFBRSxRQUFpQjtRQUNoRSxPQUFPLENBQUMsVUFBVSxHQUFHLElBQUksQ0FBQyxJQUFJLENBQUM7UUFDL0IsT0FBTyxZQUFZLENBQUMsT0FBTyxFQUFFLE9BQU8sRUFBRSxRQUFRLENBQUMsQ0FBRTtJQUNuRCxDQUFDOzs7WUFWRixVQUFVLFNBQUM7Z0JBQ1YsVUFBVSxFQUFFLE1BQU07YUFDbkI7Ozs7WUFuQlEsVUFBVTs7Ozs7Ozs7SUFzQkwsOEJBQXdCIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgSW5qZWN0YWJsZSB9IGZyb20gJ0Bhbmd1bGFyL2NvcmUnO1xuaW1wb3J0IHsgY3JlYXRlQ2xpZW50IH0gZnJvbSAnLi9zb2FwL3NvYXAnO1xuaW1wb3J0IHsgSHR0cENsaWVudCB9IGZyb20gJ0Bhbmd1bGFyL2NvbW1vbi9odHRwJztcbmltcG9ydCB7IENsaWVudCB9IGZyb20gJy4vc29hcC9pbnRlcmZhY2VzJztcblxuZXhwb3J0IHtcbiAgQ2xpZW50LFxuICBXU0RMLFxuICBJU29hcE1ldGhvZCxcbiAgSVNvYXBNZXRob2RSZXNwb25zZSxcbiAgQmFzaWNBdXRoU2VjdXJpdHksXG4gIEJlYXJlclNlY3VyaXR5LFxuICAvLyBXU1NlY3VyaXR5Q2VydCxcbiAgV1NTZWN1cml0eSxcbiAgTlRMTVNlY3VyaXR5XG59IGZyb20gJy4vc29hcC9pbnRlcmZhY2VzJztcblxuZXhwb3J0IHsgc2VjdXJpdHkgfSBmcm9tICcuL3NvYXAvc2VjdXJpdHkvc2VjdXJpdHknXG5cbkBJbmplY3RhYmxlKHtcbiAgcHJvdmlkZWRJbjogJ3Jvb3QnXG59KVxuZXhwb3J0IGNsYXNzIE5neFNvYXBTZXJ2aWNlIHtcblxuICBjb25zdHJ1Y3Rvcihwcml2YXRlIGh0dHA6IEh0dHBDbGllbnQpIHsgfVxuXG4gIGNyZWF0ZUNsaWVudCh3c2RsVXJsOiBzdHJpbmcsIG9wdGlvbnM6IGFueSA9IHt9LCBlbmRwb2ludD86IHN0cmluZyk6IFByb21pc2U8Q2xpZW50PiB7XG4gICAgb3B0aW9ucy5odHRwQ2xpZW50ID0gdGhpcy5odHRwO1xuICAgIHJldHVybiBjcmVhdGVDbGllbnQod3NkbFVybCwgb3B0aW9ucywgZW5kcG9pbnQpIDtcbiAgfVxufVxuIl19
+            }]
+    }], function () { return [{ type: i1.HttpClient }]; }, null); })();
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibmd4LXNvYXAuc2VydmljZS5qcyIsInNvdXJjZVJvb3QiOiJuZzovL25neC1zb2FwLyIsInNvdXJjZXMiOlsibGliL25neC1zb2FwLnNlcnZpY2UudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEsT0FBTyxFQUFFLFVBQVUsRUFBRSxNQUFNLGVBQWUsQ0FBQztBQUMzQyxPQUFPLEVBQUUsWUFBWSxFQUFFLE1BQU0sYUFBYSxDQUFDO0FBQzNDLE9BQU8sRUFBRSxVQUFVLEVBQUUsTUFBTSxzQkFBc0IsQ0FBQzs7O0FBZWxELE9BQU8sRUFBRSxRQUFRLEVBQUUsTUFBTSwwQkFBMEIsQ0FBQTtBQUtuRCxNQUFNLE9BQU8sY0FBYztJQUV6QixZQUFvQixJQUFnQjtRQUFoQixTQUFJLEdBQUosSUFBSSxDQUFZO0lBQUksQ0FBQztJQUV6QyxZQUFZLENBQUMsT0FBZSxFQUFFLFVBQWUsRUFBRSxFQUFFLFFBQWlCO1FBQ2hFLE9BQU8sQ0FBQyxVQUFVLEdBQUcsSUFBSSxDQUFDLElBQUksQ0FBQztRQUMvQixPQUFPLFlBQVksQ0FBQyxPQUFPLEVBQUUsT0FBTyxFQUFFLFFBQVEsQ0FBQyxDQUFFO0lBQ25ELENBQUM7OzRFQVBVLGNBQWM7c0RBQWQsY0FBYyxXQUFkLGNBQWMsbUJBRmIsTUFBTTtrREFFUCxjQUFjO2NBSDFCLFVBQVU7ZUFBQztnQkFDVixVQUFVLEVBQUUsTUFBTTthQUNuQiIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IEluamVjdGFibGUgfSBmcm9tICdAYW5ndWxhci9jb3JlJztcbmltcG9ydCB7IGNyZWF0ZUNsaWVudCB9IGZyb20gJy4vc29hcC9zb2FwJztcbmltcG9ydCB7IEh0dHBDbGllbnQgfSBmcm9tICdAYW5ndWxhci9jb21tb24vaHR0cCc7XG5pbXBvcnQgeyBDbGllbnQgfSBmcm9tICcuL3NvYXAvaW50ZXJmYWNlcyc7XG5cbmV4cG9ydCB7XG4gIENsaWVudCxcbiAgV1NETCxcbiAgSVNvYXBNZXRob2QsXG4gIElTb2FwTWV0aG9kUmVzcG9uc2UsXG4gIEJhc2ljQXV0aFNlY3VyaXR5LFxuICBCZWFyZXJTZWN1cml0eSxcbiAgLy8gV1NTZWN1cml0eUNlcnQsXG4gIFdTU2VjdXJpdHksXG4gIE5UTE1TZWN1cml0eVxufSBmcm9tICcuL3NvYXAvaW50ZXJmYWNlcyc7XG5cbmV4cG9ydCB7IHNlY3VyaXR5IH0gZnJvbSAnLi9zb2FwL3NlY3VyaXR5L3NlY3VyaXR5J1xuXG5ASW5qZWN0YWJsZSh7XG4gIHByb3ZpZGVkSW46ICdyb290J1xufSlcbmV4cG9ydCBjbGFzcyBOZ3hTb2FwU2VydmljZSB7XG5cbiAgY29uc3RydWN0b3IocHJpdmF0ZSBodHRwOiBIdHRwQ2xpZW50KSB7IH1cblxuICBjcmVhdGVDbGllbnQod3NkbFVybDogc3RyaW5nLCBvcHRpb25zOiBhbnkgPSB7fSwgZW5kcG9pbnQ/OiBzdHJpbmcpOiBQcm9taXNlPENsaWVudD4ge1xuICAgIG9wdGlvbnMuaHR0cENsaWVudCA9IHRoaXMuaHR0cDtcbiAgICByZXR1cm4gY3JlYXRlQ2xpZW50KHdzZGxVcmwsIG9wdGlvbnMsIGVuZHBvaW50KSA7XG4gIH1cbn1cbiJdfQ==

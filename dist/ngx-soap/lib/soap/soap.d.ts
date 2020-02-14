@@ -1,5 +1,3 @@
-export { Client } from './client';
-export { security } from './security/security';
 export { passwordDigest } from './utils';
 export declare const WSDL: (definition: any, uri: any, options: any) => void;
 export declare function createClient(url: any, options: any, endpoint: any): Promise<any>;

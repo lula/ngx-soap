@@ -1,8 +1,7 @@
 {
   "name": "ngx-soap",
-  "version": "0.6.1-beta.1",
+  "version": "0.6.3",
   "description": "SOAP service for Angular",
-  "homepage": "https://github.com/lula/ngx-soap",
   "author": "Luca Lulani",
   "license": "MIT",
   "keywords": [
@@ -12,23 +11,25 @@
     "Angular5",
     "Angular6",
     "Angular7",
+    "Angular9",
     "@angular",
     "SOAP",
     "WSDL"
   ],
   "peerDependencies": {
     "@angular/common": ">=6.0.0 <=9.0.0",
-    "@angular/core": ">=6.0.0 <9=.0.0",
+    "@angular/core": ">=6.0.0 <=9.0.0",
     "buffer": "^5.4.3",
     "concat-stream": "^2.0.0",
     "core-js": "^3.6.4",
     "crypto-js": "^4.0.0",
     "events": "^3.1.0",
     "lodash": "^4.17.15",
-    "rxjs": "^6.5.4",
+    "rxjs": "^6.5.3",
     "sax": "^1.2.4",
     "stream": "^0.0.2",
-    "uuid": "^3.4.0"
+    "uuid": "^3.4.0",
+    "tslib": "^1.10.0"
   },
   "main": "bundles/ngx-soap.umd.js",
   "module": "fesm5/ngx-soap.js",
@@ -38,9 +39,8 @@
   "fesm5": "fesm5/ngx-soap.js",
   "fesm2015": "fesm2015/ngx-soap.js",
   "typings": "ngx-soap.d.ts",
-  "metadata": "ngx-soap.metadata.json",
   "sideEffects": false,
-  "dependencies": {
-    "tslib": "^1.9.0"
+  "scripts": {
+    "prepublishOnly": "node --eval \"console.error('ERROR: Trying to publish a package that has been compiled by Ivy. This is not allowed.\\nPlease delete and rebuild the package, without compiling with Ivy, before attempting to publish.\\n')\" && exit 1"
   }
 }
