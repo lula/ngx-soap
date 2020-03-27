@@ -1741,12 +1741,11 @@ WSDL.prototype.filterOutIgnoredNameSpace = function (ns) {
  * @param {NamespaceContext} nsContext Namespace context
  */
 WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmlnsAttr, schemaObject, nsContext) {
-  let self = this;
-  let schema = this.definitions.schemas[nsURI];
+  const schema = this.definitions.schemas[nsURI];
 
   let parentNsPrefix = nsPrefix ? nsPrefix.parent : undefined;
   if (typeof parentNsPrefix !== 'undefined') {
-    //we got the parentNsPrefix for our array. setting the namespace-letiable back to the current namespace string
+    // we got the parentNsPrefix for our array. setting the namespace-variable back to the current namespace string
     nsPrefix = nsPrefix.current;
   }
 
@@ -1755,15 +1754,15 @@ WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmln
     parentNsPrefix = '';
   }
 
-  let soapHeader = !schema;
-  let qualified = schema && schema.$elementFormDefault === 'qualified';
-  let parts = [];
-  let prefixNamespace = (nsPrefix || qualified) && nsPrefix !== TNS_PREFIX;
+  const soapHeader = !schema;
+  const qualified = schema && schema.$elementFormDefault === 'qualified';
+  const parts = [];
+  const prefixNamespace = (nsPrefix || qualified) && nsPrefix !== TNS_PREFIX;
 
   let xmlnsAttrib = '';
   if (nsURI && isFirst) {
-    if (self.options.overrideRootElement && self.options.overrideRootElement.xmlnsAttributes) {
-      self.options.overrideRootElement.xmlnsAttributes.forEach(function (attribute) {
+    if (this.options.overrideRootElement && this.options.overrideRootElement.xmlnsAttributes) {
+      this.options.overrideRootElement.xmlnsAttributes.forEach((attribute) => {
         xmlnsAttrib += ' ' + attribute.name + '="' + attribute.value + '"';
       });
     } else {
@@ -1772,7 +1771,7 @@ WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmln
         xmlnsAttrib += ' xmlns:' + nsPrefix + '="' + nsURI + '"';
       }
       // only add default namespace if the schema elementFormDefault is qualified
-      if (qualified || soapHeader) xmlnsAttrib += ' xmlns="' + nsURI + '"';
+      if (qualified || soapHeader) { xmlnsAttrib += ' xmlns="' + nsURI + '"'; }
     }
   }
 
@@ -1784,75 +1783,94 @@ WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmln
   }
 
   // explicitly use xmlns attribute if available
-  if (xmlnsAttr && !(self.options.overrideRootElement && self.options.overrideRootElement.xmlnsAttributes)) {
+  if (xmlnsAttr && !(this.options.overrideRootElement && this.options.overrideRootElement.xmlnsAttributes)) {
     xmlnsAttrib = xmlnsAttr;
   }
 
   let ns = '';
 
-  if (self.options.overrideRootElement && isFirst) {
-    ns = self.options.overrideRootElement.namespace;
+  if (this.options.overrideRootElement && isFirst) {
+    ns = this.options.overrideRootElement.namespace;
   } else if (prefixNamespace && (qualified || isFirst || soapHeader) && !this.isIgnoredNameSpace(nsPrefix)) {
     ns = nsPrefix;
   }
 
-  let i, n;
+  let i;
+  let n;
   // start building out XML string.
   if (Array.isArray(obj)) {
+    let nonSubNameSpace = '';
+    let emptyNonSubNameSpaceForArray = false;
+    const nameWithNsRegex = /^([^:]+):([^:]+)$/.exec(name);
+    if (nameWithNsRegex) {
+      nonSubNameSpace = nameWithNsRegex[1];
+      name = nameWithNsRegex[2];
+    } else if (name[0] === ':') {
+      emptyNonSubNameSpaceForArray = true;
+      name = name.substr(1);
+    }
+
     for (i = 0, n = obj.length; i < n; i++) {
-      let item = obj[i];
-      let arrayAttr = self.processAttributes(item, nsContext),
-        correctOuterNsPrefix = parentNsPrefix || ns; //using the parent namespace prefix if given
+      const item = obj[i];
+      const arrayAttr = this.processAttributes(item, nsContext);
+      const correctOuterNsPrefix = nonSubNameSpace || parentNsPrefix || ns; // using the parent namespace prefix if given
 
-      let body = self.objectToXML(item, name, nsPrefix, nsURI, false, null, schemaObject, nsContext);
+      const body = this.objectToXML(item, name, nsPrefix, nsURI, false, null, schemaObject, nsContext);
 
-      let openingTagParts = ['<', appendColon(correctOuterNsPrefix), name, arrayAttr, xmlnsAttrib];
+      let openingTagParts = ['<', name, arrayAttr, xmlnsAttrib];
+      if (!emptyNonSubNameSpaceForArray) {
+        openingTagParts = ['<', appendColon(correctOuterNsPrefix), name, arrayAttr, xmlnsAttrib];
+      }
 
-      if (body === '' && self.options.useEmptyTag) {
+      if (body === '' && this.options.useEmptyTag) {
         // Use empty (self-closing) tags if no contents
         openingTagParts.push(' />');
         parts.push(openingTagParts.join(''));
       } else {
         openingTagParts.push('>');
-        if (self.options.namespaceArrayElements || i === 0) {
+        if (this.options.namespaceArrayElements || i === 0) {
           parts.push(openingTagParts.join(''));
         }
         parts.push(body);
-        if (self.options.namespaceArrayElements || i === n - 1) {
-          parts.push(['</', appendColon(correctOuterNsPrefix), name, '>'].join(''));
+        if (this.options.namespaceArrayElements || i === n - 1) {
+          if (emptyNonSubNameSpaceForArray) {
+            parts.push(['</', name, '>'].join(''));
+          } else {
+            parts.push(['</', appendColon(correctOuterNsPrefix), name, '>'].join(''));
+          }
         }
       }
     }
   } else if (typeof obj === 'object') {
     for (name in obj) {
-      if (!obj.hasOwnProperty(name)) continue;
-      //don't process attributes as element
-      if (name === self.options.attributesKey) {
+      if (!obj.hasOwnProperty(name)) { continue; }
+      // don't process attributes as element
+      if (name === this.options.attributesKey) {
         continue;
       }
-      //Its the value of a xml object. Return it directly.
-      if (name === self.options.xmlKey) {
+      // Its the value of a xml object. Return it directly.
+      if (name === this.options.xmlKey) {
         nsContext.popContext();
         return obj[name];
       }
-      //Its the value of an item. Return it directly.
-      if (name === self.options.valueKey) {
+      // Its the value of an item. Return it directly.
+      if (name === this.options.valueKey) {
         nsContext.popContext();
         return xmlEscape(obj[name]);
       }
 
-      let child = obj[name];
+      const child = obj[name];
       if (typeof child === 'undefined') {
         continue;
       }
 
-      let attr = self.processAttributes(child, nsContext);
+      const attr = this.processAttributes(child, nsContext);
 
       let value = '';
       let nonSubNameSpace = '';
       let emptyNonSubNameSpace = false;
 
-      let nameWithNsRegex = /^([^:]+):([^:]+)$/.exec(name);
+      const nameWithNsRegex = /^([^:]+):([^:]+)$/.exec(name);
       if (nameWithNsRegex) {
         nonSubNameSpace = nameWithNsRegex[1] + ':';
         name = nameWithNsRegex[2];
@@ -1862,16 +1880,16 @@ WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmln
       }
 
       if (isFirst) {
-        value = self.objectToXML(child, name, nsPrefix, nsURI, false, null, schemaObject, nsContext);
+        value = this.objectToXML(child, name, nsPrefix, nsURI, false, null, schemaObject, nsContext);
       } else {
 
-        if (self.definitions.schemas) {
+        if (this.definitions.schemas) {
           if (schema) {
-            let childSchemaObject = self.findChildSchemaObject(schemaObject, name);
-            //find sub namespace if not a primitive
+            const childSchemaObject = this.findChildSchemaObject(schemaObject, name);
+            // find sub namespace if not a primitive
             if (childSchemaObject &&
-              ((childSchemaObject.$type && (childSchemaObject.$type.indexOf('xsd:') === -1)) ||
-                childSchemaObject.$ref || childSchemaObject.$name)) {
+                ((childSchemaObject.$type && (childSchemaObject.$type.indexOf('xsd:') === -1)) ||
+                    childSchemaObject.$ref || childSchemaObject.$name)) {
               /*if the base name space of the children is not in the ingoredSchemaNamspaces we use it.
                This is because in some services the child nodes do not need the baseNameSpace.
                */
@@ -1897,7 +1915,7 @@ WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmln
                   if (this.isIgnoredNameSpace(childNsPrefix)) {
                     childNsPrefix = nsPrefix;
                   }
-                  childNsURI = schema.xmlns[childNsPrefix] || self.definitions.xmlns[childNsPrefix];
+                  childNsURI = schema.xmlns[childNsPrefix] || this.definitions.xmlns[childNsPrefix];
                 }
 
                 let unqualified = false;
@@ -1925,19 +1943,19 @@ WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmln
 
               let resolvedChildSchemaObject;
               if (childSchemaObject.$type) {
-                let typeQName = splitQName(childSchemaObject.$type);
-                let typePrefix = typeQName.prefix;
-                let typeURI = schema.xmlns[typePrefix] || self.definitions.xmlns[typePrefix];
+                const typeQName = splitQName(childSchemaObject.$type);
+                const typePrefix = typeQName.prefix;
+                const typeURI = schema.xmlns[typePrefix] || this.definitions.xmlns[typePrefix];
                 childNsURI = typeURI;
                 if (typeURI !== 'http://www.w3.org/2001/XMLSchema' && typePrefix !== TNS_PREFIX) {
                   // Add the prefix/namespace mapping, but not declare it
                   nsContext.addNamespace(typePrefix, typeURI);
                 }
                 resolvedChildSchemaObject =
-                  self.findSchemaType(typeQName.name, typeURI) || childSchemaObject;
+                    this.findSchemaType(typeQName.name, typeURI) || childSchemaObject;
               } else {
                 resolvedChildSchemaObject =
-                  self.findSchemaObject(childNsURI, childName) || childSchemaObject;
+                    this.findSchemaObject(childNsURI, childName) || childSchemaObject;
               }
 
               if (childSchemaObject.$baseNameSpace && this.options.ignoreBaseNameSpaces) {
@@ -1953,55 +1971,59 @@ WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmln
               ns = childNsPrefix;
 
               if (Array.isArray(child)) {
-                //for arrays, we need to remember the current namespace
+                // for arrays, we need to remember the current namespace
                 childNsPrefix = {
                   current: childNsPrefix,
-                  parent: ns
+                  parent: ns,
                 };
               } else {
-                //parent (array) already got the namespace
+                // parent (array) already got the namespace
                 childXmlnsAttrib = null;
               }
 
-              value = self.objectToXML(child, name, childNsPrefix, childNsURI,
-                false, childXmlnsAttrib, resolvedChildSchemaObject, nsContext);
-            } else if (obj[self.options.attributesKey] && obj[self.options.attributesKey].xsi_type) {
-              //if parent object has complex type defined and child not found in parent
-              let completeChildParamTypeObject = self.findChildSchemaObject(
-                obj[self.options.attributesKey].xsi_type.type,
-                obj[self.options.attributesKey].xsi_type.xmlns);
+              value = this.objectToXML(child, name, childNsPrefix, childNsURI,
+                  false, childXmlnsAttrib, resolvedChildSchemaObject, nsContext);
+            } else if (obj[this.options.attributesKey] && obj[this.options.attributesKey].xsi_type) {
+              // if parent object has complex type defined and child not found in parent
+              const completeChildParamTypeObject = this.findChildSchemaObject(
+                  obj[this.options.attributesKey].xsi_type.type,
+                  obj[this.options.attributesKey].xsi_type.xmlns);
 
-              nonSubNameSpace = obj[self.options.attributesKey].xsi_type.prefix;
-              nsContext.addNamespace(obj[self.options.attributesKey].xsi_type.prefix,
-                obj[self.options.attributesKey].xsi_type.xmlns);
-              value = self.objectToXML(child, name, obj[self.options.attributesKey].xsi_type.prefix,
-                obj[self.options.attributesKey].xsi_type.xmlns, false, null, null, nsContext);
+              nonSubNameSpace = obj[this.options.attributesKey].xsi_type.prefix;
+              nsContext.addNamespace(obj[this.options.attributesKey].xsi_type.prefix,
+                  obj[this.options.attributesKey].xsi_type.xmlns);
+              value = this.objectToXML(child, name, obj[this.options.attributesKey].xsi_type.prefix,
+                  obj[this.options.attributesKey].xsi_type.xmlns, false, null, null, nsContext);
             } else {
               if (Array.isArray(child)) {
-                name = nonSubNameSpace + name;
+                if (emptyNonSubNameSpace) {
+                  name = ':' + name;
+                } else {
+                  name = nonSubNameSpace + name;
+                }
               }
 
-              value = self.objectToXML(child, name, nsPrefix, nsURI, false, null, null, nsContext);
+              value = this.objectToXML(child, name, nonSubNameSpace || nsPrefix, nsURI, false, null, null, nsContext);
             }
           } else {
-            value = self.objectToXML(child, name, nsPrefix, nsURI, false, null, null, nsContext);
+            value = this.objectToXML(child, name, nonSubNameSpace || nsPrefix, nsURI, false, null, null, nsContext);
           }
         }
       }
 
       ns = noColonNameSpace(ns);
-      if (prefixNamespace && !qualified && isFirst && !self.options.overrideRootElement) {
+      if (prefixNamespace && !qualified && isFirst && !this.options.overrideRootElement) {
         ns = nsPrefix;
       } else if (this.isIgnoredNameSpace(ns)) {
         ns = '';
       }
 
-      let useEmptyTag = !value && self.options.useEmptyTag;
+      const useEmptyTag = !value && this.options.useEmptyTag;
       if (!Array.isArray(child)) {
         // start tag
         parts.push(['<', emptyNonSubNameSpace ? '' : appendColon(nonSubNameSpace || ns), name, attr, xmlnsAttrib,
           (child === null ? ' xsi:nil="true"' : ''),
-          useEmptyTag ? ' />' : '>'
+          useEmptyTag ? ' />' : '>',
         ].join(''));
       }
 
@@ -2014,7 +2036,7 @@ WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmln
       }
     }
   } else if (obj !== undefined) {
-    parts.push((self.options.escapeXML) ? xmlEscape(obj) : obj);
+    parts.push((this.options.escapeXML) ? xmlEscape(obj) : obj);
   }
   nsContext.popContext();
   return parts.join('');
