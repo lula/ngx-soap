@@ -1,6 +1,6 @@
 {
   "name": "ngx-soap",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "SOAP service for Angular4",
   "main": "src/index.js",
   "module": "src/index.js",
@@ -13,7 +13,8 @@
     "postbundle": "node tools/bundle-scripts/remove-code.js",
     "build": "npm run bundle && npm run copy",
     "copy": "node tools/bundle-scripts/copy-files.js && node tools/bundle-scripts/cleanup.js",
-    "test": "rimraf spec/out && tsc -p tsconfig.spec.json && jasmine"
+    "test": "rimraf spec/out && tsc -p tsconfig.spec.json && jasmine",
+    "build:lib": "ng build --prod ngx-soap && cp README.md LICENSE dist/ngx-soap"
   },
   "keywords": [
     "Angular",
