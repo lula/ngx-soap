@@ -1,7 +1,3 @@
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 import { Injectable } from '@angular/core';
 import { createClient } from './soap/soap';
 import { HttpClient } from '@angular/common/http';
@@ -12,41 +8,20 @@ var NgxSoapService = /** @class */ (function () {
     function NgxSoapService(http) {
         this.http = http;
     }
-    /**
-     * @param {?} wsdlUrl
-     * @param {?=} options
-     * @param {?=} endpoint
-     * @return {?}
-     */
-    NgxSoapService.prototype.createClient = /**
-     * @param {?} wsdlUrl
-     * @param {?=} options
-     * @param {?=} endpoint
-     * @return {?}
-     */
-    function (wsdlUrl, options, endpoint) {
+    NgxSoapService.prototype.createClient = function (wsdlUrl, options, endpoint) {
         if (options === void 0) { options = {}; }
         options.httpClient = this.http;
         return createClient(wsdlUrl, options, endpoint);
     };
-    NgxSoapService.decorators = [
-        { type: Injectable, args: [{
-                    providedIn: 'root'
-                },] }
-    ];
-    /** @nocollapse */
-    NgxSoapService.ctorParameters = function () { return [
-        { type: HttpClient }
-    ]; };
-    /** @nocollapse */ NgxSoapService.ngInjectableDef = i0.defineInjectable({ factory: function NgxSoapService_Factory() { return new NgxSoapService(i0.inject(i1.HttpClient)); }, token: NgxSoapService, providedIn: "root" });
+    NgxSoapService.ɵfac = function NgxSoapService_Factory(t) { return new (t || NgxSoapService)(i0.ɵɵinject(i1.HttpClient)); };
+    NgxSoapService.ɵprov = i0.ɵɵdefineInjectable({ token: NgxSoapService, factory: NgxSoapService.ɵfac, providedIn: 'root' });
     return NgxSoapService;
 }());
 export { NgxSoapService };
-if (false) {
-    /**
-     * @type {?}
-     * @private
-     */
-    NgxSoapService.prototype.http;
-}
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibmd4LXNvYXAuc2VydmljZS5qcyIsInNvdXJjZVJvb3QiOiJuZzovL25neC1zb2FwLyIsInNvdXJjZXMiOlsibGliL25neC1zb2FwLnNlcnZpY2UudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7OztBQUFBLE9BQU8sRUFBRSxVQUFVLEVBQUUsTUFBTSxlQUFlLENBQUM7QUFDM0MsT0FBTyxFQUFFLFlBQVksRUFBRSxNQUFNLGFBQWEsQ0FBQztBQUMzQyxPQUFPLEVBQUUsVUFBVSxFQUFFLE1BQU0sc0JBQXNCLENBQUM7OztBQWVsRCxPQUFPLEVBQUUsUUFBUSxFQUFFLE1BQU0sMEJBQTBCLENBQUE7QUFFbkQ7SUFLRSx3QkFBb0IsSUFBZ0I7UUFBaEIsU0FBSSxHQUFKLElBQUksQ0FBWTtJQUFJLENBQUM7Ozs7Ozs7SUFFekMscUNBQVk7Ozs7OztJQUFaLFVBQWEsT0FBZSxFQUFFLE9BQWlCLEVBQUUsUUFBaUI7UUFBcEMsd0JBQUEsRUFBQSxZQUFpQjtRQUM3QyxPQUFPLENBQUMsVUFBVSxHQUFHLElBQUksQ0FBQyxJQUFJLENBQUM7UUFDL0IsT0FBTyxZQUFZLENBQUMsT0FBTyxFQUFFLE9BQU8sRUFBRSxRQUFRLENBQUMsQ0FBRTtJQUNuRCxDQUFDOztnQkFWRixVQUFVLFNBQUM7b0JBQ1YsVUFBVSxFQUFFLE1BQU07aUJBQ25COzs7O2dCQW5CUSxVQUFVOzs7eUJBRm5CO0NBOEJDLEFBWEQsSUFXQztTQVJZLGNBQWM7Ozs7OztJQUViLDhCQUF3QiIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IEluamVjdGFibGUgfSBmcm9tICdAYW5ndWxhci9jb3JlJztcclxuaW1wb3J0IHsgY3JlYXRlQ2xpZW50IH0gZnJvbSAnLi9zb2FwL3NvYXAnO1xyXG5pbXBvcnQgeyBIdHRwQ2xpZW50IH0gZnJvbSAnQGFuZ3VsYXIvY29tbW9uL2h0dHAnO1xyXG5pbXBvcnQgeyBDbGllbnQgfSBmcm9tICcuL3NvYXAvaW50ZXJmYWNlcyc7XHJcblxyXG5leHBvcnQge1xyXG4gIENsaWVudCxcclxuICBXU0RMLFxyXG4gIElTb2FwTWV0aG9kLFxyXG4gIElTb2FwTWV0aG9kUmVzcG9uc2UsXHJcbiAgQmFzaWNBdXRoU2VjdXJpdHksXHJcbiAgQmVhcmVyU2VjdXJpdHksXHJcbiAgLy8gV1NTZWN1cml0eUNlcnQsXHJcbiAgV1NTZWN1cml0eSxcclxuICBOVExNU2VjdXJpdHlcclxufSBmcm9tICcuL3NvYXAvaW50ZXJmYWNlcyc7XHJcblxyXG5leHBvcnQgeyBzZWN1cml0eSB9IGZyb20gJy4vc29hcC9zZWN1cml0eS9zZWN1cml0eSdcclxuXHJcbkBJbmplY3RhYmxlKHtcclxuICBwcm92aWRlZEluOiAncm9vdCdcclxufSlcclxuZXhwb3J0IGNsYXNzIE5neFNvYXBTZXJ2aWNlIHtcclxuXHJcbiAgY29uc3RydWN0b3IocHJpdmF0ZSBodHRwOiBIdHRwQ2xpZW50KSB7IH1cclxuXHJcbiAgY3JlYXRlQ2xpZW50KHdzZGxVcmw6IHN0cmluZywgb3B0aW9uczogYW55ID0ge30sIGVuZHBvaW50Pzogc3RyaW5nKTogUHJvbWlzZTxDbGllbnQ+IHtcclxuICAgIG9wdGlvbnMuaHR0cENsaWVudCA9IHRoaXMuaHR0cDtcclxuICAgIHJldHVybiBjcmVhdGVDbGllbnQod3NkbFVybCwgb3B0aW9ucywgZW5kcG9pbnQpIDtcclxuICB9XHJcbn1cclxuIl19
+/*@__PURE__*/ (function () { i0.ɵsetClassMetadata(NgxSoapService, [{
+        type: Injectable,
+        args: [{
+                providedIn: 'root'
+            }]
+    }], function () { return [{ type: i1.HttpClient }]; }, null); })();
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibmd4LXNvYXAuc2VydmljZS5qcyIsInNvdXJjZVJvb3QiOiJuZzovL25neC1zb2FwLyIsInNvdXJjZXMiOlsibGliL25neC1zb2FwLnNlcnZpY2UudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEsT0FBTyxFQUFFLFVBQVUsRUFBRSxNQUFNLGVBQWUsQ0FBQztBQUMzQyxPQUFPLEVBQUUsWUFBWSxFQUFFLE1BQU0sYUFBYSxDQUFDO0FBQzNDLE9BQU8sRUFBRSxVQUFVLEVBQUUsTUFBTSxzQkFBc0IsQ0FBQzs7O0FBZWxELE9BQU8sRUFBRSxRQUFRLEVBQUUsTUFBTSwwQkFBMEIsQ0FBQTtBQUVuRDtJQUtFLHdCQUFvQixJQUFnQjtRQUFoQixTQUFJLEdBQUosSUFBSSxDQUFZO0lBQUksQ0FBQztJQUV6QyxxQ0FBWSxHQUFaLFVBQWEsT0FBZSxFQUFFLE9BQWlCLEVBQUUsUUFBaUI7UUFBcEMsd0JBQUEsRUFBQSxZQUFpQjtRQUM3QyxPQUFPLENBQUMsVUFBVSxHQUFHLElBQUksQ0FBQyxJQUFJLENBQUM7UUFDL0IsT0FBTyxZQUFZLENBQUMsT0FBTyxFQUFFLE9BQU8sRUFBRSxRQUFRLENBQUMsQ0FBRTtJQUNuRCxDQUFDO2dGQVBVLGNBQWM7MERBQWQsY0FBYyxXQUFkLGNBQWMsbUJBRmIsTUFBTTt5QkFwQnBCO0NBOEJDLEFBWEQsSUFXQztTQVJZLGNBQWM7a0RBQWQsY0FBYztjQUgxQixVQUFVO2VBQUM7Z0JBQ1YsVUFBVSxFQUFFLE1BQU07YUFDbkIiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBJbmplY3RhYmxlIH0gZnJvbSAnQGFuZ3VsYXIvY29yZSc7XHJcbmltcG9ydCB7IGNyZWF0ZUNsaWVudCB9IGZyb20gJy4vc29hcC9zb2FwJztcclxuaW1wb3J0IHsgSHR0cENsaWVudCB9IGZyb20gJ0Bhbmd1bGFyL2NvbW1vbi9odHRwJztcclxuaW1wb3J0IHsgQ2xpZW50IH0gZnJvbSAnLi9zb2FwL2ludGVyZmFjZXMnO1xyXG5cclxuZXhwb3J0IHtcclxuICBDbGllbnQsXHJcbiAgV1NETCxcclxuICBJU29hcE1ldGhvZCxcclxuICBJU29hcE1ldGhvZFJlc3BvbnNlLFxyXG4gIEJhc2ljQXV0aFNlY3VyaXR5LFxyXG4gIEJlYXJlclNlY3VyaXR5LFxyXG4gIC8vIFdTU2VjdXJpdHlDZXJ0LFxyXG4gIFdTU2VjdXJpdHksXHJcbiAgTlRMTVNlY3VyaXR5XHJcbn0gZnJvbSAnLi9zb2FwL2ludGVyZmFjZXMnO1xyXG5cclxuZXhwb3J0IHsgc2VjdXJpdHkgfSBmcm9tICcuL3NvYXAvc2VjdXJpdHkvc2VjdXJpdHknXHJcblxyXG5ASW5qZWN0YWJsZSh7XHJcbiAgcHJvdmlkZWRJbjogJ3Jvb3QnXHJcbn0pXHJcbmV4cG9ydCBjbGFzcyBOZ3hTb2FwU2VydmljZSB7XHJcblxyXG4gIGNvbnN0cnVjdG9yKHByaXZhdGUgaHR0cDogSHR0cENsaWVudCkgeyB9XHJcblxyXG4gIGNyZWF0ZUNsaWVudCh3c2RsVXJsOiBzdHJpbmcsIG9wdGlvbnM6IGFueSA9IHt9LCBlbmRwb2ludD86IHN0cmluZyk6IFByb21pc2U8Q2xpZW50PiB7XHJcbiAgICBvcHRpb25zLmh0dHBDbGllbnQgPSB0aGlzLmh0dHA7XHJcbiAgICByZXR1cm4gY3JlYXRlQ2xpZW50KHdzZGxVcmwsIG9wdGlvbnMsIGVuZHBvaW50KSA7XHJcbiAgfVxyXG59XHJcbiJdfQ==

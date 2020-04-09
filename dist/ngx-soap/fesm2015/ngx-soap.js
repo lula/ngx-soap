@@ -1,25 +1,19 @@
+import { ɵɵinject, ɵɵdefineInjectable, ɵsetClassMetadata, Injectable, ɵɵdefineNgModule, ɵɵdefineInjector, ɵɵsetNgModuleScope, NgModule } from '@angular/core';
 import { __awaiter } from 'tslib';
 import { parser, createStream } from 'sax';
-import { resolve } from 'url';
-import { Buffer } from 'buffer';
+import { mergeWith, isArray, defaultsDeep, merge, assign, isPlainObject, isObject } from 'lodash';
 import sha1 from 'crypto-js/sha1';
 import Base64 from 'crypto-js/enc-base64';
+import { Buffer } from 'buffer';
+import { resolve } from 'url';
 import { ok } from 'assert';
-import { merge, isObject, mergeWith, isArray, defaultsDeep, assign, isPlainObject } from 'lodash';
 import uuid4 from 'uuid/v4';
 import { from, throwError } from 'rxjs';
-import { flatMap, map } from 'rxjs/operators';
-import { Injectable, NgModule, defineInjectable, inject } from '@angular/core';
+import { map, flatMap } from 'rxjs/operators';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
+'use strict';
 class NamespaceScope {
-    /**
-     * @param {?} parent
-     */
     constructor(parent) {
         this.getNamespaceURI = function (prefix, localOnly) {
             switch (prefix) {
@@ -28,7 +22,6 @@ class NamespaceScope {
                 case 'xmlns':
                     return 'http://www.w3.org/2000/xmlns/';
                 default:
-                    /** @type {?} */
                     var nsUri = this.namespaces[prefix];
                     /*jshint -W116 */
                     if (nsUri != null) {
@@ -57,7 +50,6 @@ class NamespaceScope {
                         declared: true
                     };
                 default:
-                    /** @type {?} */
                     var mapping = this.namespaces[prefix];
                     /*jshint -W116 */
                     if (mapping != null) {
@@ -115,14 +107,12 @@ class NamespaceContext {
             return false;
         };
         this.pushContext = function () {
-            /** @type {?} */
             var scope = new NamespaceScope(this.currentScope);
             this.scopes.push(scope);
             this.currentScope = scope;
             return scope;
         };
         this.popContext = function () {
-            /** @type {?} */
             var scope = this.scopes.pop();
             if (scope) {
                 this.currentScope = scope.parent;
@@ -139,7 +129,6 @@ class NamespaceContext {
             return this.currentScope && this.currentScope.getPrefix(nsUri, localOnly);
         };
         this.registerNamespace = function (nsUri) {
-            /** @type {?} */
             var prefix = this.getPrefix(nsUri);
             if (prefix) {
                 // If the namespace has already mapped to a prefix
@@ -160,7 +149,6 @@ class NamespaceContext {
         };
         this.declareNamespace = function (prefix, nsUri) {
             if (this.currentScope) {
-                /** @type {?} */
                 var mapping = this.currentScope.getNamespaceMapping(prefix);
                 if (mapping && mapping.uri === nsUri && mapping.declared) {
                     return false;
@@ -183,25 +171,16 @@ class NamespaceContext {
     }
 }
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/** @type {?} */
 const passwordDigest = function passwordDigest(nonce, created, password) {
-    /** @type {?} */
     const rawNonce = new Buffer(nonce || '', 'base64').toString('binary');
     return Base64.stringify(sha1(rawNonce + created + password, ''));
 };
-/** @type {?} */
-const TNS_PREFIX = '__tns__';
-// Prefix for targetNamespace
+const TNS_PREFIX = '__tns__'; // Prefix for targetNamespace
 /**
  * Find a key from an object based on the value
- * \@param Namespace prefix/uri mapping
- * \@param nsURI value
- * \@return The matching key
- * @type {?}
+ * @param  Namespace prefix/uri mapping
+ * @param  nsURI value
+ * @returns  The matching key
  */
 const findPrefix = function (xmlnsMapping, nsURI) {
     for (const n in xmlnsMapping) {
@@ -214,11 +193,13 @@ const findPrefix = function (xmlnsMapping, nsURI) {
     }
 };
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+/*
+ * Copyright (c) 2011 Vinay Pulim <vinay@milewise.com>
+ * MIT Licensed
+ *
  */
-/** @type {?} */
+/*jshint proto:true*/
+"use strict";
 const stripBom = (x) => {
     // Catches EFBBBF (UTF-8 BOM) because the buffer-to-string
     // conversion translates it to FEFF (UTF-16 BOM)
@@ -227,11 +208,8 @@ const stripBom = (x) => {
     }
     return x;
 };
-/** @type {?} */
 let TNS_PREFIX$1 = TNS_PREFIX;
-/** @type {?} */
 let findPrefix$1 = findPrefix;
-/** @type {?} */
 let Primitives = {
     string: 1,
     boolean: 1,
@@ -266,20 +244,11 @@ let Primitives = {
     QName: 0,
     NOTATION: 0
 };
-/**
- * @param {?} nsName
- * @return {?}
- */
 function splitQName(nsName) {
-    /** @type {?} */
     let i = typeof nsName === 'string' ? nsName.indexOf(':') : -1;
     return i < 0 ? { prefix: TNS_PREFIX$1, name: nsName } :
         { prefix: nsName.substring(0, i), name: nsName.substring(i + 1) };
 }
-/**
- * @param {?} obj
- * @return {?}
- */
 function xmlEscape(obj) {
     if (typeof (obj) === 'string') {
         if (obj.substr(0, 9) === '<![CDATA[' && obj.substr(-3) === "]]>") {
@@ -294,30 +263,17 @@ function xmlEscape(obj) {
     }
     return obj;
 }
-/** @type {?} */
 let trimLeft = /^[\s\xA0]+/;
-/** @type {?} */
 let trimRight = /[\s\xA0]+$/;
-/**
- * @param {?} text
- * @return {?}
- */
 function trim(text) {
     return text.replace(trimLeft, '').replace(trimRight, '');
 }
-/**
- * @param {?} destination
- * @param {?} source
- * @return {?}
- */
 function deepMerge(destination, source) {
     return mergeWith(destination || {}, source, function (a, b) {
         return isArray(a) ? a.concat(b) : undefined;
     });
 }
-/** @type {?} */
 let Element = function (nsName, attrs, options) {
-    /** @type {?} */
     let parts = splitQName(nsName);
     this.nsName = nsName;
     this.prefix = parts.prefix;
@@ -326,7 +282,6 @@ let Element = function (nsName, attrs, options) {
     this.xmlns = {};
     this._initializeOptions(options);
     for (let key in attrs) {
-        /** @type {?} */
         let match = /^xmlns:?(.*)$/.exec(key);
         if (match) {
             this.xmlns[match[1] ? match[1] : TNS_PREFIX$1] = attrs[key];
@@ -369,8 +324,7 @@ Element.prototype.startElement = function (stack, nsName, attrs, options) {
     if (!this.allowedChildren) {
         return;
     }
-    /** @type {?} */
-    let ChildClass = this.allowedChildren[splitQName(nsName).name];
+    let ChildClass = this.allowedChildren[splitQName(nsName).name], element = null;
     if (ChildClass) {
         stack.push(new ChildClass(nsName, attrs, options));
     }
@@ -382,7 +336,6 @@ Element.prototype.endElement = function (stack, nsName) {
     if (this.nsName === nsName) {
         if (stack.length < 2)
             return;
-        /** @type {?} */
         let parent = stack[stack.length - 2];
         if (this !== stack[0]) {
             defaultsDeep(stack[0].xmlns, this.xmlns);
@@ -405,9 +358,7 @@ Element.prototype.description = function (definitions) {
 Element.prototype.init = function () {
 };
 Element.createSubClass = function () {
-    /** @type {?} */
     let root = this;
-    /** @type {?} */
     let subElement = function () {
         root.apply(this, arguments);
         this.init();
@@ -416,55 +367,30 @@ Element.createSubClass = function () {
     subElement.prototype.__proto__ = root.prototype;
     return subElement;
 };
-/** @type {?} */
 let ElementElement = Element.createSubClass();
-/** @type {?} */
 let AnyElement = Element.createSubClass();
-/** @type {?} */
 let InputElement = Element.createSubClass();
-/** @type {?} */
 let OutputElement = Element.createSubClass();
-/** @type {?} */
 let SimpleTypeElement = Element.createSubClass();
-/** @type {?} */
 let RestrictionElement = Element.createSubClass();
-/** @type {?} */
 let ExtensionElement = Element.createSubClass();
-/** @type {?} */
 let ChoiceElement = Element.createSubClass();
-/** @type {?} */
 let EnumerationElement = Element.createSubClass();
-/** @type {?} */
 let ComplexTypeElement = Element.createSubClass();
-/** @type {?} */
 let ComplexContentElement = Element.createSubClass();
-/** @type {?} */
 let SimpleContentElement = Element.createSubClass();
-/** @type {?} */
 let SequenceElement = Element.createSubClass();
-/** @type {?} */
 let AllElement = Element.createSubClass();
-/** @type {?} */
 let MessageElement = Element.createSubClass();
-/** @type {?} */
 let DocumentationElement = Element.createSubClass();
-/** @type {?} */
 let SchemaElement = Element.createSubClass();
-/** @type {?} */
 let TypesElement = Element.createSubClass();
-/** @type {?} */
 let OperationElement = Element.createSubClass();
-/** @type {?} */
 let PortTypeElement = Element.createSubClass();
-/** @type {?} */
 let BindingElement = Element.createSubClass();
-/** @type {?} */
 let PortElement = Element.createSubClass();
-/** @type {?} */
 let ServiceElement = Element.createSubClass();
-/** @type {?} */
 let DefinitionsElement = Element.createSubClass();
-/** @type {?} */
 let ElementTypeMap = {
     types: [TypesElement, 'schema documentation'],
     schema: [SchemaElement, 'element complexType simpleType include import'],
@@ -493,12 +419,7 @@ let ElementTypeMap = {
     definitions: [DefinitionsElement, 'types message portType binding service import documentation'],
     documentation: [DocumentationElement, '']
 };
-/**
- * @param {?} types
- * @return {?}
- */
 function mapElementTypes(types) {
-    /** @type {?} */
     let rtn = {};
     types = types.split(' ');
     types.forEach(function (type) {
@@ -507,7 +428,6 @@ function mapElementTypes(types) {
     return rtn;
 }
 for (let n in ElementTypeMap) {
-    /** @type {?} */
     let v = ElementTypeMap[n];
     v[0].prototype.allowedChildren = mapElementTypes(v[1]);
 }
@@ -571,7 +491,6 @@ SchemaElement.prototype.addChild = function (child) {
     if (child.$name in Primitives)
         return;
     if (child.name === 'include' || child.name === 'import') {
-        /** @type {?} */
         let location = child.$schemaLocation || child.$location;
         if (location) {
             this.includes.push({
@@ -595,7 +514,6 @@ SchemaElement.prototype.addChild = function (child) {
 //fix#325
 TypesElement.prototype.addChild = function (child) {
     ok(child instanceof SchemaElement);
-    /** @type {?} */
     let targetNamespace = child.$targetNamespace;
     if (!this.schemas.hasOwnProperty(targetNamespace)) {
         this.schemas[targetNamespace] = child;
@@ -642,7 +560,6 @@ PortElement.prototype.addChild = function (child) {
     }
 };
 DefinitionsElement.prototype.addChild = function (child) {
-    /** @type {?} */
     let self = this;
     if (child instanceof TypesElement) {
         // Merge types.schemas into definitions.schemas
@@ -666,22 +583,17 @@ DefinitionsElement.prototype.addChild = function (child) {
     else if (child instanceof ServiceElement) {
         self.services[child.$name] = child;
     }
+    else if (child instanceof DocumentationElement) {
+    }
     this.children.pop();
 };
 MessageElement.prototype.postProcess = function (definitions) {
-    /** @type {?} */
     let part = null;
-    /** @type {?} */
     let child = undefined;
-    /** @type {?} */
     let children = this.children || [];
-    /** @type {?} */
     let ns = undefined;
-    /** @type {?} */
     let nsName = undefined;
-    /** @type {?} */
     let i = undefined;
-    /** @type {?} */
     let type = undefined;
     for (i in children) {
         if ((child = children[i]).name === 'part') {
@@ -693,14 +605,10 @@ MessageElement.prototype.postProcess = function (definitions) {
         return;
     }
     if (part.$element) {
-        /** @type {?} */
-        let lookupTypes = [];
-        /** @type {?} */
-        let elementChildren;
+        let lookupTypes = [], elementChildren;
         delete this.parts;
         nsName = splitQName(part.$element);
         ns = nsName.prefix;
-        /** @type {?} */
         let schema = definitions.schemas[definitions.xmlns[ns]];
         this.element = schema.elements[nsName.name];
         if (!this.element) {
@@ -727,7 +635,6 @@ MessageElement.prototype.postProcess = function (definitions) {
                 filter(function removeEmptyLookupTypes(type) {
                 return type !== '^';
             });
-            /** @type {?} */
             let schemaXmlns = definitions.schemas[this.element.targetNamespace].xmlns;
             for (i = 0; i < lookupTypes.length; i++) {
                 lookupTypes[i] = this._createLookupTypeObject(lookupTypes[i], schemaXmlns);
@@ -736,14 +643,14 @@ MessageElement.prototype.postProcess = function (definitions) {
         this.element.$lookupTypes = lookupTypes;
         if (this.element.$type) {
             type = splitQName(this.element.$type);
-            /** @type {?} */
             let typeNs = schema.xmlns && schema.xmlns[type.prefix] || definitions.xmlns[type.prefix];
             if (typeNs) {
-                if (type.name in Primitives) ;
+                if (type.name in Primitives) {
+                    // this.element = this.element.$type;
+                }
                 else {
                     // first check local mapping of ns alias to namespace
                     schema = definitions.schemas[typeNs];
-                    /** @type {?} */
                     let ctype = schema.complexTypes[type.name] || schema.types[type.name] || schema.elements[type.name];
                     if (ctype) {
                         this.parts = ctype.description(definitions, schema.xmlns);
@@ -752,7 +659,6 @@ MessageElement.prototype.postProcess = function (definitions) {
             }
         }
         else {
-            /** @type {?} */
             let method = this.element.description(definitions, schema.xmlns);
             this.parts = method[nsName.name];
         }
@@ -771,7 +677,6 @@ MessageElement.prototype.postProcess = function (definitions) {
             nsName = splitQName(part.$type);
             ns = definitions.xmlns[nsName.prefix];
             type = nsName.name;
-            /** @type {?} */
             let schemaDefinition = definitions.schemas[ns];
             if (typeof schemaDefinition !== 'undefined') {
                 this.parts[part.$name] = definitions.schemas[ns].types[type] || definitions.schemas[ns].complexTypes[type];
@@ -800,18 +705,7 @@ MessageElement.prototype.postProcess = function (definitions) {
  * @private
  */
 MessageElement.prototype._createLookupTypeObject = function (nsString, xmlns) {
-    /** @type {?} */
-    let splittedNSString = splitQName(nsString);
-    /** @type {?} */
-    let nsAlias = splittedNSString.prefix;
-    /** @type {?} */
-    let splittedName = splittedNSString.name.split('#');
-    /** @type {?} */
-    let type = splittedName[0];
-    /** @type {?} */
-    let name = splittedName[1];
-    /** @type {?} */
-    let lookupTypeObj = {};
+    let splittedNSString = splitQName(nsString), nsAlias = splittedNSString.prefix, splittedName = splittedNSString.name.split('#'), type = splittedName[0], name = splittedName[1], lookupTypeObj = {};
     lookupTypeObj.$namespace = xmlns[nsAlias];
     lookupTypeObj.$type = nsAlias + ':' + type;
     lookupTypeObj.$name = name;
@@ -828,20 +722,15 @@ MessageElement.prototype._createLookupTypeObject = function (nsString, xmlns) {
  * @private
  */
 MessageElement.prototype._getNestedLookupTypeString = function (element) {
-    /** @type {?} */
-    let resolvedType = '^';
-    /** @type {?} */
-    let excluded = this.ignoredNamespaces.concat('xs');
+    let resolvedType = '^', excluded = this.ignoredNamespaces.concat('xs'); // do not process $type values wich start with
     if (element.hasOwnProperty('$type') && typeof element.$type === 'string') {
         if (excluded.indexOf(element.$type.split(':')[0]) === -1) {
             resolvedType += ('_' + element.$type + '#' + element.$name);
         }
     }
     if (element.children.length > 0) {
-        /** @type {?} */
         let self = this;
         element.children.forEach(function (child) {
-            /** @type {?} */
             let resolvedChildType = self._getNestedLookupTypeString(child).replace(/\^_/, '');
             if (resolvedChildType && typeof resolvedChildType === 'string') {
                 resolvedType += ('_' + resolvedChildType);
@@ -851,7 +740,6 @@ MessageElement.prototype._getNestedLookupTypeString = function (element) {
     return resolvedType;
 };
 OperationElement.prototype.postProcess = function (definitions, tag) {
-    /** @type {?} */
     let children = this.children;
     for (let i = 0, child; child = children[i]; i++) {
         if (child.name !== 'input' && child.name !== 'output')
@@ -861,9 +749,7 @@ OperationElement.prototype.postProcess = function (definitions, tag) {
             children.splice(i--, 1);
             continue;
         }
-        /** @type {?} */
         let messageName = splitQName(child.$message).name;
-        /** @type {?} */
         let message = definitions.messages[messageName];
         message.postProcess(definitions);
         if (message.element) {
@@ -878,7 +764,6 @@ OperationElement.prototype.postProcess = function (definitions, tag) {
     this.deleteFixedAttrs();
 };
 PortTypeElement.prototype.postProcess = function (definitions) {
-    /** @type {?} */
     let children = this.children;
     if (typeof children === 'undefined')
         return;
@@ -893,14 +778,7 @@ PortTypeElement.prototype.postProcess = function (definitions) {
     this.deleteFixedAttrs();
 };
 BindingElement.prototype.postProcess = function (definitions) {
-    /** @type {?} */
-    let type = splitQName(this.$type).name;
-    /** @type {?} */
-    let portType = definitions.portTypes[type];
-    /** @type {?} */
-    let style = this.style;
-    /** @type {?} */
-    let children = this.children;
+    let type = splitQName(this.$type).name, portType = definitions.portTypes[type], style = this.style, children = this.children;
     if (portType) {
         portType.postProcess(definitions);
         this.methods = portType.methods;
@@ -910,7 +788,6 @@ BindingElement.prototype.postProcess = function (definitions) {
             child.postProcess(definitions, 'binding');
             children.splice(i--, 1);
             child.style || (child.style = style);
-            /** @type {?} */
             let method = this.methods[child.$name];
             if (method) {
                 method.style = child.style;
@@ -927,17 +804,12 @@ BindingElement.prototype.postProcess = function (definitions) {
     this.deleteFixedAttrs();
 };
 ServiceElement.prototype.postProcess = function (definitions) {
-    /** @type {?} */
-    let children = this.children;
-    /** @type {?} */
-    let bindings = definitions.bindings;
+    let children = this.children, bindings = definitions.bindings;
     if (children && children.length > 0) {
         for (let i = 0, child; child = children[i]; i++) {
             if (child.name !== 'port')
                 continue;
-            /** @type {?} */
             let bindingName = splitQName(child.$binding).name;
-            /** @type {?} */
             let binding = bindings[bindingName];
             if (binding) {
                 binding.postProcess(definitions);
@@ -953,7 +825,6 @@ ServiceElement.prototype.postProcess = function (definitions) {
     this.deleteFixedAttrs();
 };
 SimpleTypeElement.prototype.description = function (definitions) {
-    /** @type {?} */
     let children = this.children;
     for (let i = 0, child; child = children[i]; i++) {
         if (child instanceof RestrictionElement)
@@ -962,9 +833,7 @@ SimpleTypeElement.prototype.description = function (definitions) {
     return {};
 };
 RestrictionElement.prototype.description = function (definitions, xmlns) {
-    /** @type {?} */
     let children = this.children;
-    /** @type {?} */
     let desc;
     for (let i = 0, child; child = children[i]; i++) {
         if (child instanceof SequenceElement ||
@@ -974,32 +843,20 @@ RestrictionElement.prototype.description = function (definitions, xmlns) {
         }
     }
     if (desc && this.$base) {
-        /** @type {?} */
-        let type = splitQName(this.$base);
-        /** @type {?} */
-        let typeName = type.name;
-        /** @type {?} */
-        let ns = xmlns && xmlns[type.prefix] || definitions.xmlns[type.prefix];
-        /** @type {?} */
-        let schema = definitions.schemas[ns];
-        /** @type {?} */
-        let typeElement = schema && (schema.complexTypes[typeName] || schema.types[typeName] || schema.elements[typeName]);
+        let type = splitQName(this.$base), typeName = type.name, ns = xmlns && xmlns[type.prefix] || definitions.xmlns[type.prefix], schema = definitions.schemas[ns], typeElement = schema && (schema.complexTypes[typeName] || schema.types[typeName] || schema.elements[typeName]);
         desc.getBase = function () {
             return typeElement.description(definitions, schema.xmlns);
         };
         return desc;
     }
     // then simple element
-    /** @type {?} */
     let base = this.$base ? this.$base + "|" : "";
     return base + this.children.map(function (child) {
         return child.description();
     }).join(",");
 };
 ExtensionElement.prototype.description = function (definitions, xmlns) {
-    /** @type {?} */
     let children = this.children;
-    /** @type {?} */
     let desc = {};
     for (let i = 0, child; child = children[i]; i++) {
         if (child instanceof SequenceElement ||
@@ -1008,23 +865,14 @@ ExtensionElement.prototype.description = function (definitions, xmlns) {
         }
     }
     if (this.$base) {
-        /** @type {?} */
-        let type = splitQName(this.$base);
-        /** @type {?} */
-        let typeName = type.name;
-        /** @type {?} */
-        let ns = xmlns && xmlns[type.prefix] || definitions.xmlns[type.prefix];
-        /** @type {?} */
-        let schema = definitions.schemas[ns];
+        let type = splitQName(this.$base), typeName = type.name, ns = xmlns && xmlns[type.prefix] || definitions.xmlns[type.prefix], schema = definitions.schemas[ns];
         if (typeName in Primitives) {
             return this.$base;
         }
         else {
-            /** @type {?} */
             let typeElement = schema && (schema.complexTypes[typeName] ||
                 schema.types[typeName] || schema.elements[typeName]);
             if (typeElement) {
-                /** @type {?} */
                 let base = typeElement.description(definitions, schema.xmlns);
                 desc = defaultsDeep(base, desc);
             }
@@ -1036,7 +884,6 @@ EnumerationElement.prototype.description = function () {
     return this[this.valueKey];
 };
 ComplexTypeElement.prototype.description = function (definitions, xmlns) {
-    /** @type {?} */
     let children = this.children || [];
     for (let i = 0, child; child = children[i]; i++) {
         if (child instanceof ChoiceElement ||
@@ -1050,7 +897,6 @@ ComplexTypeElement.prototype.description = function (definitions, xmlns) {
     return {};
 };
 ComplexContentElement.prototype.description = function (definitions, xmlns) {
-    /** @type {?} */
     let children = this.children;
     for (let i = 0, child; child = children[i]; i++) {
         if (child instanceof ExtensionElement) {
@@ -1060,7 +906,6 @@ ComplexContentElement.prototype.description = function (definitions, xmlns) {
     return {};
 };
 SimpleContentElement.prototype.description = function (definitions, xmlns) {
-    /** @type {?} */
     let children = this.children;
     for (let i = 0, child; child = children[i]; i++) {
         if (child instanceof ExtensionElement) {
@@ -1070,11 +915,7 @@ SimpleContentElement.prototype.description = function (definitions, xmlns) {
     return {};
 };
 ElementElement.prototype.description = function (definitions, xmlns) {
-    /** @type {?} */
-    let element = {};
-    /** @type {?} */
-    let name = this.$name;
-    /** @type {?} */
+    let element = {}, name = this.$name;
     let isMany = !this.$maxOccurs ? false : (isNaN(this.$maxOccurs) ? (this.$maxOccurs === 'unbounded') : (this.$maxOccurs > 1));
     if (this.$minOccurs !== this.$maxOccurs && isMany) {
         name += '[]';
@@ -1082,27 +923,17 @@ ElementElement.prototype.description = function (definitions, xmlns) {
     if (xmlns && xmlns[TNS_PREFIX$1]) {
         this.$targetNamespace = xmlns[TNS_PREFIX$1];
     }
-    /** @type {?} */
     let type = this.$type || this.$ref;
     if (type) {
         type = splitQName(type);
-        /** @type {?} */
-        let typeName = type.name;
-        /** @type {?} */
-        let ns = xmlns && xmlns[type.prefix] || definitions.xmlns[type.prefix];
-        /** @type {?} */
-        let schema = definitions.schemas[ns];
-        /** @type {?} */
-        let typeElement = schema && (this.$type ? schema.complexTypes[typeName] || schema.types[typeName] : schema.elements[typeName]);
+        let typeName = type.name, ns = xmlns && xmlns[type.prefix] || definitions.xmlns[type.prefix], schema = definitions.schemas[ns], typeElement = schema && (this.$type ? schema.complexTypes[typeName] || schema.types[typeName] : schema.elements[typeName]);
         if (ns && definitions.schemas[ns]) {
             xmlns = definitions.schemas[ns].xmlns;
         }
         if (typeElement && !(typeName in Primitives)) {
             if (!(typeName in definitions.descriptions.types)) {
-                /** @type {?} */
                 let elem = {};
                 definitions.descriptions.types[typeName] = elem;
-                /** @type {?} */
                 let description = typeElement.description(definitions, xmlns);
                 if (typeof description === 'string') {
                     elem = description;
@@ -1138,7 +969,6 @@ ElementElement.prototype.description = function (definitions, xmlns) {
         }
     }
     else {
-        /** @type {?} */
         let children = this.children;
         element[name] = {};
         for (let i = 0, child; child = children[i]; i++) {
@@ -1151,15 +981,12 @@ ElementElement.prototype.description = function (definitions, xmlns) {
 };
 AllElement.prototype.description =
     SequenceElement.prototype.description = function (definitions, xmlns) {
-        /** @type {?} */
         let children = this.children;
-        /** @type {?} */
         let sequence = {};
         for (let i = 0, child; child = children[i]; i++) {
             if (child instanceof AnyElement) {
                 continue;
             }
-            /** @type {?} */
             let description = child.description(definitions, xmlns);
             for (let key in description) {
                 sequence[key] = description[key];
@@ -1168,12 +995,9 @@ AllElement.prototype.description =
         return sequence;
     };
 ChoiceElement.prototype.description = function (definitions, xmlns) {
-    /** @type {?} */
     let children = this.children;
-    /** @type {?} */
     let choice = {};
     for (let i = 0, child; child = children[i]; i++) {
-        /** @type {?} */
         let description = child.description(definitions, xmlns);
         for (let key in description) {
             choice[key] = description[key];
@@ -1185,25 +1009,20 @@ MessageElement.prototype.description = function (definitions) {
     if (this.element) {
         return this.element && this.element.description(definitions);
     }
-    /** @type {?} */
     let desc = {};
     desc[this.$name] = this.parts;
     return desc;
 };
 PortTypeElement.prototype.description = function (definitions) {
-    /** @type {?} */
     let methods = {};
     for (let name in this.methods) {
-        /** @type {?} */
         let method = this.methods[name];
         methods[name] = method.description(definitions);
     }
     return methods;
 };
 OperationElement.prototype.description = function (definitions) {
-    /** @type {?} */
     let inputDesc = this.input ? this.input.description(definitions) : null;
-    /** @type {?} */
     let outputDesc = this.output ? this.output.description(definitions) : null;
     return {
         input: inputDesc && inputDesc[Object.keys(inputDesc)[0]],
@@ -1211,31 +1030,23 @@ OperationElement.prototype.description = function (definitions) {
     };
 };
 BindingElement.prototype.description = function (definitions) {
-    /** @type {?} */
     let methods = {};
     for (let name in this.methods) {
-        /** @type {?} */
         let method = this.methods[name];
         methods[name] = method.description(definitions);
     }
     return methods;
 };
 ServiceElement.prototype.description = function (definitions) {
-    /** @type {?} */
     let ports = {};
     for (let name in this.ports) {
-        /** @type {?} */
         let port = this.ports[name];
         ports[name] = port.binding.description(definitions);
     }
     return ports;
 };
-/** @type {?} */
 let WSDL = function (definition, uri, options) {
-    /** @type {?} */
-    let self = this;
-    /** @type {?} */
-    let fromFunc;
+    let self = this, fromFunc;
     this.uri = uri;
     this.callback = function () {
     };
@@ -1262,14 +1073,12 @@ let WSDL = function (definition, uri, options) {
         }
         self.processIncludes().then(() => {
             self.definitions.deleteFixedAttrs();
-            /** @type {?} */
             let services = self.services = self.definitions.services;
             if (services) {
                 for (const name in services) {
                     services[name].postProcess(self.definitions);
                 }
             }
-            /** @type {?} */
             let complexTypes = self.definitions.complexTypes;
             if (complexTypes) {
                 for (const name in complexTypes) {
@@ -1277,25 +1086,19 @@ let WSDL = function (definition, uri, options) {
                 }
             }
             // for document style, for every binding, prepare input message element name to (methodName, output message element name) mapping
-            /** @type {?} */
             let bindings = self.definitions.bindings;
             for (let bindingName in bindings) {
-                /** @type {?} */
                 let binding = bindings[bindingName];
                 if (typeof binding.style === 'undefined') {
                     binding.style = 'document';
                 }
                 if (binding.style !== 'document')
                     continue;
-                /** @type {?} */
                 let methods = binding.methods;
-                /** @type {?} */
                 let topEls = binding.topElements = {};
                 for (let methodName in methods) {
                     if (methods[methodName].input) {
-                        /** @type {?} */
                         let inputName = methods[methodName].input.$name;
-                        /** @type {?} */
                         let outputName = "";
                         if (methods[methodName].output)
                             outputName = methods[methodName].output.$name;
@@ -1366,7 +1169,6 @@ WSDL.prototype.xmlKey = '$xml';
 WSDL.prototype._initializeOptions = function (options) {
     this._originalIgnoredNamespaces = (options || {}).ignoredNamespaces;
     this.options = {};
-    /** @type {?} */
     let ignoredNamespaces = options ? options.ignoredNamespaces : null;
     if (ignoredNamespaces &&
         (Array.isArray(ignoredNamespaces.namespaces) || typeof ignoredNamespaces.namespaces === 'string')) {
@@ -1411,7 +1213,6 @@ WSDL.prototype._initializeOptions = function (options) {
     if (options.request) {
         this.options.request = options.request;
     }
-    /** @type {?} */
     let ignoreBaseNameSpaces = options ? options.ignoreBaseNameSpaces : null;
     if (ignoreBaseNameSpaces !== null && typeof ignoreBaseNameSpaces !== 'undefined') {
         this.options.ignoreBaseNameSpaces = ignoreBaseNameSpaces;
@@ -1433,18 +1234,13 @@ WSDL.prototype.onReady = function (callback) {
 };
 WSDL.prototype._processNextInclude = function (includes) {
     return __awaiter(this, void 0, void 0, function* () {
-        /** @type {?} */
-        let self = this;
-        /** @type {?} */
-        let include = includes.shift();
-        /** @type {?} */
-        let options;
+        let self = this, include = includes.shift(), options;
         if (!include)
             return; // callback();
-        // callback();
-        /** @type {?} */
         let includePath;
-        if (!/^https?:/.test(self.uri) && !/^https?:/.test(include.location)) ;
+        if (!/^https?:/.test(self.uri) && !/^https?:/.test(include.location)) {
+            // includePath = path.resolve(path.dirname(self.uri), include.location);
+        }
         else {
             includePath = resolve(self.uri || '', include.location);
         }
@@ -1452,7 +1248,6 @@ WSDL.prototype._processNextInclude = function (includes) {
         // follow supplied ignoredNamespaces option
         options.ignoredNamespaces = this._originalIgnoredNamespaces || this.options.ignoredNamespaces;
         options.WSDL_CACHE = this.WSDL_CACHE;
-        /** @type {?} */
         const wsdl = yield open_wsdl_recursive(includePath, options);
         self._includesWsdl.push(wsdl);
         if (wsdl.definitions instanceof DefinitionsElement) {
@@ -1484,12 +1279,8 @@ WSDL.prototype._processNextInclude = function (includes) {
 };
 WSDL.prototype.processIncludes = function () {
     return __awaiter(this, void 0, void 0, function* () {
-        /** @type {?} */
-        let schemas = this.definitions.schemas;
-        /** @type {?} */
-        let includes = [];
+        let schemas = this.definitions.schemas, includes = [];
         for (let ns in schemas) {
-            /** @type {?} */
             let schema = schemas[ns];
             includes = includes.concat(schema.includes || []);
         }
@@ -1497,10 +1288,8 @@ WSDL.prototype.processIncludes = function () {
     });
 };
 WSDL.prototype.describeServices = function () {
-    /** @type {?} */
     let services = {};
     for (let name in this.services) {
-        /** @type {?} */
         let service = this.services[name];
         services[name] = service.description(this.definitions);
     }
@@ -1510,15 +1299,10 @@ WSDL.prototype.toXML = function () {
     return this.xml || '';
 };
 WSDL.prototype.xmlToObject = function (xml, callback) {
-    /** @type {?} */
     let self = this;
-    /** @type {?} */
     let p = typeof callback === 'function' ? {} : parser(true);
-    /** @type {?} */
     let objectName = null;
-    /** @type {?} */
     let root = {};
-    /** @type {?} */
     let schema = {};
     /*let schema = {
       Envelope: {
@@ -1585,48 +1369,25 @@ WSDL.prototype.xmlToObject = function (xml, callback) {
             }
         };
     }
-    /** @type {?} */
     let stack = [{ name: null, object: root, schema: schema }];
-    /** @type {?} */
     let xmlns = {};
-    /** @type {?} */
-    let refs = {};
-    /** @type {?} */
-    let id;
+    let refs = {}, id; // {id:{hrefs:[],obj:}, ...}
     p.onopentag = function (node) {
-        /** @type {?} */
         let nsName = node.name;
-        /** @type {?} */
         let attrs = node.attributes;
-        /** @type {?} */
-        let name = splitQName(nsName).name;
-        /** @type {?} */
-        let attributeName;
-        /** @type {?} */
-        let top = stack[stack.length - 1];
-        /** @type {?} */
-        let topSchema = top.schema;
-        /** @type {?} */
-        let elementAttributes = {};
-        /** @type {?} */
-        let hasNonXmlnsAttribute = false;
-        /** @type {?} */
-        let hasNilAttribute = false;
-        /** @type {?} */
-        let obj = {};
-        /** @type {?} */
+        let name = splitQName(nsName).name, attributeName, top = stack[stack.length - 1], topSchema = top.schema, elementAttributes = {}, hasNonXmlnsAttribute = false, hasNilAttribute = false, obj = {};
         let originalName = name;
         if (!objectName && top.name === 'Body' && name !== 'Fault') {
-            /** @type {?} */
             let message = self.definitions.messages[name];
             // Support RPC/literal messages where response body contains one element named
             // after the operation + 'Response'. See http://www.w3.org/TR/wsdl#_names
             if (!message) {
                 try {
                     // Determine if this is request or response
-                    /** @type {?} */
                     let isInput = false;
+                    let isOutput = false;
                     if ((/Response$/).test(name)) {
+                        isOutput = true;
                         name = name.replace(/Response$/, '');
                     }
                     else if ((/Request$/).test(name)) {
@@ -1638,12 +1399,9 @@ WSDL.prototype.xmlToObject = function (xml, callback) {
                         name = name.replace(/Solicit$/, '');
                     }
                     // Look up the appropriate message as given in the portType's operations
-                    /** @type {?} */
                     let portTypes = self.definitions.portTypes;
-                    /** @type {?} */
                     let portTypeNames = Object.keys(portTypes);
                     // Currently this supports only one portType definition.
-                    /** @type {?} */
                     let portType = portTypes[portTypeNames[0]];
                     if (isInput) {
                         name = portType.methods[name].input.$name;
@@ -1686,7 +1444,6 @@ WSDL.prototype.xmlToObject = function (xml, callback) {
             elementAttributes[attributeName] = attrs[attributeName];
         }
         for (attributeName in elementAttributes) {
-            /** @type {?} */
             let res = splitQName(attributeName);
             if (res.name === 'nil' && xmlns[res.prefix] === 'http://www.w3.org/2001/XMLSchema-instance' && elementAttributes[attributeName] &&
                 (elementAttributes[attributeName].toLowerCase() === 'true' || elementAttributes[attributeName] === '1')) {
@@ -1698,14 +1455,10 @@ WSDL.prototype.xmlToObject = function (xml, callback) {
             obj[self.options.attributesKey] = elementAttributes;
         }
         // Pick up the schema for the type specified in element's xsi:type attribute.
-        /** @type {?} */
         let xsiTypeSchema;
-        /** @type {?} */
         let xsiType = elementAttributes['xsi:type'];
         if (xsiType) {
-            /** @type {?} */
             let type = splitQName(xsiType);
-            /** @type {?} */
             let typeURI;
             if (type.prefix === TNS_PREFIX$1) {
                 // In case of xsi:type = "MyType"
@@ -1714,7 +1467,6 @@ WSDL.prototype.xmlToObject = function (xml, callback) {
             else {
                 typeURI = xmlns[type.prefix];
             }
-            /** @type {?} */
             let typeDef = self.findSchemaObject(typeURI, type.name);
             if (typeDef) {
                 xsiTypeSchema = typeDef.description(self.definitions);
@@ -1732,19 +1484,8 @@ WSDL.prototype.xmlToObject = function (xml, callback) {
         });
     };
     p.onclosetag = function (nsName) {
-        /** @type {?} */
-        let cur = stack.pop();
-        /** @type {?} */
-        let obj = cur.object;
-        /** @type {?} */
-        let top = stack[stack.length - 1];
-        /** @type {?} */
-        let topObject = top.object;
-        /** @type {?} */
-        let topSchema = top.schema;
-        /** @type {?} */
-        let name = splitQName(nsName).name;
-        if (typeof cur.schema === 'string' && (cur.schema === 'string' || ((/** @type {?} */ (cur.schema))).split(':')[1] === 'string')) {
+        let cur = stack.pop(), obj = cur.object, top = stack[stack.length - 1], topObject = top.object, topSchema = top.schema, name = splitQName(nsName).name;
+        if (typeof cur.schema === 'string' && (cur.schema === 'string' || cur.schema.split(':')[1] === 'string')) {
             if (typeof obj === 'object' && Object.keys(obj).length === 0)
                 obj = cur.object = '';
         }
@@ -1779,16 +1520,13 @@ WSDL.prototype.xmlToObject = function (xml, callback) {
         }
     };
     p.oncdata = function (text) {
-        /** @type {?} */
         let originalText = text;
         text = trim(text);
         if (!text.length) {
             return;
         }
         if (/<\?xml[\s\S]+\?>/.test(text)) {
-            /** @type {?} */
             let top = stack[stack.length - 1];
-            /** @type {?} */
             let value = self.xmlToObject(text);
             if (top.object[self.options.attributesKey]) {
                 top.object[self.options.valueKey] = value;
@@ -1813,18 +1551,13 @@ WSDL.prototype.xmlToObject = function (xml, callback) {
         };
     };
     p.ontext = function (text) {
-        /** @type {?} */
         let originalText = text;
         text = trim(text);
         if (!text.length) {
             return;
         }
-        /** @type {?} */
         let top = stack[stack.length - 1];
-        /** @type {?} */
-        let name = splitQName(top.schema).name;
-        /** @type {?} */
-        let value;
+        let name = splitQName(top.schema).name, value;
         if (self.options && self.options.customDeserializer && self.options.customDeserializer[name]) {
             value = self.options.customDeserializer[name](text, top);
         }
@@ -1860,7 +1593,6 @@ WSDL.prototype.xmlToObject = function (xml, callback) {
     };
     if (typeof callback === 'function') {
         // we be streaming
-        /** @type {?} */
         let saxStream = createStream(true);
         saxStream.on('opentag', p.onopentag);
         saxStream.on('closetag', p.onclosetag);
@@ -1871,7 +1603,6 @@ WSDL.prototype.xmlToObject = function (xml, callback) {
             callback(err);
         })
             .on('end', function () {
-            /** @type {?} */
             let r;
             try {
                 r = finish();
@@ -1885,41 +1616,30 @@ WSDL.prototype.xmlToObject = function (xml, callback) {
     }
     p.write(xml).close();
     return finish();
-    /**
-     * @return {?}
-     */
     function finish() {
         // MultiRef support: merge objects instead of replacing
         for (let n in refs) {
-            /** @type {?} */
             let ref = refs[n];
             for (let i = 0; i < ref.hrefs.length; i++) {
                 assign(ref.hrefs[i].obj, ref.obj);
             }
         }
         if (root.Envelope) {
-            /** @type {?} */
             let body = root.Envelope.Body;
-            /** @type {?} */
             let error;
             if (body && body.Fault) {
                 if (!body.Fault.Code) {
-                    /** @type {?} */
                     let code = body.Fault.faultcode && body.Fault.faultcode.$value;
-                    /** @type {?} */
                     let string = body.Fault.faultstring && body.Fault.faultstring.$value;
-                    /** @type {?} */
                     let detail = body.Fault.detail && body.Fault.detail.$value;
                     code = code || body.Fault.faultcode;
                     string = string || body.Fault.faultstring;
                     detail = detail || body.Fault.detail;
+                    let error = new Error(code + ': ' + string + (detail ? ': ' + detail : ''));
                 }
                 else {
-                    /** @type {?} */
                     let code = body.Fault.Code.Value;
-                    /** @type {?} */
                     let string = body.Fault.Reason.Text.$value;
-                    /** @type {?} */
                     let detail = body.Fault.Detail.info;
                     error = new Error(code + ': ' + string + (detail ? ': ' + detail : ''));
                 }
@@ -1941,10 +1661,8 @@ WSDL.prototype.findSchemaObject = function (nsURI, qname) {
     if (!nsURI || !qname) {
         return null;
     }
-    /** @type {?} */
     let def = null;
     if (this.definitions.schemas) {
-        /** @type {?} */
         let schema = this.definitions.schemas[nsURI];
         if (schema) {
             if (qname.indexOf(':') !== -1) {
@@ -1970,10 +1688,8 @@ WSDL.prototype.objectToDocumentXML = function (name, params, nsPrefix, nsURI, ty
     if (params && params._xml) {
         return params._xml;
     }
-    /** @type {?} */
     let args = {};
     args[name] = params;
-    /** @type {?} */
     let parameterTypeObj = type ? this.findSchemaObject(nsURI, type) : null;
     return this.objectToXML(args, null, nsPrefix, nsURI, true, null, parameterTypeObj);
 };
@@ -1986,11 +1702,8 @@ WSDL.prototype.objectToDocumentXML = function (name, params, nsPrefix, nsURI, ty
  * @returns {string}
  */
 WSDL.prototype.objectToRpcXML = function (name, params, nsPrefix, nsURI, isParts) {
-    /** @type {?} */
     let parts = [];
-    /** @type {?} */
     let defs = this.definitions;
-    /** @type {?} */
     let nsAttrName = '_xmlns';
     nsPrefix = nsPrefix || findPrefix$1(defs.xmlns, nsURI);
     nsURI = nsURI || defs.xmlns[nsPrefix];
@@ -2001,14 +1714,10 @@ WSDL.prototype.objectToRpcXML = function (name, params, nsPrefix, nsURI, isParts
             continue;
         }
         if (key !== nsAttrName) {
-            /** @type {?} */
             let value = params[key];
-            /** @type {?} */
             let prefixedKey = (isParts ? '' : nsPrefix) + key;
-            /** @type {?} */
             let attributes = [];
             if (typeof value === 'object' && value.hasOwnProperty(this.options.attributesKey)) {
-                /** @type {?} */
                 let attrs = value[this.options.attributesKey];
                 for (let n in attrs) {
                     attributes.push(' ' + n + '=' + '"' + attrs[n] + '"');
@@ -2022,17 +1731,9 @@ WSDL.prototype.objectToRpcXML = function (name, params, nsPrefix, nsURI, isParts
     parts.push(['</', nsPrefix, name, '>'].join(''));
     return parts.join('');
 };
-/**
- * @param {?} ns
- * @return {?}
- */
 function appendColon(ns) {
     return (ns && ns.charAt(ns.length - 1) !== ':') ? ns + ':' : ns;
 }
-/**
- * @param {?} ns
- * @return {?}
- */
 function noColonNameSpace(ns) {
     return (ns && ns.charAt(ns.length - 1) === ':') ? ns.substring(0, ns.length - 1) : ns;
 }
@@ -2040,7 +1741,6 @@ WSDL.prototype.isIgnoredNameSpace = function (ns) {
     return this.options.ignoredNamespaces.indexOf(ns) > -1;
 };
 WSDL.prototype.filterOutIgnoredNameSpace = function (ns) {
-    /** @type {?} */
     let namespace = noColonNameSpace(ns);
     return this.isIgnoredNameSpace(namespace) ? '' : namespace;
 };
@@ -2058,11 +1758,8 @@ WSDL.prototype.filterOutIgnoredNameSpace = function (ns) {
  * @param {NamespaceContext} nsContext Namespace context
  */
 WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmlnsAttr, schemaObject, nsContext) {
-    /** @type {?} */
     let self = this;
-    /** @type {?} */
     let schema = this.definitions.schemas[nsURI];
-    /** @type {?} */
     let parentNsPrefix = nsPrefix ? nsPrefix.parent : undefined;
     if (typeof parentNsPrefix !== 'undefined') {
         //we got the parentNsPrefix for our array. setting the namespace-letiable back to the current namespace string
@@ -2072,15 +1769,10 @@ WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmln
     if (this.isIgnoredNameSpace(parentNsPrefix)) {
         parentNsPrefix = '';
     }
-    /** @type {?} */
     let soapHeader = !schema;
-    /** @type {?} */
     let qualified = schema && schema.$elementFormDefault === 'qualified';
-    /** @type {?} */
     let parts = [];
-    /** @type {?} */
     let prefixNamespace = (nsPrefix || qualified) && nsPrefix !== TNS_PREFIX$1;
-    /** @type {?} */
     let xmlnsAttrib = '';
     if (nsURI && isFirst) {
         if (self.options.overrideRootElement && self.options.overrideRootElement.xmlnsAttributes) {
@@ -2109,7 +1801,6 @@ WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmln
     if (xmlnsAttr && !(self.options.overrideRootElement && self.options.overrideRootElement.xmlnsAttributes)) {
         xmlnsAttrib = xmlnsAttr;
     }
-    /** @type {?} */
     let ns = '';
     if (self.options.overrideRootElement && isFirst) {
         ns = self.options.overrideRootElement.namespace;
@@ -2117,23 +1808,13 @@ WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmln
     else if (prefixNamespace && (qualified || isFirst || soapHeader) && !this.isIgnoredNameSpace(nsPrefix)) {
         ns = nsPrefix;
     }
-    /** @type {?} */
-    let i;
-    /** @type {?} */
-    let n;
+    let i, n;
     // start building out XML string.
     if (Array.isArray(obj)) {
         for (i = 0, n = obj.length; i < n; i++) {
-            /** @type {?} */
             let item = obj[i];
-            /** @type {?} */
-            let arrayAttr = self.processAttributes(item, nsContext);
-            /** @type {?} */
-            let correctOuterNsPrefix = parentNsPrefix || ns;
-            //using the parent namespace prefix if given
-            /** @type {?} */
+            let arrayAttr = self.processAttributes(item, nsContext), correctOuterNsPrefix = parentNsPrefix || ns; //using the parent namespace prefix if given
             let body = self.objectToXML(item, name, nsPrefix, nsURI, false, null, schemaObject, nsContext);
-            /** @type {?} */
             let openingTagParts = ['<', appendColon(correctOuterNsPrefix), name, arrayAttr, xmlnsAttrib];
             if (body === '' && self.options.useEmptyTag) {
                 // Use empty (self-closing) tags if no contents
@@ -2170,20 +1851,14 @@ WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmln
                 nsContext.popContext();
                 return xmlEscape(obj[name]);
             }
-            /** @type {?} */
             let child = obj[name];
             if (typeof child === 'undefined') {
                 continue;
             }
-            /** @type {?} */
             let attr = self.processAttributes(child, nsContext);
-            /** @type {?} */
             let value = '';
-            /** @type {?} */
             let nonSubNameSpace = '';
-            /** @type {?} */
             let emptyNonSubNameSpace = false;
-            /** @type {?} */
             let nameWithNsRegex = /^([^:]+):([^:]+)$/.exec(name);
             if (nameWithNsRegex) {
                 nonSubNameSpace = nameWithNsRegex[1] + ':';
@@ -2199,24 +1874,18 @@ WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmln
             else {
                 if (self.definitions.schemas) {
                     if (schema) {
-                        /** @type {?} */
                         let childSchemaObject = self.findChildSchemaObject(schemaObject, name);
                         //find sub namespace if not a primitive
                         if (childSchemaObject &&
                             ((childSchemaObject.$type && (childSchemaObject.$type.indexOf('xsd:') === -1)) ||
                                 childSchemaObject.$ref || childSchemaObject.$name)) {
                             /*if the base name space of the children is not in the ingoredSchemaNamspaces we use it.
-                                           This is because in some services the child nodes do not need the baseNameSpace.
-                                           */
-                            /** @type {?} */
+                             This is because in some services the child nodes do not need the baseNameSpace.
+                             */
                             let childNsPrefix = '';
-                            /** @type {?} */
                             let childName = '';
-                            /** @type {?} */
                             let childNsURI;
-                            /** @type {?} */
                             let childXmlnsAttrib = '';
-                            /** @type {?} */
                             let elementQName = childSchemaObject.$ref || childSchemaObject.$name;
                             if (elementQName) {
                                 elementQName = splitQName(elementQName);
@@ -2236,7 +1905,6 @@ WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmln
                                     }
                                     childNsURI = schema.xmlns[childNsPrefix] || self.definitions.xmlns[childNsPrefix];
                                 }
-                                /** @type {?} */
                                 let unqualified = false;
                                 // Check qualification form for local elements
                                 if (childSchemaObject.$name && childSchemaObject.targetNamespace === undefined) {
@@ -2260,14 +1928,10 @@ WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmln
                                     }
                                 }
                             }
-                            /** @type {?} */
                             let resolvedChildSchemaObject;
                             if (childSchemaObject.$type) {
-                                /** @type {?} */
                                 let typeQName = splitQName(childSchemaObject.$type);
-                                /** @type {?} */
                                 let typePrefix = typeQName.prefix;
-                                /** @type {?} */
                                 let typeURI = schema.xmlns[typePrefix] || self.definitions.xmlns[typePrefix];
                                 childNsURI = typeURI;
                                 if (typeURI !== 'http://www.w3.org/2001/XMLSchema' && typePrefix !== TNS_PREFIX$1) {
@@ -2305,7 +1969,6 @@ WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmln
                         }
                         else if (obj[self.options.attributesKey] && obj[self.options.attributesKey].xsi_type) {
                             //if parent object has complex type defined and child not found in parent
-                            /** @type {?} */
                             let completeChildParamTypeObject = self.findChildSchemaObject(obj[self.options.attributesKey].xsi_type.type, obj[self.options.attributesKey].xsi_type.xmlns);
                             nonSubNameSpace = obj[self.options.attributesKey].xsi_type.prefix;
                             nsContext.addNamespace(obj[self.options.attributesKey].xsi_type.prefix, obj[self.options.attributesKey].xsi_type.xmlns);
@@ -2330,7 +1993,6 @@ WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmln
             else if (this.isIgnoredNameSpace(ns)) {
                 ns = '';
             }
-            /** @type {?} */
             let useEmptyTag = !value && self.options.useEmptyTag;
             if (!Array.isArray(child)) {
                 // start tag
@@ -2355,17 +2017,13 @@ WSDL.prototype.objectToXML = function (obj, name, nsPrefix, nsURI, isFirst, xmln
     return parts.join('');
 };
 WSDL.prototype.processAttributes = function (child, nsContext) {
-    /** @type {?} */
     let attr = '';
     if (child === null) {
         child = [];
     }
-    /** @type {?} */
     let attrObj = child[this.options.attributesKey];
     if (attrObj && attrObj.xsi_type) {
-        /** @type {?} */
         let xsiType = attrObj.xsi_type;
-        /** @type {?} */
         let prefix = xsiType.prefix || xsiType.namespace;
         // Generate a new namespace for complex extension if one not provided
         if (!prefix) {
@@ -2380,7 +2038,6 @@ WSDL.prototype.processAttributes = function (child, nsContext) {
         for (let attrKey in attrObj) {
             //handle complex extension separately
             if (attrKey === 'xsi_type') {
-                /** @type {?} */
                 let attrValue = attrObj[attrKey];
                 attr += ' xsi:type="' + attrValue.prefix + ':' + attrValue.type + '"';
                 attr += ' xmlns:' + attrValue.prefix + '="' + attrValue.xmlns + '"';
@@ -2403,7 +2060,6 @@ WSDL.prototype.findSchemaType = function (name, nsURI) {
     if (!this.definitions.schemas || !name || !nsURI) {
         return null;
     }
-    /** @type {?} */
     let schema = this.definitions.schemas[nsURI];
     if (!schema || !schema.complexTypes) {
         return null;
@@ -2424,19 +2080,10 @@ WSDL.prototype.findChildSchemaObject = function (parameterTypeObj, childName, ba
     else {
         backtrace = backtrace.concat([parameterTypeObj]);
     }
-    /** @type {?} */
-    let found = null;
-    /** @type {?} */
-    let i = 0;
-    /** @type {?} */
-    let child;
-    /** @type {?} */
-    let ref;
+    let found = null, i = 0, child, ref;
     if (Array.isArray(parameterTypeObj.$lookupTypes) && parameterTypeObj.$lookupTypes.length) {
-        /** @type {?} */
         let types = parameterTypeObj.$lookupTypes;
         for (i = 0; i < types.length; i++) {
-            /** @type {?} */
             let typeObj = types[i];
             if (typeObj.$name === childName) {
                 found = typeObj;
@@ -2444,7 +2091,6 @@ WSDL.prototype.findChildSchemaObject = function (parameterTypeObj, childName, ba
             }
         }
     }
-    /** @type {?} */
     let object = parameterTypeObj;
     if (object.$name === childName && object.name === 'element') {
         return object;
@@ -2455,11 +2101,9 @@ WSDL.prototype.findChildSchemaObject = function (parameterTypeObj, childName, ba
             return object;
         }
     }
-    /** @type {?} */
     let childNsURI;
     // want to avoid unecessary recursion to improve performance
     if (object.$type && backtrace.length === 1) {
-        /** @type {?} */
         let typeInfo = splitQName(object.$type);
         if (typeInfo.prefix === TNS_PREFIX$1) {
             childNsURI = parameterTypeObj.$targetNamespace;
@@ -2467,7 +2111,6 @@ WSDL.prototype.findChildSchemaObject = function (parameterTypeObj, childName, ba
         else {
             childNsURI = this.definitions.xmlns[typeInfo.prefix];
         }
-        /** @type {?} */
         let typeDef = this.findSchemaType(typeInfo.name, childNsURI);
         if (typeDef) {
             return this.findChildSchemaObject(typeDef, childName, backtrace);
@@ -2480,12 +2123,9 @@ WSDL.prototype.findChildSchemaObject = function (parameterTypeObj, childName, ba
                 break;
             }
             if (child.$base) {
-                /** @type {?} */
                 let baseQName = splitQName(child.$base);
-                /** @type {?} */
                 let childNameSpace = baseQName.prefix === TNS_PREFIX$1 ? '' : baseQName.prefix;
                 childNsURI = child.xmlns[baseQName.prefix] || this.definitions.xmlns[baseQName.prefix];
-                /** @type {?} */
                 let foundBase = this.findSchemaType(baseQName.name, childNsURI);
                 if (foundBase) {
                     found = this.findChildSchemaObject(foundBase, childName, backtrace);
@@ -2504,28 +2144,11 @@ WSDL.prototype.findChildSchemaObject = function (parameterTypeObj, childName, ba
     return found;
 };
 WSDL.prototype._parse = function (xml) {
-    /** @type {?} */
-    let self = this;
-    /** @type {?} */
-    let p = parser(true);
-    /** @type {?} */
-    let stack = [];
-    /** @type {?} */
-    let root = null;
-    /** @type {?} */
-    let types = null;
-    /** @type {?} */
-    let schema = null;
-    /** @type {?} */
-    let options = self.options;
+    let self = this, p = parser(true), stack = [], root = null, types = null, schema = null, options = self.options;
     p.onopentag = function (node) {
-        /** @type {?} */
         let nsName = node.name;
-        /** @type {?} */
         let attrs = node.attributes;
-        /** @type {?} */
         let top = stack[stack.length - 1];
-        /** @type {?} */
         let name;
         if (top) {
             try {
@@ -2561,7 +2184,6 @@ WSDL.prototype._parse = function (xml) {
         }
     };
     p.onclosetag = function (name) {
-        /** @type {?} */
         let top = stack[stack.length - 1];
         ok(top, 'Unmatched close tag: ' + name);
         top.endElement(stack, name);
@@ -2579,15 +2201,12 @@ WSDL.prototype._fromXML = function (xml) {
 WSDL.prototype._fromServices = function (services) {
 };
 WSDL.prototype._xmlnsMap = function () {
-    /** @type {?} */
     let xmlns = this.definitions.xmlns;
-    /** @type {?} */
     let str = '';
     for (let alias in xmlns) {
         if (alias === '' || alias === TNS_PREFIX$1) {
             continue;
         }
-        /** @type {?} */
         let ns = xmlns[alias];
         switch (ns) {
             case "http://xml.apache.org/xml-soap": // apachesoap
@@ -2629,16 +2248,8 @@ WSDL.prototype._xmlnsMap = function () {
  * By the time file A starts processing its includes its definitions will be already loaded,
  * this is the only thing that B will depend on when "opening" A
  */
-/**
- * @param {?} uri
- * @param {?} options
- * @return {?}
- */
 function open_wsdl_recursive(uri, options) {
-    /** @type {?} */
-    let fromCache;
-    /** @type {?} */
-    let WSDL_CACHE;
+    let fromCache, WSDL_CACHE;
     // if (typeof options === 'function') {
     //   callback = options;
     //   options = {};
@@ -2650,27 +2261,15 @@ function open_wsdl_recursive(uri, options) {
     }
     return open_wsdl(uri, options);
 }
-/**
- * @param {?} uri
- * @param {?} options
- * @return {?}
- */
 function open_wsdl(uri, options) {
     return __awaiter(this, void 0, void 0, function* () {
         // if (typeof options === 'function') {
         //   callback = options;
         //   options = {};
         // }
-        // if (typeof options === 'function') {
-        //   callback = options;
-        //   options = {};
-        // }
         // initialize cache when calling open_wsdl directly
-        /** @type {?} */
         let WSDL_CACHE = options.WSDL_CACHE || {};
-        /** @type {?} */
         let request_headers = options.wsdl_headers;
-        /** @type {?} */
         let request_options = options.wsdl_options;
         // let wsdl;
         // if (!/^https?:/.test(uri)) {
@@ -2704,32 +2303,18 @@ function open_wsdl(uri, options) {
         //   }, request_headers, request_options);
         // }
         // return wsdl;
-        /** @type {?} */
         const httpClient = options.httpClient;
-        /** @type {?} */
         const wsdlDef = yield httpClient.get(uri, { responseType: 'text' }).toPromise();
-        /** @type {?} */
-        const wsdlObj = yield new Promise((resolve$$1) => {
-            /** @type {?} */
+        const wsdlObj = yield new Promise((resolve) => {
             const wsdl = new WSDL(wsdlDef, uri, options);
             WSDL_CACHE[uri] = wsdl;
             wsdl.WSDL_CACHE = WSDL_CACHE;
-            wsdl.onReady(resolve$$1(wsdl));
+            wsdl.onReady(resolve(wsdl));
         });
         return wsdlObj;
     });
 }
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @param {?} username
- * @param {?} password
- * @param {?} defaults
- * @return {?}
- */
 function BasicAuthSecurity(username, password, defaults) {
     this._username = username;
     this._password = password;
@@ -2746,18 +2331,8 @@ BasicAuthSecurity.prototype.addOptions = function (options) {
     merge(options, this.defaults);
 };
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/** @type {?} */
+"use strict";
 var validPasswordTypes = ['PasswordDigest', 'PasswordText'];
-/**
- * @param {?} username
- * @param {?} password
- * @param {?} options
- * @return {?}
- */
 function WSSecurity(username, password, options) {
     options = options || {};
     this._username = username;
@@ -2788,15 +2363,7 @@ function WSSecurity(username, password, options) {
 }
 WSSecurity.prototype.toXML = function () {
     // avoid dependency on date formatting libraries
-    /**
-     * @param {?} d
-     * @return {?}
-     */
     function getDate(d) {
-        /**
-         * @param {?} n
-         * @return {?}
-         */
         function pad(n) {
             return n < 10 ? '0' + n : n;
         }
@@ -2807,24 +2374,17 @@ WSSecurity.prototype.toXML = function () {
             + pad(d.getUTCMinutes()) + ':'
             + pad(d.getUTCSeconds()) + 'Z';
     }
-    /** @type {?} */
     var now = new Date();
-    /** @type {?} */
     var created = getDate(now);
-    /** @type {?} */
     var timeStampXml = '';
     if (this._hasTimeStamp) {
-        /** @type {?} */
         var expires = getDate(new Date(now.getTime() + (1000 * 600)));
         timeStampXml = "<wsu:Timestamp wsu:Id=\"Timestamp-" + created + "\">" +
             "<wsu:Created>" + created + "</wsu:Created>" +
             "<wsu:Expires>" + expires + "</wsu:Expires>" +
             "</wsu:Timestamp>";
     }
-    /** @type {?} */
-    var password;
-    /** @type {?} */
-    var nonce;
+    var password, nonce;
     if (this._hasNonce || this._passwordType !== 'PasswordText') {
         // nonce = base64 ( sha1 ( created + random ) )
         // var nHash = crypto.createHash('sha1');
@@ -2854,15 +2414,7 @@ WSSecurity.prototype.toXML = function () {
         "</wsse:Security>";
 };
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @param {?} token
- * @param {?} defaults
- * @return {?}
- */
+"use strict";
 function BearerSecurity(token, defaults) {
     this._token = token;
     this.defaults = {};
@@ -2878,17 +2430,7 @@ BearerSecurity.prototype.addOptions = function (options) {
     merge(options, this.defaults);
 };
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @param {?} username
- * @param {?} password
- * @param {?} domain
- * @param {?} workstation
- * @return {?}
- */
+"use strict";
 function NTLMSecurity(username, password, domain, workstation) {
     if (typeof username === "object") {
         this.defaults = username;
@@ -2914,11 +2456,7 @@ NTLMSecurity.prototype.addOptions = function (options) {
     merge(options, this.defaults);
 };
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/** @type {?} */
+"use strict";
 const security = {
     BasicAuthSecurity,
     BearerSecurity,
@@ -2927,27 +2465,13 @@ const security = {
     NTLMSecurity,
 };
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 class Multipart {
     constructor() {
         this.preambleCRLF = true;
         this.postambleCRLF = true;
     }
-    /**
-     * @param {?} parts
-     * @param {?} boundary
-     * @return {?}
-     */
     build(parts, boundary) {
-        /** @type {?} */
         const body = [];
-        /**
-         * @param {?} part
-         * @return {?}
-         */
         function add(part) {
             if (typeof part === 'number') {
                 part = part.toString();
@@ -2958,7 +2482,6 @@ class Multipart {
             add('\r\n');
         }
         parts.forEach(function (part) {
-            /** @type {?} */
             let preamble = '--' + boundary + '\r\n';
             Object.keys(part).forEach(function (key) {
                 if (key === 'body') {
@@ -2975,7 +2498,6 @@ class Multipart {
         if (this.postambleCRLF) {
             add('\r\n');
         }
-        /** @type {?} */
         const size = body.map((part) => {
             if (typeof part === 'string') {
                 return part.length;
@@ -2984,9 +2506,7 @@ class Multipart {
                 return part.byteLength;
             }
         }).reduce((a, b) => a + b, 0);
-        /** @type {?} */
         let uint8array = new Uint8Array(size);
-        /** @type {?} */
         let i = 0;
         body.forEach((part) => {
             if (typeof part === 'string') {
@@ -3004,45 +2524,26 @@ class Multipart {
     }
 }
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 class SoapAttachment {
-    /**
-     * @param {?} mimetype
-     * @param {?} contentId
-     * @param {?} name
-     * @param {?} body
-     */
     constructor(mimetype, contentId, name, body) {
         this.mimetype = mimetype;
         this.contentId = contentId;
         this.name = name;
         this.body = body;
     }
-    /**
-     * @param {?=} files
-     * @return {?}
-     */
     static fromFormFiles(files = []) {
         if (files instanceof FileList) {
             files = Array.from(files);
         }
-        /** @type {?} */
         const promises = files.map((file) => {
-            return new Promise(function (resolve$$1) {
-                /** @type {?} */
+            return new Promise(function (resolve) {
                 const reader = new FileReader();
                 reader.readAsArrayBuffer(file);
                 reader.onload = function (e) {
-                    /** @type {?} */
-                    const arrayBuffer = ((/** @type {?} */ (e.target))).result;
-                    /** @type {?} */
+                    const arrayBuffer = e.target.result;
                     const bytes = new Uint8Array(arrayBuffer);
-                    /** @type {?} */
                     const attachment = new SoapAttachment(file.type, file.contentId || file.name, file.name, bytes);
-                    resolve$$1(attachment);
+                    resolve(attachment);
                 };
             });
         });
@@ -3050,24 +2551,22 @@ class SoapAttachment {
     }
 }
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+/*
+ * Copyright (c) 2011 Vinay Pulim <vinay@milewise.com>
+ * MIT Licensed
  */
-/** @type {?} */
 const nonIdentifierChars = /[^a-z$_0-9]/i;
-/** @type {?} */
 const Client = function (wsdl, endpoint, options) {
     options = options || {};
     this.wsdl = wsdl;
     this._initializeOptions(options);
     this._initializeServices(endpoint);
-    this.httpClient = (/** @type {?} */ (options.httpClient));
-    /** @type {?} */
+    this.httpClient = options.httpClient;
     const promiseOptions = { multiArgs: true };
     if (options.overridePromiseSuffix) {
         promiseOptions.suffix = options.overridePromiseSuffix;
     }
+    Promise.all([this, promiseOptions]);
 };
 Client.prototype.addSoapHeader = function (soapHeader, name, namespace, xmlns) {
     if (!this.soapHeaders) {
@@ -3110,7 +2609,6 @@ Client.prototype.addBodyAttribute = function (bodyAttribute, name, namespace, xm
         this.bodyAttributes = [];
     }
     if (typeof bodyAttribute === 'object') {
-        /** @type {?} */
         let composition = '';
         Object.getOwnPropertyNames(bodyAttribute).forEach(function (prop, idx, array) {
             composition += ' ' + prop + '="' + bodyAttribute[prop] + '"';
@@ -3132,7 +2630,6 @@ Client.prototype.setEndpoint = function (endpoint) {
     this._initializeServices(endpoint);
 };
 Client.prototype.describe = function () {
-    /** @type {?} */
     const types = this.wsdl.definitions.types;
     return this.wsdl.describeServices();
 };
@@ -3143,10 +2640,7 @@ Client.prototype.setSOAPAction = function (SOAPAction) {
     this.SOAPAction = SOAPAction;
 };
 Client.prototype._initializeServices = function (endpoint) {
-    /** @type {?} */
-    const definitions = this.wsdl.definitions;
-    /** @type {?} */
-    const services = definitions.services;
+    const definitions = this.wsdl.definitions, services = definitions.services;
     for (const name in services) {
         this[name] = this._defineService(services[name], endpoint);
     }
@@ -3172,72 +2666,32 @@ Client.prototype._initializeOptions = function (options) {
     this.wsdl.options.forceSoap12Headers = !!options.forceSoap12Headers;
 };
 Client.prototype._defineService = function (service, endpoint) {
-    /** @type {?} */
-    const ports = service.ports;
-    /** @type {?} */
-    const def = {};
+    const ports = service.ports, def = {};
     for (const name in ports) {
         def[name] = this._definePort(ports[name], endpoint ? endpoint : ports[name].location);
     }
     return def;
 };
 Client.prototype._definePort = function (port, endpoint) {
-    /** @type {?} */
-    const location = endpoint;
-    /** @type {?} */
-    const binding = port.binding;
-    /** @type {?} */
-    const methods = binding.methods;
-    /** @type {?} */
-    const def = {};
+    const location = endpoint, binding = port.binding, methods = binding.methods, def = {};
     for (const name in methods) {
         def[name] = this._defineMethod(methods[name], location);
-        /** @type {?} */
         const methodName = this.normalizeNames ? name.replace(nonIdentifierChars, '_') : name;
         this[methodName] = def[name];
     }
     return def;
 };
 Client.prototype._defineMethod = function (method, location) {
-    /** @type {?} */
     const self = this;
+    let temp = null;
     return function (args, options, extraHeaders) {
         return self._invoke(method, args, location, options, extraHeaders);
     };
 };
 Client.prototype._invoke = function (method, args, location, options, extraHeaders) {
-    /** @type {?} */
-    let self = this;
-    /** @type {?} */
-    let name = method.$name;
-    /** @type {?} */
-    let input = method.input;
-    /** @type {?} */
-    let output = method.output;
-    /** @type {?} */
-    let style = method.style;
-    /** @type {?} */
-    let defs = this.wsdl.definitions;
-    /** @type {?} */
-    let envelopeKey = this.wsdl.options.envelopeKey;
-    /** @type {?} */
-    let ns = defs.$targetNamespace;
-    /** @type {?} */
-    let encoding = '';
-    /** @type {?} */
-    let message = '';
-    /** @type {?} */
-    let xml = null;
-    /** @type {?} */
-    let soapAction = null;
-    /** @type {?} */
-    let alias = findPrefix(defs.xmlns, ns);
-    /** @type {?} */
-    let headers = {
+    let self = this, name = method.$name, input = method.input, output = method.output, style = method.style, defs = this.wsdl.definitions, envelopeKey = this.wsdl.options.envelopeKey, ns = defs.$targetNamespace, encoding = '', message = '', xml = null, req = null, soapAction = null, alias = findPrefix(defs.xmlns, ns), headers = {
         'Content-Type': 'text/xml; charset=utf-8'
-    };
-    /** @type {?} */
-    let xmlnsSoap = 'xmlns:' + envelopeKey + '="http://schemas.xmlsoap.org/soap/envelope/"';
+    }, xmlnsSoap = 'xmlns:' + envelopeKey + '="http://schemas.xmlsoap.org/soap/envelope/"';
     if (this.wsdl.options.forceSoap12Headers) {
         headers['Content-Type'] = 'application/soap+xml; charset=utf-8';
         xmlnsSoap = 'xmlns:' + envelopeKey + '="http://www.w3.org/2003/05/soap-envelope"';
@@ -3320,7 +2774,6 @@ Client.prototype._invoke = function (method, args, location, options, extraHeade
     self.lastMessage = message;
     self.lastRequest = xml;
     self.lastEndpoint = location;
-    /** @type {?} */
     const tryJSONparse = function (body) {
         try {
             return JSON.parse(body);
@@ -3334,11 +2787,8 @@ Client.prototype._invoke = function (method, args, location, options, extraHeade
             return xml;
         }
         if (options.forceMTOM || soapAttachments.length > 0) {
-            /** @type {?} */
             const start = uuid4();
-            /** @type {?} */
             const boundry = uuid4();
-            /** @type {?} */
             let action = null;
             if (headers['Content-Type'].indexOf('action') > -1) {
                 for (const ct of headers['Content-Type'].split('; ')) {
@@ -3352,7 +2802,6 @@ Client.prototype._invoke = function (method, args, location, options, extraHeade
             if (action) {
                 headers['Content-Type'] = headers['Content-Type'] + '; ' + action;
             }
-            /** @type {?} */
             const multipart = [
                 {
                     'Content-Type': 'application/xop+xml; charset=UTF-8; type="text/xml"',
@@ -3371,7 +2820,7 @@ Client.prototype._invoke = function (method, args, location, options, extraHeade
             });
             return new Multipart().build(multipart, boundry);
         }
-    }), flatMap((body) => ((/** @type {?} */ (self.httpClient)))
+    }), flatMap((body) => self.httpClient
         .post(location, body, {
         headers: headers,
         responseType: 'text',
@@ -3382,13 +2831,7 @@ Client.prototype._invoke = function (method, args, location, options, extraHeade
         self.lastResponseHeaders = response && response.headers;
         return parseSync(response.body, response);
     }))));
-    /**
-     * @param {?} body
-     * @param {?} response
-     * @return {?}
-     */
     function parseSync(body, response) {
-        /** @type {?} */
         let obj;
         try {
             obj = self.wsdl.xmlToObject(body);
@@ -3399,7 +2842,6 @@ Client.prototype._invoke = function (method, args, location, options, extraHeade
             if (!output || !output.$lookupTypes) {
                 // debug('Response element is not present. Unable to convert response xml to json.');
                 //  If the response is JSON then return it as-is.
-                /** @type {?} */
                 const json = isObject(body) ? body : tryJSONparse(body);
                 if (json) {
                     return { err: null, response, responseBody: json, header: undefined, xml };
@@ -3412,14 +2854,7 @@ Client.prototype._invoke = function (method, args, location, options, extraHeade
         }
         return finish(obj, body, response);
     }
-    /**
-     * @param {?} obj
-     * @param {?} responseBody
-     * @param {?} response
-     * @return {?}
-     */
     function finish(obj, responseBody, response) {
-        /** @type {?} */
         let result = null;
         if (!output) {
             // one-way, no output expected
@@ -3430,7 +2865,6 @@ Client.prototype._invoke = function (method, args, location, options, extraHeade
             return { err: null, obj, responseBody, header: obj.Header, xml };
         }
         if (typeof obj.Body !== 'object') {
-            /** @type {?} */
             const error = new Error('Cannot parse response');
             error.response = response;
             error.body = responseBody;
@@ -3457,18 +2891,16 @@ Client.prototype.call = function (method, body, options, extraHeaders) {
     if (!this[method]) {
         return throwError(`Method ${method} not found`);
     }
-    return ((/** @type {?} */ (this[method]))).call(this, body, options, extraHeaders);
+    return this[method].call(this, body, options, extraHeaders);
 };
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+/*
+ * Copyright (c) 2011 Vinay Pulim <vinay@milewise.com>
+ * MIT Licensed
  */
-/** @type {?} */
-const cache = {};
-// TODO some caching?
-/** @type {?} */
-const getFromCache = (url, options) => __awaiter(this, void 0, void 0, function* () {
+const WSDL$1 = WSDL;
+const cache = {}; // TODO some caching?
+const getFromCache = (url, options) => __awaiter(void 0, void 0, void 0, function* () {
     // console.log('Getting from cache', url);
     // console.log('Cache', cache)
     if (cache[url]) {
@@ -3482,11 +2914,6 @@ const getFromCache = (url, options) => __awaiter(this, void 0, void 0, function*
         });
     }
 });
-/**
- * @param {?} url
- * @param {?} options
- * @return {?}
- */
 function _requestWSDL(url, options) {
     return __awaiter(this, void 0, void 0, function* () {
         if (options.disableCache === true) {
@@ -3497,12 +2924,6 @@ function _requestWSDL(url, options) {
         }
     });
 }
-/**
- * @param {?} url
- * @param {?} options
- * @param {?} endpoint
- * @return {?}
- */
 function createClient(url, options, endpoint) {
     return __awaiter(this, void 0, void 0, function* () {
         if (typeof options === 'undefined') {
@@ -3510,72 +2931,61 @@ function createClient(url, options, endpoint) {
         }
         // console.log("createClient", options)
         endpoint = options.endpoint || endpoint;
-        /** @type {?} */
         const wsdl = yield _requestWSDL(url, options);
-        /** @type {?} */
         const client = new Client(wsdl, endpoint, options);
         return client;
     });
 }
+const BasicAuthSecurity$1 = security.BasicAuthSecurity;
+const NTLMSecurity$1 = security.NTLMSecurity;
+const WSSecurity$1 = security.WSSecurity;
+// export const WSSecurityCert = security.WSSecurityCert;
+const BearerSecurity$1 = security.BearerSecurity;
+// export const ClientSSLSecurity = security.ClientSSLSecurity;
+// export const ClientSSLSecurityPFX = security.ClientSSLSecurityPFX;
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 class NgxSoapService {
-    /**
-     * @param {?} http
-     */
     constructor(http) {
         this.http = http;
     }
-    /**
-     * @param {?} wsdlUrl
-     * @param {?=} options
-     * @param {?=} endpoint
-     * @return {?}
-     */
     createClient(wsdlUrl, options = {}, endpoint) {
         options.httpClient = this.http;
         return createClient(wsdlUrl, options, endpoint);
     }
 }
-NgxSoapService.decorators = [
-    { type: Injectable, args: [{
+NgxSoapService.ɵfac = function NgxSoapService_Factory(t) { return new (t || NgxSoapService)(ɵɵinject(HttpClient)); };
+NgxSoapService.ɵprov = ɵɵdefineInjectable({ token: NgxSoapService, factory: NgxSoapService.ɵfac, providedIn: 'root' });
+/*@__PURE__*/ (function () { ɵsetClassMetadata(NgxSoapService, [{
+        type: Injectable,
+        args: [{
                 providedIn: 'root'
-            },] }
-];
-/** @nocollapse */
-NgxSoapService.ctorParameters = () => [
-    { type: HttpClient }
-];
-/** @nocollapse */ NgxSoapService.ngInjectableDef = defineInjectable({ factory: function NgxSoapService_Factory() { return new NgxSoapService(inject(HttpClient)); }, token: NgxSoapService, providedIn: "root" });
+            }]
+    }], function () { return [{ type: HttpClient }]; }, null); })();
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 class NgxSoapModule {
 }
-NgxSoapModule.decorators = [
-    { type: NgModule, args: [{
+NgxSoapModule.ɵmod = ɵɵdefineNgModule({ type: NgxSoapModule });
+NgxSoapModule.ɵinj = ɵɵdefineInjector({ factory: function NgxSoapModule_Factory(t) { return new (t || NgxSoapModule)(); }, imports: [[
+            HttpClientModule
+        ]] });
+(function () { (typeof ngJitMode === "undefined" || ngJitMode) && ɵɵsetNgModuleScope(NgxSoapModule, { imports: [HttpClientModule] }); })();
+/*@__PURE__*/ (function () { ɵsetClassMetadata(NgxSoapModule, [{
+        type: NgModule,
+        args: [{
                 imports: [
                     HttpClientModule
                 ],
                 exports: []
-            },] }
-];
+            }]
+    }], null, null); })();
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+/*
+ * Public API Surface of ngx-soap
  */
 
 /**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
+ * Generated bundle index. Do not edit.
  */
 
-export { security, NgxSoapService, NgxSoapModule, BasicAuthSecurity as ɵa, BearerSecurity as ɵb, NTLMSecurity as ɵd, WSSecurity as ɵc };
-
+export { NgxSoapModule, NgxSoapService, security };
 //# sourceMappingURL=ngx-soap.js.map

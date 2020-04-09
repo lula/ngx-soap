@@ -1,10 +1,6 @@
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,extraRequire,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 /*
  * Public API Surface of ngx-soap
  */
-export { security, NgxSoapService } from './lib/ngx-soap.service';
-export { NgxSoapModule } from './lib/ngx-soap.module';
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHVibGljX2FwaS5qcyIsInNvdXJjZVJvb3QiOiJuZzovL25neC1zb2FwLyIsInNvdXJjZXMiOlsicHVibGljX2FwaS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7O0FBSUEseUNBQWMsd0JBQXdCLENBQUM7QUFDdkMsOEJBQWMsdUJBQXVCLENBQUMiLCJzb3VyY2VzQ29udGVudCI6WyIvKlxyXG4gKiBQdWJsaWMgQVBJIFN1cmZhY2Ugb2Ygbmd4LXNvYXBcclxuICovXHJcblxyXG5leHBvcnQgKiBmcm9tICcuL2xpYi9uZ3gtc29hcC5zZXJ2aWNlJztcclxuZXhwb3J0ICogZnJvbSAnLi9saWIvbmd4LXNvYXAubW9kdWxlJztcclxuIl19
+export * from './lib/ngx-soap.service';
+export * from './lib/ngx-soap.module';
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHVibGljX2FwaS5qcyIsInNvdXJjZVJvb3QiOiJuZzovL25neC1zb2FwLyIsInNvdXJjZXMiOlsicHVibGljX2FwaS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTs7R0FFRztBQUVILGNBQWMsd0JBQXdCLENBQUM7QUFDdkMsY0FBYyx1QkFBdUIsQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbIi8qXHJcbiAqIFB1YmxpYyBBUEkgU3VyZmFjZSBvZiBuZ3gtc29hcFxyXG4gKi9cclxuXHJcbmV4cG9ydCAqIGZyb20gJy4vbGliL25neC1zb2FwLnNlcnZpY2UnO1xyXG5leHBvcnQgKiBmcm9tICcuL2xpYi9uZ3gtc29hcC5tb2R1bGUnO1xyXG4iXX0=
