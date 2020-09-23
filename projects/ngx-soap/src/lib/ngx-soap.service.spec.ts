@@ -1,9 +1,9 @@
-import { TestBed, inject, getTestBed, async } from '@angular/core/testing';
-import { HttpClientModule, HttpRequest, HttpParams } from '@angular/common/http';
+import { TestBed } from '@angular/core/testing';
+import { HttpClientModule, HttpRequest } from '@angular/common/http';
 import { HttpTestingController, HttpClientTestingModule } from '@angular/common/http/testing';
 
+import { ISoapMethodResponse } from 'ngx-soap/ngx-soap';
 import { NgxSoapService } from './ngx-soap.service';
-import { ISoapMethodResponse } from './soap/interfaces';
 import { NgxSoapModule } from './ngx-soap.module';
 
 
@@ -215,62 +215,87 @@ const PROXIED_CALCULATOR_WSDL = `<?xml version="1.0" encoding="utf-8"?>
     </wsdl:service>
 </wsdl:definitions>`;
 
+let service: NgxSoapService;
+let httpMock: HttpTestingController;
+
 describe('NgxSoapService', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [HttpClientModule, HttpClientTestingModule, NgxSoapModule]
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            imports: [HttpClientModule, HttpClientTestingModule, NgxSoapModule],
+            providers: [NgxSoapService]
+        });
+        service = TestBed.inject(NgxSoapService);
+        httpMock = TestBed.inject(HttpTestingController);
     });
-  });
 
-  it('should be created', inject([NgxSoapService], (soap: NgxSoapService) => {
-    expect(soap).toBeTruthy();
-  }));
+    afterEach(() => {
+        httpMock.verify();
+    });
 
-  it('should create client from calculator.wsdl', async(inject([NgxSoapService, HttpTestingController], (soap: NgxSoapService, mockBackend: HttpTestingController) => {
-    soap.createClient('/calculator.wsdl')
-      .then(client => expect(client).toBeTruthy())
-      .catch(err => console.log('Error', err));
+    it('should be created', () => {
+        expect(service).toBeTruthy();
+    });
 
-    let req = mockBackend.expectOne('/calculator.wsdl');
-    req.flush(PROXIED_CALCULATOR_WSDL);
-    mockBackend.verify();
-  })));
+    it('should create client from calculator.wsdl', () => {
+        service.createClient('/calculator.wsdl', { disableCache: true })
+            .then(client => {
+                expect(client).toBeTruthy();
+                client.call('Add', { intA: 3, intB: 2 }, { exchangeId: '11bf5b37-e0b8-42e0-8dcf-dc8c4aefc000' })
+            })
+            .catch(err => console.log('Error', err));
 
-  it('3 + 2 should be equal to 5', async(inject([NgxSoapService, HttpTestingController], (soap: NgxSoapService, mockBackend: HttpTestingController) => {
-    soap.createClient('/calculator.wsdl')
-      .then(client => {
-        client.call('Add', {
-          intA: 3,
-          intB: 2
-        }, { exchangeId: '11bf5b37-e0b8-42e0-8dcf-dc8c4aefc000' }).subscribe((soapResponse: ISoapMethodResponse) => {
-          expect(soapResponse.result.AddResult).toBe(5);
-        }, err => console.error(err));
+        const req = httpMock.expectOne('/calculator.wsdl');
+        expect(req.request.method).toBe("GET");
+        req.flush(PROXIED_CALCULATOR_WSDL);
+    });
 
-        let req = mockBackend.expectOne('/calculator/calculator.asmx');
-        let res = {
-          headers: {},
-          body: ``
-        };
-        req.flush('<?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><soap:Body><AddResponse xmlns="http://tempuri.org/"><AddResult>5</AddResult></AddResponse></soap:Body></soap:Envelope>');
-        mockBackend.verify();
-      })
-      .catch(err => console.log('Error', err));
+    it('should create client from calculator.wsdl', () => {
+        service.createClient('/calculator.wsdl', { disableCache: true })
+            .then(client => expect(client).toBeTruthy())
+            .catch(err => console.log('Error', err));
 
-    let req = mockBackend.expectOne('/calculator.wsdl');
-    req.flush(PROXIED_CALCULATOR_WSDL);
-    mockBackend.verify();
-  })));
+        let req = httpMock.expectOne('/calculator.wsdl');
+        req.flush(PROXIED_CALCULATOR_WSDL);
+        httpMock.verify();
+    });
 
-  it('should raise an error when calling a missing operation', async(inject([NgxSoapService, HttpTestingController], (soap: NgxSoapService, mockBackend: HttpTestingController) => {
-    soap.createClient('/calculator.wsdl')
-      .then(client => {
-        const method = 'NonExistingMethod';
-        client.call(method, {}, { exchangeId: '11bf5b37-e0b8-42e0-8dcf-dc8c4aefc000' })
-            .subscribe(() => {}, err => expect(err).toBe(`Method ${method} not found`));
-      });
+    it('3 + 2 should be equal to 5', () => {
+        service.createClient('/calculator.wsdl', { disableCache: true })
+            .then(client => {
+                client.call('Add', {
+                    intA: 3,
+                    intB: 2
+                }, { exchangeId: '11bf5b37-e0b8-42e0-8dcf-dc8c4aefc000' }).subscribe((soapResponse: ISoapMethodResponse) => {
+                    expect(soapResponse.result.AddResult).toBe(5);
+                }, err => console.error(err));
 
-    let req = mockBackend.expectOne('/calculator.wsdl');
-    req.flush(PROXIED_CALCULATOR_WSDL);
-    mockBackend.verify();
-  })));
+                let req = httpMock.expectOne('/calculator/calculator.asmx');
+                let res = {
+                    headers: {},
+                    body: ``
+                };
+                req.flush('<?xml version="1.0" encoding="utf-8"?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><soap:Body><AddResponse xmlns="http://tempuri.org/"><AddResult>5</AddResult></AddResponse></soap:Body></soap:Envelope>');
+                httpMock.verify();
+            })
+            .catch(err => console.log('Error', err));
+
+        let req = httpMock.expectOne('/calculator.wsdl');
+        expect(req.request.method).toBe("GET");
+        req.flush(PROXIED_CALCULATOR_WSDL);
+    });
+
+    it('should raise an error when calling a missing operation', () => {
+        service
+            .createClient('/calculator.wsdl', { disableCache: true })
+            .then(client => {
+                const method = 'NonExistingMethod';
+                client
+                    .call(method, {}, { exchangeId: '11bf5b37-e0b8-42e0-8dcf-dc8c4aefc000' })
+                    .subscribe(() => { }, err => expect(err).toBe(`Method ${method} not found`));
+            });
+
+        const req = httpMock.expectOne('/calculator.wsdl');
+        expect(req.request.method).toBe("GET");
+        req.flush(PROXIED_CALCULATOR_WSDL);
+    });
 });

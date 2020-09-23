@@ -34,7 +34,6 @@ async function _requestWSDL(url, options) {
   } else {
     return getFromCache(url, options);
   }
-
 }
 
 export async function createClient(url, options, endpoint): Promise<any> {

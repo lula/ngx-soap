@@ -16,9 +16,12 @@
     "SOAP",
     "WSDL"
   ],
+  "dependencies": {
+    "tslib": "^2.0.0"
+  },
   "peerDependencies": {
-    "@angular/common": ">=6.0.0 <=8.0.0",
-    "@angular/core": ">=6.0.0 <=8.0.0",
+    "@angular/common": ">=6.0.0 <=10.0.0",
+    "@angular/core": ">=6.0.0 <=10.0.0",
     "buffer": "^5.1.0",
     "concat-stream": "^1.6.2",
     "core-js": "^2.5.4",
