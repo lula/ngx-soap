@@ -1,6 +1,6 @@
 {
   "name": "ngx-soap",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "description": "SOAP service for Angular",
   "homepage": "https://github.com/lula/ngx-soap",
   "author": "Luca Lulani",
@@ -12,6 +12,9 @@
     "Angular5",
     "Angular6",
     "Angular7",
+    "Angular8",
+    "Angular9",
+    "Angular10",
     "@angular",
     "SOAP",
     "WSDL"
