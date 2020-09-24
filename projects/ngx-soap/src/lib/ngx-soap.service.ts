@@ -26,6 +26,6 @@ export class NgxSoapService {
 
   createClient(wsdlUrl: string, options: any = {}, endpoint?: string): Promise<Client> {
     options.httpClient = this.http;
-    return createClient(wsdlUrl, options, endpoint) ;
+    return createClient(wsdlUrl, options, endpoint);
   }
 }

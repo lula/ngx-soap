@@ -13,6 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "aot": true,
             "outputPath": "dist/ngx-soap-app",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -32,6 +33,12 @@
           },
           "configurations": {
             "production": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
+                }
+              ],
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -137,7 +144,8 @@
           },
           "configurations": {
             "production": {
-              "project": "projects/ngx-soap/ng-package.prod.json"
+              "project": "projects/ngx-soap/ng-package.prod.json",
+              "tsConfig": "projects/ngx-soap/tsconfig.lib.prod.json"
             }
           }
         },
@@ -164,5 +172,8 @@
       }
     }
   },
-  "defaultProject": "ngx-soap-app"
+  "defaultProject": "ngx-soap-app",
+  "cli": {
+    "analytics": "88b524fc-7fbb-409d-94a4-e2bece002fd1"
+  }
 }
