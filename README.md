@@ -63,3 +63,6 @@ Project has been recreated from scratch with Angualr 6 CLI.
 5. `ng serve --proxy-config proxy.conf.json`
 
 See example app under `src/app`
+
+## Contributors
+[Andrei Bespamiatnov](https://github.com/AndreyBespamyatnov)
